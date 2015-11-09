@@ -34,10 +34,10 @@ public class TileserverController {
 	@Autowired
 	ServletContext servletContext;
 	
-	@RequestMapping(value = "/name-ch{channel:[\\d]+}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}", produces = "image/jpg" )
+	@RequestMapping(value = "/name-{channel}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}", produces = "image/jpg" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
-			@PathVariable("channel") int channel,
+			@PathVariable("channel") String channel,
 			@PathVariable("slice_index") int slice_index,
 			@PathVariable("row_index") int row_index,
 			@PathVariable("column_index") int column_index,
@@ -52,7 +52,8 @@ public class TileserverController {
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		return tileGenerator.getTileAsJPEG( channel, tc );
+		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getChannel( channel ), tc );
+		return img;
 	}
 	
 	@ResponseStatus( value=HttpStatus.CONFLICT, reason="problem with HDF5 source file" )
