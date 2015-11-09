@@ -29,11 +29,11 @@ public class TileGenerator {
 		return colormap;
 	}
 	
-	public BufferedImage getTile( Channel channel, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
 		
 		int size = coordinates.getSize();
 		
-		short[] data = channel.getBlock( size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		short[] data = stack.getBlock( size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
 		
 		int[] rgb = new int[ data.length ];
 		
@@ -55,13 +55,13 @@ public class TileGenerator {
 		return img;
 	}
 	
-	public byte[] getTileAsByteArray( Channel channel, TileCoordinates coordinates ) throws Exception {
-		return ((DataBufferByte) getTile( channel, coordinates ).getRaster().getDataBuffer()).getData();
+	public byte[] getTileAsByteArray( Stack stack, TileCoordinates coordinates ) throws Exception {
+		return ((DataBufferByte) getTile( stack, coordinates ).getRaster().getDataBuffer()).getData();
 	}
 	
-	public byte[] getTileAsJPEG( Channel channel, TileCoordinates coordinates ) throws Exception {
+	public byte[] getTileAsJPEG( Stack stack, TileCoordinates coordinates ) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( getTile( channel, coordinates ), "jpg", baos);
+		ImageIO.write( getTile( stack, coordinates ), "jpg", baos);
 		return baos.toByteArray();
 	}
 	

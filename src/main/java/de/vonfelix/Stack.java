@@ -2,13 +2,13 @@ package de.vonfelix;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
-public class Channel {
+public class Stack {
 	
 	HDF5Image hdf5Image;
 	String name;
 	long[] dimensions;
 	
-	public Channel( HDF5Image hdf5Image, String name ) {
+	public Stack( HDF5Image hdf5Image, String name ) {
 		this.hdf5Image= hdf5Image;
 		this.name= name;
 	}

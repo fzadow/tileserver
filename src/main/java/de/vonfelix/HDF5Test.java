@@ -21,11 +21,11 @@ public class HDF5Test
 			System.out.println("Image loaded (" + FILENAME + ")");
 			System.out.println("Number of Channels: " + hdf5Image.getNumChannels() );
 			
-			System.out.println( "Channel 0: " + hdf5Image.getChannel(0) );
+			System.out.println( "Stack 0: " + hdf5Image.getStack(0) );
 			
 			TileGenerator tileGenerator = new TileGenerator(hdf5Image);
 			
-			BufferedImage img = tileGenerator.getTile( hdf5Image.getChannel(0), new TileCoordinates(hdf5Image, 512, 0, 0, 0) );
+			BufferedImage img = tileGenerator.getTile( hdf5Image.getStack(0), new TileCoordinates(hdf5Image, 512, 0, 0, 0) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

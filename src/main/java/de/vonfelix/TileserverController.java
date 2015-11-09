@@ -52,7 +52,7 @@ public class TileserverController {
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getChannel( channel ), tc );
+		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getStack( channel ), tc );
 		return img;
 	}
 	

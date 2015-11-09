@@ -12,7 +12,7 @@ public class HDF5Image {
 	private String filename;
 	
 	private	IHDF5Reader reader;
-	private ArrayList<Channel> channels;
+	private ArrayList<Stack> stacks;
 	
 	int SIZE = 256;
 	
@@ -27,38 +27,38 @@ public class HDF5Image {
 		
 	}
 	
-	/** an {@link ArrayList} with all the {@link Channel}s in the image*/
-	private ArrayList<Channel> getChannels() {
-		if( channels == null ) {
-			channels = new ArrayList<Channel>();
+	/** an {@link ArrayList} with all the {@link Stack}s in the image*/
+	private ArrayList<Stack> getStacks() {
+		if( stacks == null ) {
+			stacks = new ArrayList<Stack>();
 		
-			// assume all top-level datasets are channels
+			// assume all top-level datasets are stacks
 			for( String channel_name : reader.object().getAllGroupMembers("/") ) {
 				if( reader.object().isDataSet( channel_name ) ) {
-					channels.add( new Channel( this, channel_name ) );
+					stacks.add( new Stack( this, channel_name ) );
 				}
 			}
 		
-			if( channels.size() == 0 ) {
-				System.out.println( "No channels found!" );
+			if( stacks.size() == 0 ) {
+				System.out.println( "No stacks found!" );
 			}
 		}
 		
-		return channels;
+		return stacks;
 	}
 	
 	public int getNumChannels() {
-		return getChannels().size();
+		return getStacks().size();
 	}
 	
-	public Channel getChannel( int n ) {
-		return getChannels().get( n );
+	public Stack getStack( int n ) {
+		return getStacks().get( n );
 	}
 	
-	public Channel getChannel( String name ) {
-		for( Channel channel : getChannels() ) {
-			if( channel.getName().equals( name ) ) {
-				return channel;
+	public Stack getStack( String name ) {
+		for( Stack stack : getStacks() ) {
+			if( stack.getName().equals( name ) ) {
+				return stack;
 			}
 		}
 		return null;
