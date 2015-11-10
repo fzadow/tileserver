@@ -27,10 +27,19 @@ public class Stack {
 	 * return a flat array for the requested block
 	 * @param offset_z slice
 	 * @return a flattened array of the block */
-	public short[] getBlock( int size, int offset_z, int offset_x, int offset_y ) throws Exception {
+	public MDShortArray getBlock( int size, int offset_z, long offset_x, long offset_y ) throws Exception {
+		System.out.println( "image bounds: " + getDimensions()[1] + "x" + getDimensions()[2] );
+		
+		// restrict block loading to image bounds
+		int width = offset_x + size > getDimensions()[1] ? (int) ( getDimensions()[1] - offset_x - 1) : size;
+		int height = offset_y + size > getDimensions()[2] ? (int) ( getDimensions()[2] - offset_y - 1 ) : size;
+		
+		System.out.println( "getting " + width + "x" + height + " block from " + offset_x + "," + offset_y + " to "  + ( width + offset_x ) + "," + ( height + offset_y ) );
+		
+		
 		return hdf5Image.getReader().uint16().readMDArrayBlockWithOffset( getName(),
-				new int[] {1, size, size},
-				new long[] { offset_z, offset_x, offset_y } ).getAsFlatArray();		
+				new int[] {1, width, height},
+				new long[] { offset_z, offset_x, offset_y } );
 	}
 	
 

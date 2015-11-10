@@ -7,6 +7,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import ch.systemsx.cisd.base.mdarray.MDShortArray;
+
 public class TileGenerator {
 	
 	HDF5Image hdf5Image;
@@ -33,12 +35,29 @@ public class TileGenerator {
 		
 		int size = coordinates.getSize();
 		
-		short[] data = stack.getBlock( size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		// get flattened pixel array
+		// may be smaller than size*size if out of bounds
+		MDShortArray data = stack.getBlock( size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		int data_width = data.dimensions()[2];
+		int data_height = data.dimensions()[1];
 		
-		int[] rgb = new int[ data.length ];
+		System.out.println( "read " + data_width + "x" + data_height );
 		
-		for(int i = 1; i < rgb.length; ++i) {
-			rgb[i] = getColormap()[data[i] & 0xffff ];
+		short[] flatdata = data.getAsFlatArray();
+		System.out.println( "Flatdata size " + flatdata.length );
+		
+		// create square rgb array of width 'size'
+		int[] rgb = new int[ size * size ];
+		
+		for(int y = 0; y < size; ++y) {
+			for(int x= 0; x < size; ++x ) {
+				//System.out.print( String.format("%3s", (size*y + x) ) + " " );
+				short pixel = x >= data_width || y >= data_height ? 30000 : flatdata[ data_width*y + x ];
+				//System.out.print( String.format("%2s", x ) + ":" + String.format("%2s", y ) );
+				//System.out.print( x>=data_width || y >= data_height ? " -  " : " #  "  );
+				rgb[ size*y + x ] = getColormap()[pixel & 0xffff ];
+			}
+			//System.out.println();
 		}
 		
 		for (int x = 0; x < 8; x++) {
