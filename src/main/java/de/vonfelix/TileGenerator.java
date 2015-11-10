@@ -20,12 +20,27 @@ public class TileGenerator {
 	
 	private int[] getColormap() {
 		if( colormap == null ) {
-			int FACTOR = 8;
+			int limit = 3000;
+			int factor = limit/256;
+			
 			colormap = new int[65536];
-			for(int i = 0; i < 65536; ++i) {
-				colormap[i] = ( i / FACTOR ) << 16 | ( i / FACTOR ) << 8 | ( i / FACTOR );
+//			for(int i = 0; i < 65536; ++i) {
+//				colormap[i] = ( i / FACTOR ) << 16 | ( i / FACTOR ) << 8 | ( i / FACTOR );
+//			}
+			for( int i= 0; i < 65536; ++i ) {
+				if( i < limit ) {
+					colormap[i] = (i/factor) << 16 | (i/factor) << 8 | (i/factor);
+				}
+				else {
+					//mark overexposed pixels
+					colormap[i] = 0b111111110000000011111111;
+				}
 			}
-
+			
+			// for debugging
+			colormap[40000] = 0b000000001111111100000000;
+			colormap[65535] = 0b000000001111111111111111;
+			colormap[30000] = 0b111111111100000011111111;
 		}
 		
 		return colormap;
