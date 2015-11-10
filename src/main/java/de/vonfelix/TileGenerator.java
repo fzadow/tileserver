@@ -104,7 +104,7 @@ public class TileGenerator {
 	
 	public byte[] getTileAsJPEG( Stack stack, TileCoordinates coordinates ) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( getTile( stack, coordinates ), "jpg", baos);
+		ImageIO.write( getTile( stack, coordinates ), "png", baos);
 		return baos.toByteArray();
 	}
 	
