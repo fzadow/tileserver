@@ -34,10 +34,10 @@ public class TileserverController {
 	@Autowired
 	ServletContext servletContext;
 	
-	@RequestMapping(value = "/name-{channel}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}", produces = "image/jpg" )
+	@RequestMapping(value = "/name-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}", produces = "image/jpg" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
-			@PathVariable("channel") String channel,
+			@PathVariable("stack_name") String stack_name,
 			@PathVariable("slice_index") int slice_index,
 			@PathVariable("row_index") int row_index,
 			@PathVariable("column_index") int column_index,
@@ -52,7 +52,7 @@ public class TileserverController {
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getStack( channel ), tc );
+		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getStack( stack_name ), tc );
 		return img;
 	}
 	
