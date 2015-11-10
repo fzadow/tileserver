@@ -32,15 +32,18 @@ public class TileGenerator {
 					colormap[i] = (i/factor) << 16 | (i/factor) << 8 | (i/factor);
 				}
 				else {
-					//mark overexposed pixels
+					// mark overexposed pixels
 					colormap[i] = 0b111111110000000011111111;
 				}
 			}
 			
 			// for debugging
-			colormap[40000] = 0b000000001111111100000000;
-			colormap[65535] = 0b000000001111111111111111;
-			colormap[30000] = 0b111111111100000011111111;
+			if( Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ) {
+				System.out.println( "using debug colormap" );
+				colormap[40000] = 0b000000001111111100000000; // green
+				colormap[65535] = 0b000000001111111111111111; // cyan
+				colormap[30000] = 0b111111110000000011111111; // pink
+			}
 		}
 		
 		return colormap;
@@ -66,13 +69,19 @@ public class TileGenerator {
 		
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
-				//System.out.print( String.format("%3s", (size*y + x) ) + " " );
-				short pixel = x >= data_width || y >= data_height ? 30000 : flatdata[ data_width*y + x ];
-				//System.out.print( String.format("%2s", x ) + ":" + String.format("%2s", y ) );
-				//System.out.print( x>=data_width || y >= data_height ? " -  " : " #  "  );
+				// fill overlap with pink instead of black if debug mode.
+				short fillpixel = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ? (short)30000 : (short)0 ; 
+				
+				short pixel = x >= data_width || y >= data_height ? fillpixel : flatdata[ data_width*y + x ];
+
+				if ( Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ) {
+					if( ( x % 64 == 0 && y % 64 == 0 ) || ( (x-1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-1) % 64 == 0 ) || ( (x+1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+1) % 64 == 0 ) || ( (x-2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-2) % 64 == 0 ) || ( (x+2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+2) % 64 == 0 ) ) {
+						pixel = (short)30000;
+					}
+				}
+				
 				rgb[ size*y + x ] = getColormap()[pixel & 0xffff ];
 			}
-			//System.out.println();
 		}
 		
 		for (int x = 0; x < 8; x++) {

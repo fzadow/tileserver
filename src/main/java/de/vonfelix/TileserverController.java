@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TileserverController {
-	
+
 	private TileGenerator tileGenerator;
 	private HDF5Image hdf5Image;
-	private static final String FILENAME = "/home/felix/Dev/tileserver/ovary.h5";
+	private static final String FILENAME = TileserverTestApplication.properties.getProperty("source_image_dir") + "ovary.h5";
 
 	
 	public TileserverController() throws Exception {
@@ -61,5 +61,4 @@ public class TileserverController {
 	public void conflict() {
 		
 	}
-
 }
