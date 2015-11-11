@@ -26,15 +26,10 @@ public class TileserverController {
 		this.tileGenerator = new TileGenerator(hdf5Image);
 	}
 
-	@RequestMapping("/")
-	public String test() {
-		return "ok";
-	}
-
 	@Autowired
 	ServletContext servletContext;
 	
-	@RequestMapping(value = "/name-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}", produces = "image/jpg" )
+	@RequestMapping(value = "/name-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
 			@PathVariable("stack_name") String stack_name,
