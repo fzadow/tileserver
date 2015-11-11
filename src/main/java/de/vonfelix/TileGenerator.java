@@ -11,11 +11,9 @@ import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
 public class TileGenerator {
 	
-	HDF5Image hdf5Image;
 	int[] colormap;
 
-	public TileGenerator( HDF5Image hdf5Image ) {
-		this.hdf5Image= hdf5Image;
+	public TileGenerator() {
 	}
 	
 	private int[] getColormap() {

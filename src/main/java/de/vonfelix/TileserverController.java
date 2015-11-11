@@ -16,22 +16,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class TileserverController {
 
 	private TileGenerator tileGenerator;
-	private HDF5Image hdf5Image;
-	private static final String FILENAME = TileserverTestApplication.properties.getProperty("source_image_dir") + "ovary.h5";
+	private ImageHandler imageHandler;
 
-	
 	public TileserverController() throws Exception {
 		super();
-		this.hdf5Image = new HDF5Image( FILENAME );
-		this.tileGenerator = new TileGenerator(hdf5Image);
+		this.imageHandler = new ImageHandler();
+		this.tileGenerator = new TileGenerator();
 	}
 
 	@Autowired
 	ServletContext servletContext;
-	
-	@RequestMapping(value = "/name-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}" )
+
+	@RequestMapping(value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
+			@PathVariable("image_name") String image_name,
 			@PathVariable("stack_name") String stack_name,
 			@PathVariable("slice_index") int slice_index,
 			@PathVariable("row_index") int row_index,
@@ -39,15 +38,17 @@ public class TileserverController {
 			@PathVariable("scale_level") int scale_level
 			) throws Exception {
 		
+		System.out.println( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
+		
 		resp.reset();
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
-		TileCoordinates tc = new TileCoordinates(hdf5Image, 256, row_index, column_index, slice_index);
+		TileCoordinates tc = new TileCoordinates(imageHandler.getImage( image_name ), 256, row_index, column_index, slice_index);
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		byte[] img = tileGenerator.getTileAsJPEG( hdf5Image.getStack( stack_name ), tc );
+		byte[] img = tileGenerator.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), tc );
 		return img;
 	}
 	
