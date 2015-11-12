@@ -25,7 +25,7 @@ public class HDF5Test
 			
 			TileGenerator tileGenerator = new TileGenerator();
 			
-			BufferedImage img = tileGenerator.getTile( hdf5Image.getStack(0), new TileCoordinates(hdf5Image, 512, 0, 0, 0) );
+			BufferedImage img = tileGenerator.getTile( hdf5Image.getStack(0), 0, new TileCoordinates( 512, 0, 0, 0) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

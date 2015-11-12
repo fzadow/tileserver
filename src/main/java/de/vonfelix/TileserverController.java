@@ -26,8 +26,10 @@ public class TileserverController {
 
 	@Autowired
 	ServletContext servletContext;
+	
+	// TODO mapping for small.jpg
 
-	@RequestMapping(value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level}" )
+	@RequestMapping(value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level:[\\d]+}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
 			@PathVariable("image_name") String image_name,
@@ -38,6 +40,7 @@ public class TileserverController {
 			@PathVariable("scale_level") int scale_level
 			) throws Exception {
 		
+		System.out.println( "___" );
 		System.out.println( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
 		resp.reset();
@@ -54,7 +57,7 @@ public class TileserverController {
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		byte[] img = tileGenerator.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), tc );
+		byte[] img = tileGenerator.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), scale_level, tc );
 		return img;
 	}
 	

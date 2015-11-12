@@ -21,21 +21,23 @@ public class HDF5Image {
 		
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( filename );
-		
-		System.out.println( reader.object().getAllAttributeNames("c0") );
-		System.out.println( reader.object().getDimensions("c0")[0] );
-		
 	}
 	
 	/** an {@link ArrayList} with all the {@link Stack}s in the image*/
 	private ArrayList<Stack> getStacks() {
 		if( stacks == null ) {
 			stacks = new ArrayList<Stack>();
-		
-			// assume all top-level datasets are stacks
-			for( String channel_name : reader.object().getAllGroupMembers("/") ) {
-				if( reader.object().isDataSet( channel_name ) ) {
-					stacks.add( new Stack( this, channel_name ) );
+			
+			try {
+
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
+			
+			// look for stacks (groups in group "stacks/")
+			for( String stack_name : reader.object().getAllGroupMembers("stacks/") ) {
+				if( reader.object().isGroup( "stacks/" + stack_name ) ) {
+					stacks.add( new Stack( this, stack_name ) );
 				}
 			}
 		

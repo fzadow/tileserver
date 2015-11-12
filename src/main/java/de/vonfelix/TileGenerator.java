@@ -9,6 +9,9 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
+// TODO add simple downscaling algorithm (in case scale level is not available)
+
+
 public class TileGenerator {
 	
 	int[] colormap;
@@ -48,7 +51,7 @@ public class TileGenerator {
 		return colormap;
 	}
 	
-	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
 		
 		final boolean debug = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") );
 		final boolean debug_tile_bounds = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug_tile_bounds") );
@@ -57,14 +60,13 @@ public class TileGenerator {
 		
 		// get flattened pixel array
 		// may be smaller than size*size if out of bounds
-		MDShortArray data = stack.getBlock( size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		MDShortArray data = stack.getBlock( scaleLevel, size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
 		int data_width = data.dimensions()[2];
 		int data_height = data.dimensions()[1];
 		
-		System.out.println( "read " + data_width + "x" + data_height );
+		System.out.println( "TileGenerator: got an array of " + data_width + "x" + data_height );
 		
 		short[] flatdata = data.getAsFlatArray();
-		System.out.println( "Flatdata size " + flatdata.length );
 		
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
@@ -107,13 +109,13 @@ public class TileGenerator {
 		return img;
 	}
 	
-	public byte[] getTileAsByteArray( Stack stack, TileCoordinates coordinates ) throws Exception {
-		return ((DataBufferByte) getTile( stack, coordinates ).getRaster().getDataBuffer()).getData();
+	public byte[] getTileAsByteArray( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+		return ((DataBufferByte) getTile( stack, scaleLevel, coordinates ).getRaster().getDataBuffer()).getData();
 	}
 	
-	public byte[] getTileAsJPEG( Stack stack, TileCoordinates coordinates ) throws Exception {
+	public byte[] getTileAsJPEG( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( getTile( stack, coordinates ), "jpg", baos);
+		ImageIO.write( getTile( stack, scaleLevel, coordinates ), "png", baos);
 		return baos.toByteArray();
 	}
 	
