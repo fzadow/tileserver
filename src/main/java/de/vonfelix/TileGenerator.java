@@ -39,8 +39,9 @@ public class TileGenerator {
 			if( Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ) {
 				System.out.println( "using debug colormap" );
 				colormap[40000] = 0b000000001111111100000000; // green
+				colormap[50000] = 0b111111110000000000000000; // red
 				colormap[65535] = 0b000000001111111111111111; // cyan
-				colormap[30000] = 0b111111110000000011111111; // pink
+				colormap[30000] = 0b001111110011111100111111; // grey
 			}
 		}
 		
@@ -50,6 +51,8 @@ public class TileGenerator {
 	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
 		
 		final boolean debug = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") );
+		final boolean debug_tile_bounds = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug_tile_bounds") );
+
 		int size = coordinates.getSize();
 		
 		// get flattened pixel array
@@ -74,9 +77,15 @@ public class TileGenerator {
 				
 				short pixel = x >= data_width || y >= data_height ? fillpixel : flatdata[ data_width*y + x ];
 
-				if ( debug ) {
+				if ( debug && debug_tile_bounds ) {
 					if( ( x % 64 == 0 && y % 64 == 0 ) || ( (x-1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-1) % 64 == 0 ) || ( (x+1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+1) % 64 == 0 ) || ( (x-2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-2) % 64 == 0 ) || ( (x+2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+2) % 64 == 0 ) ) {
 						pixel = (short)30000;
+					}
+					if( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) ) {
+						pixel = (short)40000;
+					}
+					if( ( x == size-1 && y % 4 == 0 ) || ( y == size-1 && x % 4 == 0 ) ) {
+						pixel = (short)50000;
 					}
 				}
 				
