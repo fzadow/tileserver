@@ -49,6 +49,7 @@ public class TileGenerator {
 	
 	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
 		
+		final boolean debug = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") );
 		int size = coordinates.getSize();
 		
 		// get flattened pixel array
@@ -67,12 +68,13 @@ public class TileGenerator {
 		
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
+
 				// fill overlap with pink instead of black if debug mode.
-				short fillpixel = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ? (short)30000 : (short)0 ; 
+				short fillpixel = (short) (debug ? 30000 : 0 ) ; 
 				
 				short pixel = x >= data_width || y >= data_height ? fillpixel : flatdata[ data_width*y + x ];
 
-				if ( Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ) {
+				if ( debug ) {
 					if( ( x % 64 == 0 && y % 64 == 0 ) || ( (x-1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-1) % 64 == 0 ) || ( (x+1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+1) % 64 == 0 ) || ( (x-2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-2) % 64 == 0 ) || ( (x+2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+2) % 64 == 0 ) ) {
 						pixel = (short)30000;
 					}
@@ -102,7 +104,7 @@ public class TileGenerator {
 	
 	public byte[] getTileAsJPEG( Stack stack, TileCoordinates coordinates ) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( getTile( stack, coordinates ), "png", baos);
+		ImageIO.write( getTile( stack, coordinates ), "jpg", baos);
 		return baos.toByteArray();
 	}
 	
