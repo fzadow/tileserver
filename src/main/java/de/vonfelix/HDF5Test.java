@@ -23,7 +23,7 @@ public class HDF5Test
 			
 			System.out.println( "Stack 0: " + hdf5Image.getStack(0) );
 			
-			TileGenerator tileGenerator = new TileGenerator(hdf5Image);
+			TileGenerator tileGenerator = new TileGenerator();
 			
 			BufferedImage img = tileGenerator.getTile( hdf5Image.getStack(0), new TileCoordinates(hdf5Image, 512, 0, 0, 0) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
