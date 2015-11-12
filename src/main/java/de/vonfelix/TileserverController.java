@@ -50,7 +50,7 @@ public class TileserverController {
 		resp.setHeader("Access-Control-Max-Age", "3600");
 		resp.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 		
-		TileCoordinates tc = new TileCoordinates(imageHandler.getImage( image_name ), 256, row_index, column_index, slice_index);
+		TileCoordinates tc = new TileCoordinates(256, row_index, column_index, slice_index);
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		

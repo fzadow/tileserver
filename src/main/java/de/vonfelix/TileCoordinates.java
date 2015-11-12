@@ -1,9 +1,14 @@
 package de.vonfelix;
 
+/**
+ * Describes the location and dimensions of a tile inside a Stack
+ * 
+ * @author felix
+ *
+ */
+
 public class TileCoordinates {
 	
-	private HDF5Image hdf5Image;
-
 	private int size;
 
 	private int slice_index;
@@ -11,8 +16,7 @@ public class TileCoordinates {
 	private int column_index;
 	
 	
-	public TileCoordinates( HDF5Image hdf5Image, int size, int row_index, int column_index, int slice_index) {
-		this.hdf5Image = hdf5Image;
+	public TileCoordinates( int size, int row_index, int column_index, int slice_index) {
 		this.size = size;
 		this.row_index = row_index;
 		this.column_index = column_index;
