@@ -11,6 +11,9 @@ import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
+// TODO different contrast curves?
+
+// TODO automatic contrast
 
 public class TileGenerator {
 	
@@ -21,7 +24,7 @@ public class TileGenerator {
 	
 	private int[] getColormap() {
 		if( colormap == null ) {
-			int limit = 3000;
+			int limit = 2000;
 			int factor = limit/256;
 			
 			colormap = new int[65536];
@@ -39,7 +42,7 @@ public class TileGenerator {
 			}
 			
 			// for debugging
-			if( Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") ) ) {
+			if( Boolean.parseBoolean( Tileserver.getProperty("debug") ) ) {
 				System.out.println( "using debug colormap" );
 				colormap[40000] = 0b000000001111111100000000; // green
 				colormap[50000] = 0b111111110000000000000000; // red
@@ -53,8 +56,8 @@ public class TileGenerator {
 	
 	public BufferedImage getTile( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
 		
-		final boolean debug = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug") );
-		final boolean debug_tile_bounds = Boolean.parseBoolean( TileserverTestApplication.properties.getProperty("debug_tile_bounds") );
+		final boolean debug = Boolean.parseBoolean( Tileserver.getProperty("debug") );
+		final boolean debug_tile_bounds = Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
 
 		int size = coordinates.getSize();
 		

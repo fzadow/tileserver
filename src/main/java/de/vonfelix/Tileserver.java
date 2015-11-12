@@ -13,9 +13,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
-public class TileserverTestApplication {
+public class Tileserver {
 
-	public static Properties properties;
+	private static Properties properties;
+	
+	static String getProperty( String key ) {
+		return properties.getProperty( key );
+	}
 
 	public static void main(String[] args) {
 
@@ -41,7 +45,7 @@ public class TileserverTestApplication {
 
 		// launch Spring application
 
-		ApplicationContext ctx = SpringApplication.run(TileserverTestApplication.class, args);
+		ApplicationContext ctx = SpringApplication.run(Tileserver.class, args);
 
         // list provided beans
         

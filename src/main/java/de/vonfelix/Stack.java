@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
+import ch.systemsx.cisd.hdf5.HDF5DataClass;
 
 public class Stack {
 	
@@ -21,11 +22,24 @@ public class Stack {
 		this.hdf5Image= hdf5Image;
 		this.name = name;
 		this.dimensions = new HashMap<Integer,long[]>();
-		scaleLevels = hdf5Image.getReader().object().getAllGroupMembers( "stacks/" + name + "/" );
+
+		scaleLevels = hdf5Image.getReader().object().getAllGroupMembers(
+				Tileserver.getProperty("hdf5_stack_path") + name + "/" );
+		
+		// TODO get stack info (max value)
+	}
+	
+	public Object readProperty( String name ) {
+		//hdf5Image.getReader().object().getAllAttributeNames(arg0)
+		return null;
 	}
 	
 	public int getNumScaleLevels() {
 		return scaleLevels.size();
+	}
+	
+	public HDF5Image getHdf5Image() {
+		return hdf5Image;
 	}
 	
 	public String getName() {
@@ -33,13 +47,14 @@ public class Stack {
 	}
 	
 	public String getFullName() {
-		return "stacks/" + this.getName();
+		return Tileserver.getProperty("hdf5_stack_path") + this.getName();
 	}
 	
 	public long[] getDimensions( int scaleLevel) {
 
 		if( ! dimensions.containsKey( scaleLevel ) ) {
-			dimensions.put(scaleLevel, hdf5Image.getReader().object().getDimensions( "stacks/" + getName() + "/" + scaleLevel ) );
+			dimensions.put(scaleLevel, hdf5Image.getReader().object().getDimensions( 
+					Tileserver.getProperty("hdf5_stack_path") + getName() + "/" + scaleLevel ) );
 		}
 		return dimensions.get( scaleLevel );
 	}
