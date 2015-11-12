@@ -44,6 +44,12 @@ public class TileserverController {
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
+		// Allow CORS
+		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+		resp.setHeader("Access-Control-Max-Age", "3600");
+		resp.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+		
 		TileCoordinates tc = new TileCoordinates(imageHandler.getImage( image_name ), 256, row_index, column_index, slice_index);
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
