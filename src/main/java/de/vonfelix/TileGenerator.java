@@ -24,16 +24,20 @@ public class TileGenerator {
 	
 	private int[] getColormap() {
 		if( colormap == null ) {
-			int limit = 2000;
-			int factor = limit/256;
-			
+			int limit = 2400;
+			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
+			int target = 256;
+
+			System.out.println( "Generating colormap with adjustment=" + exp + " and limit=" + limit );
+
 			colormap = new int[65536];
 //			for(int i = 0; i < 65536; ++i) {
 //				colormap[i] = ( i / FACTOR ) << 16 | ( i / FACTOR ) << 8 | ( i / FACTOR );
 //			}
 			for( int i= 0; i < 65536; ++i ) {
 				if( i < limit ) {
-					colormap[i] = (i/factor) << 16 | (i/factor) << 8 | (i/factor);
+					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
+					colormap[i] = ( c << 16 ) | (c << 8 ) | c;
 				}
 				else {
 					// mark overexposed pixels
