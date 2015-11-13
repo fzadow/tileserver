@@ -40,6 +40,7 @@ public class TileserverController {
 			@PathVariable("scale_level") int scale_level
 			) throws Exception {
 		
+		long startTime = System.nanoTime();
 		System.out.println( "___" );
 		System.out.println( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
@@ -52,6 +53,8 @@ public class TileserverController {
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
 		byte[] img = tileGenerator.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), scale_level, tc );
+		long duration = ( System.nanoTime() - startTime );
+		System.out.println( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000+ " ms" );
 		return img;
 	}
 	
