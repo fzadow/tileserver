@@ -20,6 +20,10 @@ public class Tileserver {
 	static String getProperty( String key ) {
 		return properties.getProperty( key );
 	}
+	
+	static boolean hasProperty( String key ) {
+		return properties.containsKey( key );
+	}
 
 	public static void main(String[] args) {
 
