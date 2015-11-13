@@ -24,16 +24,13 @@ public class TileGenerator {
 	
 	private int[] getColormap() {
 		if( colormap == null ) {
-			int limit = 2400;
+			int limit =  Tileserver.hasProperty("tile_value_limit") ? Integer.parseInt( Tileserver.getProperty("tile_value_limit") ) : 65536;
 			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
 			int target = 256;
 
 			System.out.println( "Generating colormap with adjustment=" + exp + " and limit=" + limit );
 
 			colormap = new int[65536];
-//			for(int i = 0; i < 65536; ++i) {
-//				colormap[i] = ( i / FACTOR ) << 16 | ( i / FACTOR ) << 8 | ( i / FACTOR );
-//			}
 			for( int i= 0; i < 65536; ++i ) {
 				if( i < limit ) {
 					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
