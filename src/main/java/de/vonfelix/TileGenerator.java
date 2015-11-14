@@ -2,10 +2,9 @@ package de.vonfelix;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-
+import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
