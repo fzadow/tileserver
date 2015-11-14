@@ -48,7 +48,7 @@ public class TileserverController {
 		resp.setContentType("image/jpg");
 		
 		
-		TileCoordinates tc = new TileCoordinates(256, row_index, column_index, slice_index);
+		TileCoordinates tc = new TileCoordinates(512, row_index, column_index, slice_index);
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
