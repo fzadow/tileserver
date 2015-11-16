@@ -52,10 +52,10 @@ public class HDF5Image {
 				}
 				for( Element s : root.getChild("CompositeStacks", ns).getChildren() ) {
 					System.out.println( "  composite stack " + s.getChildText( "name", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
-					CompositeStack cs = new CompositeStack( this, s.getChildText( "stack", ns ), s.getChildText( "title", ns ) );
+					CompositeStack cs = new CompositeStack( this, s.getChildText( "name", ns ), s.getChildText( "title", ns ) );
 					for( Element c : s.getChild( "Channels", ns ).getChildren() ) {
 						System.out.println( "    " + c.getChildText( "stack", ns ) + " : " + c.getChildText( "color", ns ) );
-						cs.addChannel( (Stack)getStack( c.getChildText( "stack", ns ) ), ChannelColor.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
+						cs.addChannel( (Stack)stacks.get( c.getChildText( "stack", ns ) ), ChannelColor.ColorName.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
 					}
 					stacks.put( cs.getName(), cs );
 				}
