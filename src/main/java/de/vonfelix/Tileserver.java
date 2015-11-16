@@ -1,5 +1,6 @@
 package de.vonfelix;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,8 +63,18 @@ public class Tileserver extends SpringBootServletInitializer {
 		InputStream input = null;
 
 		try {
+			// load properties from configuration file in project
 			input = new FileInputStream( "config.properties" );
 			properties.load( input );
+			
+			// additionally load properties from system global configuration
+			// file, overwriting any properties with the same key.
+			if( new File("/opt/etc/tileserver/config.properties").exists() ) {
+				Properties system_properties = new Properties();
+				system_properties.load( new FileInputStream( "/opt/etc/tileserver/config.properties" ) );
+				properties.putAll( system_properties );
+			}
+			
 		} catch ( IOException io ) {
 			io.printStackTrace();
 		} finally {
