@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.example.org/hdf5"
+xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
+
+	<complexType name="AbstractStackType">
+		<sequence>
+			<element name="title" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="CompositeStackType">
+		<complexContent>
+    		<extension base="h:AbstractStackType">
+    			<sequence>
+					<element name="name" type="string"></element>
+					<element ref="h:Channels"></element>
+    			</sequence>
+    		</extension>
+		
+    		</complexContent>
+	</complexType>
+
+    <complexType name="StackType">
+    	<complexContent>
+    		<extension base="h:AbstractStackType">
+    			<sequence>
+					<element name="name" type="string"></element>
+    				<element name="path" type="string" />
+    			</sequence>
+    		</extension>
+    	</complexContent>
+    </complexType>
+
+    <complexType name="ChannelType">
+    	<sequence>
+    		<element name="stack" type="string"></element>
+    		<element name="color" type="h:ColorType"></element>
+    	</sequence>
+    </complexType>
+
+	<simpleType name="ColorType" final="restriction">
+		<restriction base="string">
+			<enumeration value="red"></enumeration>
+			<enumeration value="green"></enumeration>
+			<enumeration value="blue"></enumeration>
+		</restriction>
+	</simpleType>
+    
+	<element name="Stacks">
+		<complexType>
+			<sequence>
+				<element ref="h:Stack" maxOccurs="unbounded"></element>
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="CompositeStacks">
+		<complexType>
+			<sequence>
+				<element ref="h:CompositeStack" maxOccurs="unbounded"></element>
+			</sequence>
+		</complexType>
+	</element>
+	
+	<element name="Channels">
+		<complexType>
+			<sequence>
+				<element ref="h:Channel" maxOccurs="unbounded"></element>
+			</sequence>
+		</complexType>
+	</element>
+	
+	<element name="AbstractStack" type="h:AbstractStackType" abstract="true"></element>
+
+	<element name="Stack" type="h:StackType" substitutionGroup="h:AbstractStack"></element>
+
+	<element name="CompositeStack" type="h:CompositeStackType" substitutionGroup="h:AbstractStack"></element>
+
+	<element name="HDF5Image">
+		<complexType>
+			<sequence>
+				<element name="title" type="string"></element>
+				<element ref="h:Stacks" minOccurs="1" maxOccurs="1"></element>
+				<element ref="h:CompositeStacks" minOccurs="0" maxOccurs="1"></element>
+			</sequence>
+		</complexType>
+	</element>
+
+    <element name="Channel" type="h:ChannelType"></element>
+
+</schema>

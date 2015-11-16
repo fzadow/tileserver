@@ -18,7 +18,7 @@ public class ImageHandler {
 				System.out.println( "ImageHandler: Error! File " + Tileserver.getProperty("source_image_dir") + name + ".h5" + " does not exist." );
 				return null;
 			}
-			images.put( name, new HDF5Image(  Tileserver.getProperty("source_image_dir") + name + ".h5" ) );
+			images.put( name, new HDF5Image( name ) );
 			System.out.println( "ImageHandler: File " + name + " loaded." );
 		}
 

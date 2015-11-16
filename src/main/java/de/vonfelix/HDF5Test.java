@@ -12,20 +12,18 @@ public class HDF5Test
 {
 	public static void main( final String[] args ) throws IOException
 	{
-		String FILENAME = "/home/felix/Dev/tileserver/ovary.h5";
+		String FILENAME = "ovary";
 		
 		HDF5Image hdf5Image;
 		try {
 			hdf5Image = new HDF5Image( FILENAME );
 
 			System.out.println("Image loaded (" + FILENAME + ")");
-			System.out.println("Number of Channels: " + hdf5Image.getNumChannels() );
-			
-			System.out.println( "Stack 0: " + hdf5Image.getStack(0) );
+			System.out.println("Number of Stacks: " + hdf5Image.getNumChannels() );
 			
 			TileGenerator tileGenerator = new TileGenerator();
 			
-			BufferedImage img = tileGenerator.getTile( hdf5Image.getStack(0), 0, new TileCoordinates( 512, 0, 0, 0) );
+			BufferedImage img = tileGenerator.getTile( (Stack) hdf5Image.getStack( "channel0" ), 0, new TileCoordinates( 512, 0, 0, 0) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -18,34 +18,20 @@ public class Tileserver {
 	private static Properties properties;
 	
 	static String getProperty( String key ) {
+		if( properties == null )
+			initProperties();
+		
 		return properties.getProperty( key );
 	}
 	
 	static boolean hasProperty( String key ) {
+		if( properties == null )
+			initProperties();
+		
 		return properties.containsKey( key );
 	}
 
 	public static void main(String[] args) {
-
-		// read properties
-
-		properties = new Properties();
-		InputStream input = null;
-
-		try {
-			input = new FileInputStream( "config.properties" );
-			properties.load( input );
-		} catch ( IOException io ) {
-			io.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 
 		// launch Spring application
 
@@ -63,4 +49,24 @@ public class Tileserver {
         }
         //*/
     }
+	
+	private static void initProperties() {
+		properties = new Properties();
+		InputStream input = null;
+
+		try {
+			input = new FileInputStream( "config.properties" );
+			properties.load( input );
+		} catch ( IOException io ) {
+			io.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }
