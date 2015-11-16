@@ -25,8 +25,9 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
     	<complexContent>
     		<extension base="h:AbstractStackType">
     			<sequence>
-					<element name="name" type="string"></element>
+					<element name="name" type="string" />
     				<element name="path" type="string" />
+    				<element name="tile_value_limit" type="int" />
     			</sequence>
     		</extension>
     	</complexContent>
@@ -34,8 +35,9 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 
     <complexType name="ChannelType">
     	<sequence>
-    		<element name="stack" type="string"></element>
-    		<element name="color" type="h:ColorType"></element>
+    		<element name="stack" type="string" />
+    		<element name="color" type="h:ColorType" />
+    		<element name="tile_value_limit" type="int" />
     	</sequence>
     </complexType>
 
@@ -85,7 +87,7 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 		<complexType>
 			<sequence>
 				<element name="title" type="string"></element>
-				<element ref="h:Stacks" minOccurs="1" maxOccurs="1"></element>
+				<element name="tile_value_limit" type="int"></element>
 				<element ref="h:CompositeStacks" minOccurs="0" maxOccurs="1"></element>
 			</sequence>
 		</complexType>
