@@ -10,10 +10,12 @@ import java.util.Properties;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
-public class Tileserver {
+public class Tileserver extends SpringBootServletInitializer {
 
 	private static Properties properties;
 	
@@ -29,6 +31,11 @@ public class Tileserver {
 			initProperties();
 		
 		return properties.containsKey( key );
+	}
+	
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(Tileserver.class);
 	}
 
 	public static void main(String[] args) {
