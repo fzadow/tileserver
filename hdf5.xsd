@@ -44,6 +44,10 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 			<enumeration value="red"></enumeration>
 			<enumeration value="green"></enumeration>
 			<enumeration value="blue"></enumeration>
+			<enumeration value="cyan"></enumeration>
+			<enumeration value="magenta"></enumeration>
+			<enumeration value="yellow"></enumeration>
+			<enumeration value="grays"></enumeration>
 		</restriction>
 	</simpleType>
     
