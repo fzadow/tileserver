@@ -104,13 +104,13 @@ public class TileGenerator {
 		
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
-		
+
+		// fill overlap with black (or grey if in debug mode)
+		short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
+
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
 
-				// fill overlap with black (or grey if in debug mode)
-				short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
-				
 				short pixel = x >= data_width || y >= data_height ? fillpixel : flatdata[ data_width*y + x ];
 
 				if ( debug_tile_bounds ) {
