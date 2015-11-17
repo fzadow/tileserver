@@ -26,62 +26,38 @@ public class TileGenerator {
 	}
 	
 	private int[] getGrayMap( int limit ) {
-		if( ! grayMaps.containsKey( limit ) ) {
-			double exp = 1;
+		if( ! grayMaps.containsKey( limit ) || Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) {
+			long startTime = System.nanoTime();
+
+			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
 			int target = 256;
-			
+
 			int[] grayMap = new int[65536];
 			for ( int i = 0; i < 65536; ++i ) {
 				if( i < limit ) {
 					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
 					grayMap[ i ] = c;
 				} else {
-					// mark overexposed pixels;
+					// overexposed pixels;
 					grayMap[ i ] = 0b11111111;
 				}
 			}
 			grayMaps.put( limit, grayMap );
+
+			System.out.print( "TileGenerator: colormap with adjustment=" + exp + " and limit=" + limit );
+			System.out.println( " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 		}
 		return grayMaps.get( limit );
 	}
 	
-	private int[] getColormap() {
-		if( colormap == null ) {
-			long startTime = System.nanoTime();
-
-			int limit =  Tileserver.hasProperty("tile_value_limit") ? Integer.parseInt( Tileserver.getProperty("tile_value_limit") ) : 65536;
-			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
-			int target = 256;
-
-			System.out.print( "Generating colormap with adjustment=" + exp + " and limit=" + limit );
-
-			colormap = new int[65536];
-			for( int i= 0; i < 65536; ++i ) {
-				if( i < limit ) {
-					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
-					colormap[i] = ( c << 16 ) | (c << 8 ) | c;
-				}
-				else {
-					// mark overexposed pixels
-					colormap[i] = ChannelColor.BLUE;
-				}
-			}
-			
-			// for debugging
-			if( Boolean.parseBoolean( Tileserver.getProperty("debug") ) ) {
-				System.out.println( "using debug colormap" );
-				colormap[40000] = ChannelColor.GREEN;
-				colormap[50000] = ChannelColor.RED;
-				colormap[65535] = ChannelColor.CYAN;
-				colormap[30000] = ChannelColor.GRAYS;
-			}
-			
-			System.out.println( " ... done (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
-		}
-		
-		return colormap;
-	}
-	
+	/**
+	 * get a single channel tile
+	 * @param stack
+	 * @param scaleLevel
+	 * @param coordinates
+	 * @return
+	 * @throws Exception
+	 */
 	public BufferedImage getTile( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
 		
 		long startTime = System.nanoTime();
@@ -98,8 +74,6 @@ public class TileGenerator {
 		int data_width = data.dimensions()[2];
 		int data_height = data.dimensions()[1];
 		
-		System.out.print( "TileGenerator: Generating tile ... " );
-		
 		short[] flatdata = data.getAsFlatArray();
 		
 		// create square rgb array of width 'size'
@@ -107,6 +81,8 @@ public class TileGenerator {
 
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
+
+		int[] grayMap = getGrayMap( stack.getValueLimit() );
 
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
@@ -124,8 +100,9 @@ public class TileGenerator {
 						pixel = (short)50000;
 					}
 				}
-				
-				rgb[ size*y + x ] = getColormap()[pixel & 0xffff ];
+				int grayValue = grayMap[pixel & 0xffff ];
+
+				rgb[ size*y + x ] = grayValue << 16 | grayValue << 8 | grayValue;
 			}
 		}
 		
@@ -133,13 +110,24 @@ public class TileGenerator {
 
 		img.setRGB(0, 0, size, size, rgb, 0, size);
 
-		System.out.println( " done (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		System.out.println( "TileGenerator: tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}
 	
 
+	/**
+	 * get a composite tile
+	 * 
+	 * @param stack
+	 * @param scaleLevel
+	 * @param coordinates
+	 * @return
+	 * @throws Exception
+	 */
 	public BufferedImage getTile( CompositeStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+
+		long startTime = System.nanoTime();
 
 		final boolean debug = Boolean.parseBoolean( Tileserver.getProperty("debug") );
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
@@ -149,8 +137,6 @@ public class TileGenerator {
 
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
-
-		System.out.println( "TileGenerator: Generating composite tile ... " );
 
 		// get data for all channels
 		for( Stack channel : stack.getChannels().values() ) {
@@ -178,7 +164,7 @@ public class TileGenerator {
 
 		img.setRGB(0, 0, size, size, rgb, 0, size);
 
-//		System.out.println( " done (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		System.out.println( "TileGenerator: composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}
