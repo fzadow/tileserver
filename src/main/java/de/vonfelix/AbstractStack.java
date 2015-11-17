@@ -8,13 +8,15 @@ public abstract class AbstractStack implements IStack {
 	protected String name;
 	protected String title;
 	protected HashMap<Integer,long[]> dimensions;
+	protected int valueLimit;
 
+	
 	public AbstractStack( HDF5Image hdf5Image, String name, String title ) {
 		this.hdf5Image= hdf5Image;
 		this.name= name;
 		this.title= title;
 		this.dimensions = new HashMap<Integer,long[]>();
-
+		this.valueLimit = hdf5Image.getValueLimit();
 	}
 	
 	public HDF5Image getHdf5Image() {
@@ -27,6 +29,13 @@ public abstract class AbstractStack implements IStack {
 	
 	public String getTitle() {
 		return title;
+	}
+	
+	public void setValueLimit( int valueLimit ) {
+		this.valueLimit = valueLimit;
+	}
+	public int getValueLimit() {
+		return valueLimit;
 	}
 	
 	@Override

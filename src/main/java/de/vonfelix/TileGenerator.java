@@ -3,6 +3,7 @@ package de.vonfelix;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -19,18 +20,17 @@ import ch.systemsx.cisd.base.mdarray.MDShortArray;
 public class TileGenerator {
 	
 	int[] colormap;
-	int[] grayMap;
+	HashMap<Integer,int[]> grayMaps = new HashMap<Integer,int[]>();
 
 	public TileGenerator() {
 	}
 	
-	private int[] getGrayMap() {
-		if( grayMap == null ) {
-			int limit = 2000;
+	private int[] getGrayMap( int limit ) {
+		if( ! grayMaps.containsKey( limit ) ) {
 			double exp = 1;
 			int target = 256;
 			
-			grayMap = new int[65536];
+			int[] grayMap = new int[65536];
 			for ( int i = 0; i < 65536; ++i ) {
 				if( i < limit ) {
 					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
@@ -40,8 +40,9 @@ public class TileGenerator {
 					grayMap[ i ] = 0b11111111;
 				}
 			}
+			grayMaps.put( limit, grayMap );
 		}
-		return grayMap;
+		return grayMaps.get( limit );
 	}
 	
 	private int[] getColormap() {
@@ -140,8 +141,6 @@ public class TileGenerator {
 
 	public BufferedImage getTile( CompositeStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
 
-		System.out.println( "getting composite tile" );
-		
 		final boolean debug = Boolean.parseBoolean( Tileserver.getProperty("debug") );
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
 		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
@@ -163,12 +162,15 @@ public class TileGenerator {
 			
 			System.out.println( "  Channel " + channel.getName() + ": " + stack.getColor( channel.getName() ) );
 			
+			int colorMask = ChannelColor.getColor( stack.getColor( channel.getName() ) );
+			int[] grayMap = getGrayMap( channel.getValueLimit() );
+			
 			for(int y = 0; y < size; ++y) {
 				for(int x= 0; x < size; ++x ) {
 					// fill overlap with black
 					short pixel = x >= data_width || y >= data_height ? 0 : flatdata[ data_width*y + x ];
-					int grayValue = getGrayMap()[pixel & 0xffff ];
-					rgb[ size*y + x ] = rgb[ size*y + x ] | ( ( grayValue << 16 ) | (grayValue << 8 ) | grayValue ) & ChannelColor.getColor( stack.getColor( channel.getName() ) );
+					int grayValue = grayMap[pixel & 0xffff ];
+					rgb[ size*y + x ] = rgb[ size*y + x ] | ( ( grayValue << 16 ) | (grayValue << 8 ) | grayValue ) & colorMask;
 				}
 			}
 		}

@@ -66,13 +66,13 @@ public class Stack extends AbstractStack {
 	 * return a flat array for the requested block
 	 * @return a flattened array of the block */
 	public MDShortArray getBlock( int scaleLevel, int size, int offset_z, long offset_x, long offset_y ) throws Exception {
-		System.out.println( "Stack: image bounds: " + getDimensions( scaleLevel )[1] + "x" + getDimensions( scaleLevel )[2] );
+		//System.out.println( "Stack: image bounds: " + getDimensions( scaleLevel )[1] + "x" + getDimensions( scaleLevel )[2] );
 		
 		// restrict block loading to image bounds
 		int width = offset_x + size > getDimensions( scaleLevel )[1] ? (int) ( getDimensions( scaleLevel )[1] - offset_x - 1) : size;
 		int height = offset_y + size > getDimensions( scaleLevel )[2] ? (int) ( getDimensions( scaleLevel )[2] - offset_y - 1 ) : size;
 		
-		System.out.println( "Stack: getting " + width + "x" + height + " block from " + offset_x + "," + offset_y + " to "  + ( width + offset_x ) + "," + ( height + offset_y ) );
+		//System.out.println( "Stack: getting " + width + "x" + height + " block from " + offset_x + "," + offset_y + " to "  + ( width + offset_x ) + "," + ( height + offset_y ) );
 		
 		
 		return hdf5Image.getReader().uint16().readMDArrayBlockWithOffset( getFullName() + "/" + scaleLevel,
