@@ -13,7 +13,9 @@ public class ImageHandler {
 	
 	public HDF5Image getImage( String name ) {
 		
-		if( ! images.containsKey( name ) ) {
+		if( ! images.containsKey( name ) ||
+				( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) &&
+				Boolean.parseBoolean( Tileserver.getProperty( "debug_reload_image" ) ) ) ) {
 			if( ! new File( Tileserver.getProperty("source_image_dir") + name + ".h5" ).exists() ) {
 				System.out.println( "ImageHandler: Error! File " + Tileserver.getProperty("source_image_dir") + name + ".h5" + " does not exist." );
 				return null;
@@ -21,8 +23,6 @@ public class ImageHandler {
 			images.put( name, new HDF5Image( name ) );
 			System.out.println( "ImageHandler: File " + name + " loaded." );
 		}
-
-		System.out.println( images.get( name ) );
 
 		return images.get( name );
 	}

@@ -21,14 +21,14 @@ public class Tileserver extends SpringBootServletInitializer {
 	private static Properties properties;
 	
 	static String getProperty( String key ) {
-		if( properties == null )
+		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
 			initProperties();
 		
 		return properties.getProperty( key );
 	}
 	
 	static boolean hasProperty( String key ) {
-		if( properties == null )
+		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true  )
 			initProperties();
 		
 		return properties.containsKey( key );
