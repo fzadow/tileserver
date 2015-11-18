@@ -19,11 +19,11 @@ public class HDF5Test
 			hdf5Image = new HDF5Image( FILENAME );
 
 			System.out.println("Image loaded (" + FILENAME + ")");
-			System.out.println("Number of Stacks: " + hdf5Image.getNumChannels() );
+			System.out.println("Number of Stacks: " + hdf5Image.getNumStacks() );
 			
 			TileGenerator tileGenerator = new TileGenerator();
 			
-			BufferedImage img = tileGenerator.getTile( (CompositeStack) hdf5Image.getStack( "asd" ), 0, new TileCoordinates( 512, 1, 0, 0) );
+			BufferedImage img = tileGenerator.getTile( (CompositeStack) hdf5Image.getStack( "asd" ), new TileCoordinates( 512, 0, 1, 0, 0) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

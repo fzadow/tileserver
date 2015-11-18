@@ -11,16 +11,22 @@ public class TileCoordinates {
 	
 	private int size;
 
+	private int scale_level;
 	private int slice_index;
 	private int row_index;
 	private int column_index;
 	
 	
-	public TileCoordinates( int size, int row_index, int column_index, int slice_index) {
+	public TileCoordinates( int size, int scale_level, int row_index, int column_index, int slice_index) {
 		this.size = size;
+		this.scale_level = scale_level;
 		this.row_index = row_index;
 		this.column_index = column_index;
 		this.slice_index = slice_index;
+	}
+	
+	public int getScaleLevel() {
+		return scale_level;
 	}
 	
 	public int getRowIndex() {
@@ -53,7 +59,7 @@ public class TileCoordinates {
 	
 	@Override
 	public String toString() {
-		return "(" + slice_index + "," + row_index + "," + column_index + ") [" + getZ() + "," + getX() + "," + getY() + "]";
+		return "Coordinates: (" + slice_index + "," + row_index + "," + column_index + ") [" + getZ() + "," + getX() + "," + getY() + "]";
 
 	}
 	

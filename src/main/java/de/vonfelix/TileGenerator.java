@@ -26,7 +26,7 @@ public class TileGenerator {
 	}
 	
 	private int[] getGrayMap( int limit ) {
-		if( ! grayMaps.containsKey( limit ) || Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) {
+		if( ! grayMaps.containsKey( limit ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
 			long startTime = System.nanoTime();
 
 			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
@@ -58,7 +58,7 @@ public class TileGenerator {
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( Stack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
 		
 		long startTime = System.nanoTime();
 
@@ -70,7 +70,7 @@ public class TileGenerator {
 		
 		// get flattened pixel array
 		// may be smaller than size*size if out of bounds
-		MDShortArray data = stack.getBlock( scaleLevel, size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		MDShortArray data = stack.getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
 		int data_width = data.dimensions()[2];
 		int data_height = data.dimensions()[1];
 		
@@ -125,7 +125,7 @@ public class TileGenerator {
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( CompositeStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( CompositeStack stack, TileCoordinates coordinates ) throws Exception {
 
 		long startTime = System.nanoTime();
 
@@ -140,7 +140,7 @@ public class TileGenerator {
 
 		// get data for all channels
 		for( Stack channel : stack.getChannels().values() ) {
-			MDShortArray data = channel.getBlock( scaleLevel, size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+			MDShortArray data = channel.getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
 			int data_width = data.dimensions()[2];
 			int data_height = data.dimensions()[1];
 			
@@ -173,19 +173,20 @@ public class TileGenerator {
 //		return ((DataBufferByte) getTile( stack, scaleLevel, coordinates ).getRaster().getDataBuffer()).getData();
 //	}
 	
-	public byte[] getTileAsJPEG( IStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BufferedImage image;
 		//if( stack instanceof Stack ) {
 		switch ( stack.getClass().getSimpleName() ) {
 		case "Stack":
-			ImageIO.write( getTile( (Stack)stack, scaleLevel, coordinates ), "jpg", baos);
+			image = getTile( (Stack)stack, coordinates );
 			break;
 		case "CompositeStack":
-			ImageIO.write( getTile( (CompositeStack)stack, scaleLevel, coordinates ), "jpg", baos);
+			image = getTile( (CompositeStack)stack, coordinates );
 		default:
-			// TODO throw exception
-			break;
+			return null;
 		}
+		ImageIO.write( image, "jpg", baos);
 		return baos.toByteArray();
 	}
 	

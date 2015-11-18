@@ -46,11 +46,11 @@ public class TileserverController {
 		resp.setContentType("image/jpg");
 		
 		
-		TileCoordinates tc = new TileCoordinates(512, row_index, column_index, slice_index);
+		TileCoordinates coordinates = new TileCoordinates(512, scale_level, row_index, column_index, slice_index);
 
-		System.out.println( "getting tile " + tc + ", scale " + scale_level );
+		System.out.println( "Controller: getting tile at " + coordinates);
 		
-		byte[] img = TileProxy.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), scale_level, tc );
+		byte[] img = TileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates );
 		long duration = ( System.nanoTime() - startTime );
 		System.out.println( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000+ " ms" );
 		return img;
