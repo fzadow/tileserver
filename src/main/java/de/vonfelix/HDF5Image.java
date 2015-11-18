@@ -1,10 +1,8 @@
 package de.vonfelix;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -12,22 +10,17 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
-import ch.systemsx.cisd.base.mdarray.MDShortArray;
 import ch.systemsx.cisd.hdf5.HDF5Factory;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
 
-public class HDF5Image {
+public class HDF5Image extends AbstractImage {
 
-
-	private String name;
-	private int valueLimit = Integer.parseInt( Tileserver.getProperty( "tile_value_limit" ) );
-	
 	private	IHDF5Reader reader;
 	private HashMap<String, IStack> stacks;
 	private Document imageDesc;
 	
 	public HDF5Image( String name ){
-		this.name= name;
+		super( name );
 		
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( Tileserver.getProperty("source_image_dir") + name + ".h5" );
@@ -38,7 +31,7 @@ public class HDF5Image {
 			Element root = imageDesc.getRootElement();
 			Namespace ns = root.getNamespace();
 			if( root.getChildText( "tile_value_limit", ns ) != null ) {
-				this.valueLimit = Integer.parseInt( root.getChildText( "tile_value_limit", ns ) );
+				valueLimit = Integer.parseInt( root.getChildText( "tile_value_limit", ns ) );
 			}
 		} catch ( JDOMException e ) {
 			// TODO Auto-generated catch block
@@ -49,14 +42,6 @@ public class HDF5Image {
 		}
 
 	}
-	
-	public void setValueLimit( int valueLimit ) {
-		this.valueLimit = valueLimit;
-	}
-	public int getValueLimit() {
-		return valueLimit;
-	}
-
 	
 	/** an {@link ArrayList} with all the {@link Stack}s in the image*/
 	private HashMap<String, IStack> getStacks() {
@@ -103,7 +88,7 @@ public class HDF5Image {
 		return stacks;
 	}
 	
-	public int getNumChannels() {
+	public int getNumStacks() {
 		return getStacks().size();
 	}
 	
