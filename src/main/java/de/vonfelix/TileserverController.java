@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TileserverController {
 
-	private TileGenerator tileGenerator;
 	private ImageHandler imageHandler;
 
 	public TileserverController() throws Exception {
 		super();
 		this.imageHandler = new ImageHandler();
-		this.tileGenerator = new TileGenerator();
 	}
 
 	@Autowired
@@ -52,7 +50,7 @@ public class TileserverController {
 
 		System.out.println( "getting tile " + tc + ", scale " + scale_level );
 		
-		byte[] img = tileGenerator.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), scale_level, tc );
+		byte[] img = TileProxy.getTileAsJPEG( imageHandler.getImage( image_name ).getStack( stack_name ), scale_level, tc );
 		long duration = ( System.nanoTime() - startTime );
 		System.out.println( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000+ " ms" );
 		return img;
