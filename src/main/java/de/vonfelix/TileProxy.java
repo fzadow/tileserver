@@ -14,11 +14,16 @@ public class TileProxy {
 
 	private File tileDir;
 	private File writableTileDir;
+	private boolean bDiskRead;
+	private boolean bDiskWrite;
 
 	private TileGenerator tileGenerator = new TileGenerator();
 
+	// TODO also try reading files from writable_tile_dir if possible
+
 	public TileProxy() {
 		System.out.println( "TileProxy: initializing" );
+
 		if ( Tileserver.hasProperty( "tile_dir" ) ) {
 			if ( Files.isDirectory( Paths.get( Tileserver.getProperty( "tile_dir" ) ) ) ) {
 				tileDir = new File( Tileserver.getProperty( "tile_dir" ) );
@@ -31,12 +36,16 @@ public class TileProxy {
 				System.out.println( "TileProxy: Found writable_tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) );
 			}
 		}
+
+		this.bDiskRead = tileDir.isDirectory() && Tileserver.hasProperty( "read_from_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "read_from_disk" ) );
+		this.bDiskWrite = writableTileDir.isDirectory() && Tileserver.hasProperty( "save_to_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "save_to_disk" ) );
+
 	}
 
 	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 
 		// check if tile exists on disk
-		if ( tileDir != null ) {
+		if ( bDiskRead ) {
 			Path path = Paths.get( tileDir.getAbsolutePath(), stack.getHdf5Image().getName(), stack.getName(),
 					String.valueOf( coordinates.getSliceIndex() ),
 					String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() )
@@ -57,7 +66,7 @@ public class TileProxy {
 		ImageIO.write( tile, "jpg", baos );
 
 		// save to disk
-		if ( writableTileDir != null ) {
+		if ( bDiskWrite ) {
 			System.out.print( "TileProxy: saving file... " );
 			File outFile = new File( writableTileDir.getAbsolutePath() + "/" + stack.getHdf5Image().getName() + "/" + stack.getName() + "/" + String.valueOf( coordinates.getSliceIndex() ) + "/" + String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() ) + "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
 			outFile.getParentFile().mkdirs();
