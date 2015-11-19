@@ -181,6 +181,7 @@ public class TileGenerator {
 			break;
 		case "CompositeStack":
 			image = getTile( (CompositeStack)stack, coordinates );
+			break;
 		default:
 			return null;
 		}
