@@ -1,13 +1,7 @@
 package de.vonfelix;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
-import java.util.List;
-
-import javax.imageio.ImageIO;
-
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
@@ -44,8 +38,7 @@ public class TileGenerator {
 			}
 			grayMaps.put( limit, grayMap );
 
-			System.out.print( "TileGenerator: colormap with adjustment=" + exp + " and limit=" + limit );
-			System.out.println( " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "colormap with adjustment=" + exp + " and limit=" + limit + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 		}
 		return grayMaps.get( limit );
 	}
@@ -110,7 +103,7 @@ public class TileGenerator {
 
 		img.setRGB(0, 0, size, size, rgb, 0, size);
 
-		System.out.println( "TileGenerator: tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		Tileserver.log( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}
@@ -146,7 +139,7 @@ public class TileGenerator {
 			
 			short[] flatdata = data.getAsFlatArray();
 			
-			System.out.println( "  Channel " + channel.getName() + ": " + stack.getColor( channel.getName() ) );
+			Tileserver.log( "  Channel " + channel.getName() + ": " + stack.getColor( channel.getName() ) );
 			
 			int colorMask = ChannelColor.getColor( stack.getColor( channel.getName() ) );
 			int[] grayMap = getGrayMap( channel.getValueLimit() );
@@ -164,7 +157,7 @@ public class TileGenerator {
 
 		img.setRGB(0, 0, size, size, rgb, 0, size);
 
-		System.out.println( "TileGenerator: composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		Tileserver.log( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}

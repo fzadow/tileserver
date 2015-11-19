@@ -50,12 +50,12 @@ public class HDF5Image extends AbstractImage {
 			
 			if( imageDesc != null ) {
 				// TODO sanity checks when loading channels (no dupes, only sane composites)
-				System.out.println("HDF5Image: reading stack info for " + name );
+				Tileserver.log( "reading stack info for " + name );
 				Element root = imageDesc.getRootElement();
 				Namespace ns = root.getNamespace();
 				
 				for( Element s : root.getChild("Stacks", ns).getChildren() ) {
-					System.out.println( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "name", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "tile_value_limit", ns ) );
+					Tileserver.log( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "name", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "tile_value_limit", ns ) );
 					Stack st =  new Stack( this, s.getChildText( "path", ns ), s.getChildText( "name", ns ) );
 					if( s.getChildText( "tile_value_limit", ns ) != null ) {
 						st.setValueLimit( Integer.parseInt( s.getChildText( "tile_value_limit", ns ) ) );
@@ -63,10 +63,10 @@ public class HDF5Image extends AbstractImage {
 					stacks.put( st.getName(), st );
 				}
 				for( Element s : root.getChild("CompositeStacks", ns).getChildren() ) {
-					System.out.println( "  composite stack " + s.getChildText( "name", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
+					Tileserver.log( "  composite stack " + s.getChildText( "name", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
 					CompositeStack cs = new CompositeStack( this, s.getChildText( "name", ns ), s.getChildText( "title", ns ) );
 					for( Element c : s.getChild( "Channels", ns ).getChildren() ) {
-						System.out.println( "    " + c.getChildText( "stack", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "tile_value_limit", ns ) );
+						Tileserver.log( "    " + c.getChildText( "stack", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "tile_value_limit", ns ) );
 						Stack channel = (Stack)stacks.get( c.getChildText( "stack", ns  ) );
 						if( c.getChildText( "tile_value_limit", ns ) != null ) {
 							channel.setValueLimit( Integer.parseInt( c.getChildText( "tile_value_limit", ns ) ) );
@@ -77,11 +77,11 @@ public class HDF5Image extends AbstractImage {
 					stacks.put( cs.getName(), cs );
 				}
 			} else {
-				System.out.println( "HDF5Image: No image description XML loaded!" );
+				Tileserver.log( "No image description XML loaded!" );
 			}
 
 			if( stacks.size() == 0 ) {
-				System.out.println( "HDF5Image: No stacks found!" );
+				Tileserver.log( "No stacks found!" );
 			}
 		}
 		

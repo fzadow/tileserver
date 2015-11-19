@@ -46,7 +46,7 @@ public class TileserverController {
 		
 		TileCoordinates coordinates = new TileCoordinates(512, scale_level, row_index, column_index, slice_index);
 
-		Tileserver.log( "Controller: getting tile at " + coordinates );
+		Tileserver.log( "getting tile at " + coordinates );
 		
 		byte[] img = TileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates );
 		long duration = ( System.nanoTime() - startTime );

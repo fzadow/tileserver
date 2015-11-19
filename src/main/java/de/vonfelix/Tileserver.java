@@ -36,20 +36,22 @@ public class Tileserver extends SpringBootServletInitializer {
 	}
 	
 	public static synchronized void log( String message ) {
+		String className = Thread.currentThread().getStackTrace()[ 2 ].getClassName();
+		className = className.substring( className.lastIndexOf( "." ) + 1 );
+		message = className + " : " + message;
+
 		if( log.containsKey( Thread.currentThread().getId() ) ) {
 			log.get( Thread.currentThread().getId() ).add( message ); 
 		} else {
 			log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
 		}
-		System.out.println( message + Thread.currentThread().getId() );
 	}
 
 	public static synchronized void finishLog( long threadId ) {
-		System.out.println( "------------ " + threadId );
+		System.out.println( "\n" + threadId + ":" );
 		for ( String message : log.remove( threadId ) ) {
 			System.out.println( message );
 		}
-		System.out.println( "------------ " + threadId );
 	}
 
 	@Override
