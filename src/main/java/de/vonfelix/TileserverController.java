@@ -39,21 +39,18 @@ public class TileserverController {
 			) throws Exception {
 		
 		long startTime = System.nanoTime();
-		System.out.println( "___" );
-		System.out.println( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
+		Tileserver.log( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
-		Tileserver.log( "request" );
-		
 		TileCoordinates coordinates = new TileCoordinates(512, scale_level, row_index, column_index, slice_index);
 
-		System.out.println( "Controller: getting tile at " + coordinates);
+		Tileserver.log( "Controller: getting tile at " + coordinates );
 		
 		byte[] img = TileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates );
 		long duration = ( System.nanoTime() - startTime );
-		System.out.println( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000+ " ms" );
+		Tileserver.log( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000 + " ms" );
 		return img;
 	}
 	

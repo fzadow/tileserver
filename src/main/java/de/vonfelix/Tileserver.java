@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.springframework.boot.SpringApplication;
@@ -16,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 public class Tileserver extends SpringBootServletInitializer {
 
 	private static Properties properties;
+	private static HashMap<Long, ArrayList<String>> log = new HashMap<Long, ArrayList<String>>();
 	
 	static String getProperty( String key ) {
 		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
@@ -31,8 +35,21 @@ public class Tileserver extends SpringBootServletInitializer {
 		return properties.containsKey( key );
 	}
 	
-	public static void log( String message ) {
+	public static synchronized void log( String message ) {
+		if( log.containsKey( Thread.currentThread().getId() ) ) {
+			log.get( Thread.currentThread().getId() ).add( message ); 
+		} else {
+			log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
+		}
 		System.out.println( message + Thread.currentThread().getId() );
+	}
+
+	public static synchronized void finishLog( long threadId ) {
+		System.out.println( "------------ " + threadId );
+		for ( String message : log.remove( threadId ) ) {
+			System.out.println( message );
+		}
+		System.out.println( "------------ " + threadId );
 	}
 
 	@Override
