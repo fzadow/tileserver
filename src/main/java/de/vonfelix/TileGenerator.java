@@ -1,13 +1,7 @@
 package de.vonfelix;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
-import java.util.List;
-
-import javax.imageio.ImageIO;
-
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 
