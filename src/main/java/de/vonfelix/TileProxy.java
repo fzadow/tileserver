@@ -1,11 +1,24 @@
 package de.vonfelix;
 
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
+
 public class TileProxy  {
 
 	private static TileGenerator tileGenerator = new TileGenerator();
 
-	public static byte[] getTileAsJPEG( IStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
+	public static byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 		
-		return tileGenerator.getTileAsJPEG( stack, scaleLevel, coordinates );
+		
+		// get tile from tile generator
+		BufferedImage tile = tileGenerator.getTile( stack, coordinates );
+
+		// return as JPEG
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write( tile, "jpg", baos);
+		return baos.toByteArray();
 	};
 }

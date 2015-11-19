@@ -173,10 +173,8 @@ public class TileGenerator {
 //		return ((DataBufferByte) getTile( stack, scaleLevel, coordinates ).getRaster().getDataBuffer()).getData();
 //	}
 	
-	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	public BufferedImage getTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 		BufferedImage image;
-		//if( stack instanceof Stack ) {
 		switch ( stack.getClass().getSimpleName() ) {
 		case "Stack":
 			image = getTile( (Stack)stack, coordinates );
@@ -186,8 +184,7 @@ public class TileGenerator {
 		default:
 			return null;
 		}
-		ImageIO.write( image, "jpg", baos);
-		return baos.toByteArray();
+		return image;
 	}
 	
 }
