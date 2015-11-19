@@ -2,11 +2,8 @@ package de.vonfelix;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Properties;
 
 import org.springframework.boot.SpringApplication;
@@ -34,6 +31,10 @@ public class Tileserver extends SpringBootServletInitializer {
 		return properties.containsKey( key );
 	}
 	
+	public static void log( String message ) {
+		System.out.println( message + Thread.currentThread().getId() );
+	}
+
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Tileserver.class);

@@ -45,6 +45,7 @@ public class TileserverController {
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
+		Tileserver.log( "request" );
 		
 		TileCoordinates coordinates = new TileCoordinates(512, scale_level, row_index, column_index, slice_index);
 
