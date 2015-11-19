@@ -20,6 +20,7 @@ public class Tileserver extends SpringBootServletInitializer {
 
 	private static Properties properties;
 	private static HashMap<Long, ArrayList<String>> log = new HashMap<Long, ArrayList<String>>();
+	private static HashMap<Long, Long> startTimes = new HashMap<Long, Long>();
 	
 	static String getProperty( String key ) {
 		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
@@ -43,15 +44,17 @@ public class Tileserver extends SpringBootServletInitializer {
 		if( log.containsKey( Thread.currentThread().getId() ) ) {
 			log.get( Thread.currentThread().getId() ).add( message ); 
 		} else {
+			startTimes.put( Thread.currentThread().getId(), System.nanoTime() );
 			log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
 		}
 	}
 
 	public static synchronized void finishLog( long threadId ) {
-		System.out.println( "\n" + threadId + ":" );
+		System.out.println();
 		for ( String message : log.remove( threadId ) ) {
 			System.out.println( message );
 		}
+		System.out.println( " -- time: " + ( ( System.nanoTime() - startTimes.remove( threadId ) ) / 1000000 ) + "ms" );
 	}
 
 	@Override
