@@ -4,11 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.vonfelix</groupId>
-	<artifactId>tileserver-test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>tileserver</artifactId>
 
-	<name>tileserver-test</name>
-	<description>Demo project for Spring Boot</description>
+	<name>tileserver</name>
+	<description>Tileserver</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
