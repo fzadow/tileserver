@@ -15,6 +15,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 
+// TODO when several simultaneous requests for 1 image that has not been loaded before are made, some may not yet have the HDF5Image object.
+//
+
 @SpringBootApplication
 public class Tileserver extends SpringBootServletInitializer {
 
@@ -86,9 +89,11 @@ public class Tileserver extends SpringBootServletInitializer {
 		InputStream input = null;
 
 		try {
-			// load properties from configuration file in project
-			input = new FileInputStream( "config.properties" );
-			properties.load( input );
+			// local properties (configuration file in project)
+			if ( new File( "config.properties" ).exists() ) {
+				input = new FileInputStream( "config.properties" );
+				properties.load( input );
+			}
 			
 			// additionally load properties from system global configuration
 			// file, overwriting any properties with the same key.
