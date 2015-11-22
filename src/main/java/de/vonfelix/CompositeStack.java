@@ -15,8 +15,8 @@ public class CompositeStack extends AbstractStack {
 	}
 	
 	public void addChannel( Stack channel, ColorName channelColor ) {
-		channels.put( channel.getName(), channel );
-		channelColors.put(  channel.getName(), channelColor );
+		channels.put( channel.getId(), channel );
+		channelColors.put(  channel.getId(), channelColor );
 	}
 	
 	public HashMap<String, Stack> getChannels() {

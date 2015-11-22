@@ -139,7 +139,7 @@ public class TileGenerator {
 			
 			short[] flatdata = data.getAsFlatArray();
 			
-			int colorMask = ChannelColor.getColor( stack.getColor( channel.getName() ) );
+			int colorMask = ChannelColor.getColor( stack.getColor( channel.getId() ) );
 			int[] grayMap = getGrayMap( channel.getValueLimit() );
 			
 			for(int y = 0; y < size; ++y) {

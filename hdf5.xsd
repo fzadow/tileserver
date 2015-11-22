@@ -1,45 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-targetNamespace="http://www.example.org/hdf5"
-xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/hdf5"
+	xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 
 	<complexType name="AbstractStackType">
 		<sequence>
+			<element name="id" type="string"></element>
 			<element name="title" type="string"></element>
 		</sequence>
 	</complexType>
 
 	<complexType name="CompositeStackType">
 		<complexContent>
-    		<extension base="h:AbstractStackType">
-    			<sequence>
-					<element name="name" type="string"></element>
+			<extension base="h:AbstractStackType">
+				<sequence>
 					<element ref="h:Channels"></element>
-    			</sequence>
-    		</extension>
-		
-    		</complexContent>
+				</sequence>
+			</extension>
+
+		</complexContent>
 	</complexType>
 
-    <complexType name="StackType">
-    	<complexContent>
-    		<extension base="h:AbstractStackType">
-    			<sequence>
-					<element name="name" type="string" />
-    				<element name="path" type="string" />
-    				<element name="tile_value_limit" type="int" />
-    			</sequence>
-    		</extension>
-    	</complexContent>
-    </complexType>
+	<complexType name="StackType">
+		<complexContent>
+			<extension base="h:AbstractStackType">
+				<sequence>
+					<element name="path" type="string" />
+					<element name="tile_value_limit" type="int" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
 
-    <complexType name="ChannelType">
-    	<sequence>
-    		<element name="stack" type="string" />
-    		<element name="color" type="h:ColorType" />
-    		<element name="tile_value_limit" type="int" />
-    	</sequence>
-    </complexType>
+	<complexType name="ChannelType">
+		<sequence>
+			<element name="stack_id" type="string" />
+			<element name="color" type="h:ColorType" />
+			<element name="tile_value_limit" type="int" />
+		</sequence>
+	</complexType>
 
 	<simpleType name="ColorType" final="restriction">
 		<restriction base="string">
@@ -52,7 +50,7 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 			<enumeration value="grays"></enumeration>
 		</restriction>
 	</simpleType>
-    
+
 	<element name="Stacks">
 		<complexType>
 			<sequence>
@@ -68,7 +66,7 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 			</sequence>
 		</complexType>
 	</element>
-	
+
 	<element name="Channels">
 		<complexType>
 			<sequence>
@@ -76,12 +74,14 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 			</sequence>
 		</complexType>
 	</element>
-	
-	<element name="AbstractStack" type="h:AbstractStackType" abstract="true"></element>
+
+	<element name="AbstractStack" type="h:AbstractStackType" abstract="true">
+	</element>
 
 	<element name="Stack" type="h:StackType" substitutionGroup="h:AbstractStack"></element>
 
-	<element name="CompositeStack" type="h:CompositeStackType" substitutionGroup="h:AbstractStack"></element>
+	<element name="CompositeStack" type="h:CompositeStackType"
+		substitutionGroup="h:AbstractStack"></element>
 
 	<element name="HDF5Image">
 		<complexType>
@@ -93,6 +93,6 @@ xmlns:h="http://www.example.org/hdf5" elementFormDefault="qualified">
 		</complexType>
 	</element>
 
-    <element name="Channel" type="h:ChannelType"></element>
+	<element name="Channel" type="h:ChannelType"></element>
 
 </schema>

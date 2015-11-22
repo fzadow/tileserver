@@ -5,15 +5,15 @@ import java.util.HashMap;
 public abstract class AbstractStack implements IStack {
 
 	protected HDF5Image hdf5Image;
-	protected String name;
+	protected String id;
 	protected String title;
 	protected HashMap<Integer,long[]> dimensions;
 	protected int valueLimit;
 
 	
-	public AbstractStack( HDF5Image hdf5Image, String name, String title ) {
+	public AbstractStack( HDF5Image hdf5Image, String id, String title ) {
 		this.hdf5Image= hdf5Image;
-		this.name= name;
+		this.id= id;
 		this.title= title;
 		this.dimensions = new HashMap<Integer,long[]>();
 		this.valueLimit = hdf5Image.getValueLimit();
@@ -23,8 +23,8 @@ public abstract class AbstractStack implements IStack {
 		return hdf5Image;
 	}
 	
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
 	
 	public String getTitle() {
@@ -40,6 +40,6 @@ public abstract class AbstractStack implements IStack {
 	
 	@Override
 	public String toString() {
-		return name + " (" + hdf5Image + ")";
+		return id + " (" + hdf5Image + ")";
 	}
 }

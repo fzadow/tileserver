@@ -46,7 +46,7 @@ public class TileProxy {
 
 		// check if tile exists on disk
 		if ( bDiskRead ) {
-			Path path = Paths.get( tileDir.getAbsolutePath(), stack.getHdf5Image().getName(), stack.getName(),
+			Path path = Paths.get( tileDir.getAbsolutePath(), stack.getHdf5Image().getName(), stack.getId(),
 					String.valueOf( coordinates.getSliceIndex() ),
 					String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() )
 							+ "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
@@ -68,7 +68,7 @@ public class TileProxy {
 		// save to disk
 		if ( bDiskWrite ) {
 			long startTime = System.nanoTime();
-			File outFile = new File( writableTileDir.getAbsolutePath() + "/" + stack.getHdf5Image().getName() + "/" + stack.getName() + "/" + String.valueOf( coordinates.getSliceIndex() ) + "/" + String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() ) + "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
+			File outFile = new File( writableTileDir.getAbsolutePath() + "/" + stack.getHdf5Image().getName() + "/" + stack.getId() + "/" + String.valueOf( coordinates.getSliceIndex() ) + "/" + String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() ) + "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
 			outFile.getParentFile().mkdirs();
 			ImageIO.write( tile, "jpg", outFile );
 			Tileserver.log( "saved file (" + ( ( System.nanoTime() - startTime ) / 1000000 ) + "ms)" );

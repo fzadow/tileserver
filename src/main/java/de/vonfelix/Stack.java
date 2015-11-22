@@ -20,17 +20,17 @@ public class Stack extends AbstractStack {
 	/**
 	 * 
 	 * @param hdf5Image reference to the HDF5Image containing the Image
-	 * @param name Name to identify the Stack within the HDF5 file
+	 * @param id Name to identify the Stack within the HDF5 file
 	 */
-	public Stack( HDF5Image hdf5Image, String path, String name ) {
-		this(hdf5Image, path, name, "");
+	public Stack( HDF5Image hdf5Image, String path, String id ) {
+		this(hdf5Image, path, id, "");
 	}
 	
-	public Stack( HDF5Image hdf5Image, String path, String name, String title ) {
-		super(hdf5Image, name, title);
+	public Stack( HDF5Image hdf5Image, String path, String id, String title ) {
+		super(hdf5Image, id, title);
 		this.path= path;
 		scaleLevels = hdf5Image.getReader().object().getAllGroupMembers(
-				path + name + "/" );
+				path + id + "/" );
 		
 		// TODO get stack info (max value)
 	}
@@ -49,14 +49,14 @@ public class Stack extends AbstractStack {
 	}
 
 	public String getFullName() {
-		return getPath() + "/" + getName();
+		return getPath() + "/" + getId();
 	}
 	
 	public long[] getDimensions( int scaleLevel) {
 
 		if( ! dimensions.containsKey( scaleLevel ) ) {
 			dimensions.put(scaleLevel, hdf5Image.getReader().object().getDimensions( 
-					path + name + "/" + scaleLevel ) );
+					path + id + "/" + scaleLevel ) );
 		}
 		return dimensions.get( scaleLevel );
 	}

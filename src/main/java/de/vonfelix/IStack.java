@@ -3,7 +3,7 @@ package de.vonfelix;
 public interface IStack {
 
 	public HDF5Image getHdf5Image();
-	public String getName();
+	public String getId();
 	public String getTitle();
 	
 	/**
