@@ -50,12 +50,18 @@ public class Tileserver extends SpringBootServletInitializer {
 			startTimes.put( Thread.currentThread().getId(), System.nanoTime() );
 			log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
 		}
+
+		if ( Boolean.parseBoolean( properties.getProperty( "debug_flush_log" ) ) ) {
+			System.out.println( message );
+		}
 	}
 
 	public static synchronized void finishLog( long threadId ) {
-		System.out.println();
-		for ( String message : log.remove( threadId ) ) {
-			System.out.println( message );
+		if ( !Boolean.parseBoolean( properties.getProperty( "debug_flush_log" ) ) ) {
+			System.out.println();
+			for ( String message : log.remove( threadId ) ) {
+				System.out.println( message );
+			}
 		}
 		System.out.println( " -- time: " + ( ( System.nanoTime() - startTimes.remove( threadId ) ) / 1000000 ) + "ms" );
 	}
