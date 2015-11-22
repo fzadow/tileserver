@@ -44,14 +44,14 @@ public class Tileserver extends SpringBootServletInitializer {
 		className = className.substring( className.lastIndexOf( "." ) + 1 );
 		message = className + " : " + message;
 
-		if( log.containsKey( Thread.currentThread().getId() ) ) {
-			log.get( Thread.currentThread().getId() ).add( message ); 
-		} else {
-			startTimes.put( Thread.currentThread().getId(), System.nanoTime() );
-			log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
-		}
-
 		if ( Boolean.parseBoolean( properties.getProperty( "debug_flush_log" ) ) ) {
+			if ( log.containsKey( Thread.currentThread().getId() ) ) {
+				log.get( Thread.currentThread().getId() ).add( message );
+			} else {
+				startTimes.put( Thread.currentThread().getId(), System.nanoTime() );
+				log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
+			}
+
 			System.out.println( message );
 		}
 	}
@@ -62,8 +62,8 @@ public class Tileserver extends SpringBootServletInitializer {
 			for ( String message : log.remove( threadId ) ) {
 				System.out.println( message );
 			}
+			System.out.println( " -- time: " + ( ( System.nanoTime() - startTimes.remove( threadId ) ) / 1000000 ) + "ms" );
 		}
-		System.out.println( " -- time: " + ( ( System.nanoTime() - startTimes.remove( threadId ) ) / 1000000 ) + "ms" );
 	}
 
 	@Override
