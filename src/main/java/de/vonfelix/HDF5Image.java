@@ -67,7 +67,7 @@ public class HDF5Image extends AbstractImage {
 				CompositeStack cs = new CompositeStack( this, s.getChildText( "id", ns ), s.getChildText( "title", ns ) );
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
 					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
-					Stack channel = (Stack) stacks.get( c.getChildText( "stack_id", ns ) );
+					Stack channel = new Stack( (Stack) stacks.get( c.getChildText( "stack_id", ns ) ) );
 					if ( c.getChildText( "value_limit", ns ) != null ) {
 						channel.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
 					}

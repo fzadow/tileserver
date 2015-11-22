@@ -1,10 +1,8 @@
 package de.vonfelix;
 
-import java.util.HashMap;
 import java.util.List;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
-import ch.systemsx.cisd.hdf5.HDF5DataClass;
 
 
 /**
@@ -34,7 +32,16 @@ public class Stack extends AbstractStack {
 		
 		// TODO get stack info (max value)
 	}
-	
+
+	/**
+	 * create a copy of a Stack from a given Stack
+	 * 
+	 * @param fromStack
+	 */
+	public Stack( Stack fromStack ) {
+		this( fromStack.getHdf5Image(), fromStack.getPath(), fromStack.getId(), fromStack.getTitle() );
+	}
+
 	public Object readProperty( String name ) {
 		//hdf5Image.getReader().object().getAllAttributeNames(arg0)
 		return null;
