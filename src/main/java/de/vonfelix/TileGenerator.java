@@ -38,7 +38,9 @@ public class TileGenerator {
 			}
 			grayMaps.put( limit, grayMap );
 
-			Tileserver.log( "colormap with adjustment=" + exp + " and limit=" + limit + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			// Tileserver.log( "new colormap with adjustment=" + exp + " and
+			// limit=" + limit + " (" + ( System.nanoTime() - startTime ) /
+			// 1000000 + "ms)" );
 		}
 		return grayMaps.get( limit );
 	}
@@ -76,6 +78,7 @@ public class TileGenerator {
 		short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
 
 		int[] grayMap = getGrayMap( stack.getValueLimit() );
+		Tileserver.log( "getting grayscale tile " + stack + ", limit=" + stack.getValueLimit() );
 
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
@@ -131,6 +134,8 @@ public class TileGenerator {
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
 
+		Tileserver.log( "getting composite tile " + stack + ", limit=" + stack.getValueLimit() );
+
 		// get data for all channels
 		for( Stack channel : stack.getChannels().values() ) {
 			MDShortArray data = channel.getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
@@ -141,7 +146,9 @@ public class TileGenerator {
 			
 			int colorMask = ChannelColor.getColor( stack.getColor( channel.getId() ) );
 			int[] grayMap = getGrayMap( channel.getValueLimit() );
-			
+
+			Tileserver.log( "  channel " + channel + ", limit=" + channel.getValueLimit() );
+
 			for(int y = 0; y < size; ++y) {
 				for(int x= 0; x < size; ++x ) {
 					// fill overlap with black
