@@ -3,7 +3,7 @@ package de.vonfelix;
 public abstract class AbstractImage implements IImage {
 
 	protected String name;
-	protected int valueLimit = Integer.parseInt( Tileserver.getProperty( "tile_value_limit" ) );
+	protected int valueLimit = Integer.parseInt( Tileserver.getProperty( "value_limit" ) );
 	
 	public AbstractImage( String name ) {
 		this.name = name;

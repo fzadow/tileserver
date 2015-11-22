@@ -29,8 +29,8 @@ public class HDF5Image extends AbstractImage {
 			imageDesc = new SAXBuilder().build( Tileserver.getProperty("source_image_dir") + name + ".xml" );
 			Element root = imageDesc.getRootElement();
 			Namespace ns = root.getNamespace();
-			if( root.getChildText( "tile_value_limit", ns ) != null ) {
-				valueLimit = Integer.parseInt( root.getChildText( "tile_value_limit", ns ) );
+			if ( root.getChildText( "value_limit", ns ) != null ) {
+				valueLimit = Integer.parseInt( root.getChildText( "value_limit", ns ) );
 			}
 		} catch ( JDOMException e ) {
 			// TODO Auto-generated catch block
@@ -55,10 +55,10 @@ public class HDF5Image extends AbstractImage {
 			Namespace ns = root.getNamespace();
 
 			for ( Element s : root.getChild( "Stacks", ns ).getChildren() ) {
-				Tileserver.log( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "tile_value_limit", ns ) );
+				Tileserver.log( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "value_limit", ns ) );
 				Stack st = new Stack( this, s.getChildText( "path", ns ), s.getChildText( "id", ns ) );
-				if ( s.getChildText( "tile_value_limit", ns ) != null ) {
-					st.setValueLimit( Integer.parseInt( s.getChildText( "tile_value_limit", ns ) ) );
+				if ( s.getChildText( "value_limit", ns ) != null ) {
+					st.setValueLimit( Integer.parseInt( s.getChildText( "value_limit", ns ) ) );
 				}
 				stacks.put( st.getId(), st );
 			}
@@ -66,10 +66,10 @@ public class HDF5Image extends AbstractImage {
 				Tileserver.log( "  composite stack " + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
 				CompositeStack cs = new CompositeStack( this, s.getChildText( "id", ns ), s.getChildText( "title", ns ) );
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
-					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "tile_value_limit", ns ) );
+					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
 					Stack channel = (Stack) stacks.get( c.getChildText( "stack_id", ns ) );
-					if ( c.getChildText( "tile_value_limit", ns ) != null ) {
-						channel.setValueLimit( Integer.parseInt( c.getChildText( "tile_value_limit", ns ) ) );
+					if ( c.getChildText( "value_limit", ns ) != null ) {
+						channel.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
 					}
 
 					cs.addChannel( channel, ChannelColor.ColorName.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );

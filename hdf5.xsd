@@ -25,7 +25,7 @@
 			<extension base="h:AbstractStackType">
 				<sequence>
 					<element name="path" type="string" />
-					<element name="tile_value_limit" type="int" />
+					<element name="value_limit" type="int" />
 				</sequence>
 			</extension>
 		</complexContent>
@@ -35,7 +35,7 @@
 		<sequence>
 			<element name="stack_id" type="string" />
 			<element name="color" type="h:ColorType" />
-			<element name="tile_value_limit" type="int" />
+			<element name="value_limit" type="int" />
 		</sequence>
 	</complexType>
 
@@ -87,7 +87,7 @@
 		<complexType>
 			<sequence>
 				<element name="title" type="string"></element>
-				<element name="tile_value_limit" type="int"></element>
+				<element name="value_limit" type="int"></element>
 				<element ref="h:CompositeStacks" minOccurs="0" maxOccurs="1"></element>
 			</sequence>
 		</complexType>
