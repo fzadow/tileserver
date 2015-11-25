@@ -15,7 +15,6 @@ import ch.systemsx.cisd.hdf5.IHDF5Reader;
 public class HDF5Image extends AbstractImage {
 
 	private	IHDF5Reader reader;
-	private HashMap<String, IStack> stacks;
 	private Document imageDesc;
 	
 	public HDF5Image( String name ){
@@ -41,11 +40,11 @@ public class HDF5Image extends AbstractImage {
 		}
 
 		// read stacks from XML
-		stacks = initStacks();
+		stacks = loadStacks();
 	}
 	
-	private HashMap<String, IStack> initStacks() {
-		stacks = new HashMap<String, IStack>();
+	private HashMap<String, IStack> loadStacks() {
+		Tileserver.log( "reading stacks" );
 
 		if ( imageDesc != null ) {
 			// TODO sanity checks when loading channels (no dupes, only sane
@@ -85,14 +84,6 @@ public class HDF5Image extends AbstractImage {
 		}
 		
 		return stacks;
-	}
-	
-	public int getNumStacks() {
-		return stacks.size();
-	}
-	
-	public IStack getStack( String name ) {
-		return stacks.get( name );
 	}
 	
 	public IHDF5Reader getReader() {
