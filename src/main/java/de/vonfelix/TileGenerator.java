@@ -19,11 +19,22 @@ public class TileGenerator {
 	public TileGenerator() {
 	}
 	
+	/**
+	 * return a gray map that maps pixel values from 0..65535 to 0..limit. if a
+	 * map for a specific limit value has not been generated before, generate
+	 * it.
+	 * 
+	 * @param limit
+	 * @return gray map for that limit
+	 */
 	private int[] getGrayMap( int limit ) {
 		if( ! grayMaps.containsKey( limit ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
 			long startTime = System.nanoTime();
 
+			// exponent for the adjustment curve, default 1
 			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
+
+			// map to 8 bit
 			int target = 256;
 
 			int[] grayMap = new int[65536];
@@ -38,9 +49,7 @@ public class TileGenerator {
 			}
 			grayMaps.put( limit, grayMap );
 
-			// Tileserver.log( "new colormap with adjustment=" + exp + " and
-			// limit=" + limit + " (" + ( System.nanoTime() - startTime ) /
-			// 1000000 + "ms)" );
+			Tileserver.log( "new colormap with adjustment=" + exp + " and limit=" + limit + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 		}
 		return grayMaps.get( limit );
 	}
