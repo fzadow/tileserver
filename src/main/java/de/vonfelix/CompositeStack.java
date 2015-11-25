@@ -1,5 +1,6 @@
 package de.vonfelix;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class CompositeStack extends AbstractStack {
@@ -14,10 +15,9 @@ public class CompositeStack extends AbstractStack {
 		channels.put( channel.getStack().getId(), channel );
 	}
 	
-	public HashMap<String, Channel> getChannels() {
-		return channels;
+	public Collection<Channel> channels() {
+		return channels.values();
 	}
-
 
 	@Override
 	public long[] getDimensions( int scaleLevel ) {
