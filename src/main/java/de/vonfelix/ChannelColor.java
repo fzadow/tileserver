@@ -9,7 +9,7 @@ public class ChannelColor {
 	public static final int YELLOW =  0b111111111111111100000000;
 	public static final int GRAYS =   0b111111111111111111111111;
 	
-	public static int getColor( ColorName colorName ) {
+	public static int getColorValue( ColorName colorName ) {
 		switch ( colorName ) {
 		case RED : return RED;
 		case GREEN : return GREEN;
