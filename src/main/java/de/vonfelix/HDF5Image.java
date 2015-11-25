@@ -73,8 +73,7 @@ public class HDF5Image extends AbstractImage {
 					if ( c.getChildText( "value_limit", ns ) != null ) {
 						stack.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
 					}
-
-					cs.addChannel( new Channel( stack, ChannelColor.ColorName.valueOf( c.getChildText( "color", ns ).toUpperCase() ) ) );
+					cs.addChannel( new Channel( stack, Channel.Color.valueOf( c.getChildText( "color", ns ).toUpperCase() ) ) );
 				}
 				stacks.put( cs.getId(), cs );
 			}

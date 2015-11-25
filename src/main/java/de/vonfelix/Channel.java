@@ -1,27 +1,39 @@
 package de.vonfelix;
 
-import de.vonfelix.ChannelColor.ColorName;
+import java.util.HashMap;
 
 public class Channel {
-	private Stack stack;
-	private ColorName colorName;
 
-	public Channel( Stack stack, ColorName colorName ) {
+	public enum Color {
+		RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, GRAYS
+	}
+
+	private static final HashMap<Color,Integer> colors = new HashMap<Color,Integer>() {
+		{
+			put( Color.RED, 0b111111110000000000000000 );
+			put( Color.GREEN, 0b111111110000000000000000 );
+			put( Color.BLUE, 0b111111110000000000000000 );
+			put( Color.CYAN, 0b111111110000000000000000 );
+			put( Color.MAGENTA, 0b111111110000000000000000 );
+			put( Color.YELLOW, 0b111111110000000000000000 );
+			put( Color.GRAYS, 0b111111110000000000000000 );
+		}
+	};
+
+	private Stack stack;
+	private Color color;
+
+	public Channel( Stack stack, Color color ) {
 		this.stack= stack;
-		this.colorName = colorName;
-		
+		this.color = color;
 	}
 
 	public Stack getStack() {
 		return stack;
 	}
 
-	public ColorName getColorName() {
-		return colorName;
-	}
-
-	public int getColor() {
-		return ChannelColor.getColor( colorName );
+	public Color getColor() {
+		return color;
 	}
 
 	public int getColorValue() {
