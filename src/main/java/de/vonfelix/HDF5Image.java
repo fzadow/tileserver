@@ -20,11 +20,14 @@ public class HDF5Image extends AbstractImage {
 	public HDF5Image( String name ){
 		super( name );
 		
+		Tileserver.log( "reading hdf5" );
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( Tileserver.getProperty("source_image_dir") + name + ".h5" );
 		
 		// read image info from XML
 		try {
+			Tileserver.log( "reading xml" );
+
 			imageDesc = new SAXBuilder().build( Tileserver.getProperty("source_image_dir") + name + ".xml" );
 			Element root = imageDesc.getRootElement();
 			Namespace ns = root.getNamespace();
@@ -66,12 +69,12 @@ public class HDF5Image extends AbstractImage {
 				CompositeStack cs = new CompositeStack( this, s.getChildText( "id", ns ), s.getChildText( "title", ns ) );
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
 					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
-					Stack channel = new Stack( (Stack) stacks.get( c.getChildText( "stack_id", ns ) ) );
+					Stack stack = new Stack( (Stack) stacks.get( c.getChildText( "stack_id", ns ) ) );
 					if ( c.getChildText( "value_limit", ns ) != null ) {
-						channel.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
+						stack.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
 					}
 
-					cs.addChannel( channel, ChannelColor.ColorName.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
+					cs.addChannel( new Channel( stack, ChannelColor.ColorName.valueOf( c.getChildText( "color", ns ).toUpperCase() ) ) );
 				}
 				stacks.put( cs.getId(), cs );
 			}

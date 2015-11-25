@@ -1,37 +1,28 @@
 package de.vonfelix;
 
-import de.vonfelix.ChannelColor.ColorName;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CompositeStack extends AbstractStack {
 	
-	HashMap<String, Stack> channels = new HashMap<String, Stack>();;
-	HashMap<String, ColorName> channelColors = new HashMap<String, ColorName>();
+	HashMap<String, Channel> channels = new HashMap<String, Channel>();;
 	
 	public CompositeStack( HDF5Image hdf5Image, String name, String title) {
 		super( hdf5Image, name, title );
 	}
 	
-	public void addChannel( Stack channel, ColorName channelColor ) {
-		channels.put( channel.getId(), channel );
-		channelColors.put(  channel.getId(), channelColor );
+	public void addChannel( Channel channel ) {
+		channels.put( channel.getStack().getId(), channel );
 	}
 	
-	public HashMap<String, Stack> getChannels() {
+	public HashMap<String, Channel> getChannels() {
 		return channels;
 	}
-	
-	public ColorName getColor( String channelName ) {
-		return channelColors.get( channelName );
-	}
-	
+
 
 	@Override
 	public long[] getDimensions( int scaleLevel ) {
 		try {
-			return channels.values().iterator().next().getDimensions( scaleLevel );
+			return channels.values().iterator().next().getStack().getDimensions( scaleLevel );
 		}
 		catch ( Exception e ) {
 			e.printStackTrace();

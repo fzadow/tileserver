@@ -115,13 +115,13 @@ public class TileGenerator {
 	/**
 	 * get a composite tile
 	 * 
-	 * @param stack
+	 * @param compositeStack
 	 * @param scaleLevel
 	 * @param coordinates
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( CompositeStack stack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( CompositeStack compositeStack, TileCoordinates coordinates ) throws Exception {
 
 		long startTime = System.nanoTime();
 
@@ -134,20 +134,20 @@ public class TileGenerator {
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
 
-		Tileserver.log( "getting composite tile " + stack + ", limit=" + stack.getValueLimit() );
+		Tileserver.log( "getting composite tile " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
 		// get data for all channels
-		for( Stack channel : stack.getChannels().values() ) {
-			MDShortArray data = channel.getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
+		for( Channel channel : compositeStack.channels() ) {
+			MDShortArray data = channel.getStack().getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
 			int data_width = data.dimensions()[2];
 			int data_height = data.dimensions()[1];
 			
 			short[] flatdata = data.getAsFlatArray();
 			
-			int colorMask = ChannelColor.getColor( stack.getColor( channel.getId() ) );
-			int[] grayMap = getGrayMap( channel.getValueLimit() );
+			int colorMask = channel.getColorValue();
+			int[] grayMap = getGrayMap( channel.getStack().getValueLimit() );
 
-			Tileserver.log( "  channel " + channel + ", limit=" + channel.getValueLimit() );
+			Tileserver.log( "  channel " + channel + ", limit=" + channel.getStack().getValueLimit() );
 
 			for(int y = 0; y < size; ++y) {
 				for(int x= 0; x < size; ++x ) {
