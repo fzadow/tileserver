@@ -3,8 +3,6 @@ package de.vonfelix;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
-import ch.systemsx.cisd.base.mdarray.MDShortArray;
-
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
 // TODO different contrast curves?
@@ -47,13 +45,13 @@ public class TileGenerator {
 	
 	/**
 	 * get a single channel tile
-	 * @param stack
+	 * @param simpleStack
 	 * @param scaleLevel
 	 * @param coordinates
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( Stack stack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( SimpleStack simpleStack, TileCoordinates coordinates ) throws Exception {
 		
 		long startTime = System.nanoTime();
 
@@ -63,13 +61,12 @@ public class TileGenerator {
 
 		int size = coordinates.getSize();
 		
-		// get flattened pixel array
-		// may be smaller than size*size if out of bounds
-		MDShortArray data = stack.getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
-		int data_width = data.dimensions()[2];
-		int data_height = data.dimensions()[1];
-		
-		short[] flatdata = data.getAsFlatArray();
+		// get tile as defined by coordinates. returned tile may be smaller
+		// than size*size if it overlaps the bounds of the image.
+		Tile tile = simpleStack.getTile( coordinates );
+		int tile_width = tile.getWidth();
+		int tile_height = tile.getHeight();
+		short[] flatdata = tile.getTile();
 		
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
@@ -77,13 +74,13 @@ public class TileGenerator {
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
 
-		int[] grayMap = getGrayMap( stack.getValueLimit() );
-		Tileserver.log( "getting grayscale tile " + stack + ", limit=" + stack.getValueLimit() );
+		int[] grayMap = getGrayMap( simpleStack.getValueLimit() );
+		Tileserver.log( "getting grayscale tile " + simpleStack + ", limit=" + simpleStack.getValueLimit() );
 
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
 
-				short pixel = x >= data_width || y >= data_height ? fillpixel : flatdata[ data_width*y + x ];
+				short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
 
 				if ( debug_tile_bounds ) {
 					if( ( x % 64 == 0 && y % 64 == 0 ) || ( (x-1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-1) % 64 == 0 ) || ( (x+1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+1) % 64 == 0 ) || ( (x-2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-2) % 64 == 0 ) || ( (x+2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+2) % 64 == 0 ) ) {
@@ -113,7 +110,8 @@ public class TileGenerator {
 	
 
 	/**
-	 * get a composite tile
+	 * create a composite tile by reading all component channels and assembling
+	 * them according to their colors
 	 * 
 	 * @param compositeStack
 	 * @param scaleLevel
@@ -138,21 +136,20 @@ public class TileGenerator {
 
 		// get data for all channels
 		for( Channel channel : compositeStack.channels() ) {
-			MDShortArray data = channel.getStack().getBlock( coordinates.getScaleLevel(), size, coordinates.getZ(), coordinates.getX(), coordinates.getY() );
-			int data_width = data.dimensions()[2];
-			int data_height = data.dimensions()[1];
-			
-			short[] flatdata = data.getAsFlatArray();
+			Tile tile = channel.getStack().getTile( coordinates );
+			int tile_width = tile.getWidth();
+			int tile_height = tile.getHeight();
+			short[] flatdata = tile.getTile();
 			
 			int colorMask = channel.getColorValue();
-			int[] grayMap = getGrayMap( channel.getStack().getValueLimit() );
+			int[] grayMap = getGrayMap( channel.getValueLimit() );
 
 			Tileserver.log( "  channel " + channel + ", limit=" + channel.getStack().getValueLimit() );
 
 			for(int y = 0; y < size; ++y) {
 				for(int x= 0; x < size; ++x ) {
 					// fill overlap with black
-					short pixel = x >= data_width || y >= data_height ? 0 : flatdata[ data_width*y + x ];
+					short pixel = x >= tile_width || y >= tile_height ? 0 : flatdata[ tile_width * y + x ];
 					int grayValue = grayMap[pixel & 0xffff ];
 					rgb[ size*y + x ] = rgb[ size*y + x ] | ( ( grayValue << 16 ) | (grayValue << 8 ) | grayValue ) & colorMask;
 				}
@@ -171,11 +168,19 @@ public class TileGenerator {
 //		return ((DataBufferByte) getTile( stack, scaleLevel, coordinates ).getRaster().getDataBuffer()).getData();
 //	}
 	
+	/**
+	 * generates a BufferedImage tile
+	 * 
+	 * @param stack
+	 * @param coordinates
+	 * @return
+	 * @throws Exception
+	 */
 	public BufferedImage getTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 		BufferedImage image;
 		switch ( stack.getClass().getSimpleName() ) {
 		case "Stack":
-			image = getTile( (Stack)stack, coordinates );
+			image = getTile( (SimpleStack)stack, coordinates );
 			break;
 		case "CompositeStack":
 			image = getTile( (CompositeStack)stack, coordinates );

@@ -6,12 +6,10 @@ public abstract class AbstractImage implements IImage {
 
 	protected String name;
 	protected int valueLimit = Integer.parseInt( Tileserver.getProperty( "value_limit" ) );
-	protected HashMap<String, IStack> stacks;
+	protected HashMap<String, IStack> stacks = new HashMap<>();
 	
-
 	public AbstractImage( String name ) {
 		this.name = name;
-		this.stacks = new HashMap<String, IStack>();
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package de.vonfelix;
 
-public interface IStack {
+public interface IStack extends ValueLimit {
 
-	public HDF5Image getHdf5Image();
+	public IImage getImage();
 	public String getId();
 	public String getTitle();
 	
@@ -16,6 +16,14 @@ public interface IStack {
 	/**
 	 * @return number of scale levels
 	 */
-	public int getNumScaleLevels();
+	public int getScaleLevels();
+
+	// public long getWidth();
+
+	// public long getWidth( int scaleLevel );
+
+	// public long getHeight();
+
+	// public long getHeight( int scaleLevel );
 
 }

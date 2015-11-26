@@ -1,6 +1,6 @@
 package de.vonfelix;
 
-public interface IImage {
+public interface IImage extends ValueLimit {
 
 	String getName();
 

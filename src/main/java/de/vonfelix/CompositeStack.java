@@ -7,8 +7,8 @@ public class CompositeStack extends AbstractStack {
 	
 	HashMap<String, Channel> channels = new HashMap<String, Channel>();;
 	
-	public CompositeStack( HDF5Image hdf5Image, String name, String title) {
-		super( hdf5Image, name, title );
+	public CompositeStack( AbstractImage image, String name, String title ) {
+		super( image, name, title );
 	}
 	
 	public void addChannel( Channel channel ) {
@@ -29,11 +29,4 @@ public class CompositeStack extends AbstractStack {
 			return null;
 		}
 	}
-
-	@Override
-	public int getNumScaleLevels() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 }
