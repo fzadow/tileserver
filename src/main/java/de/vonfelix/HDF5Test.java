@@ -1,7 +1,6 @@
 package de.vonfelix;
 
 import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -12,7 +11,7 @@ public class HDF5Test
 {
 	public static void main( final String[] args ) throws IOException
 	{
-		String FILENAME = "ovary";
+		String FILENAME = "R2_disc2";
 		
 		HDF5Image hdf5Image;
 		try {
@@ -23,7 +22,7 @@ public class HDF5Test
 			
 			TileGenerator tileGenerator = new TileGenerator();
 			
-			BufferedImage img = tileGenerator.getTile( (CompositeStack) hdf5Image.getStack( "asd" ), new TileCoordinates( 512, 0, 1, 0, 0) );
+			BufferedImage img = tileGenerator.getTile( (CompositeStack) hdf5Image.getStack( "composite1" ), new TileCoordinates( 512, 0, 1, 0, 0 ) );
 			ImageIO.write( img, "jpg", new File( "img.jpg" ) );
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

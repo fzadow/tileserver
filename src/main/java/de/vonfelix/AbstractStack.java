@@ -4,29 +4,34 @@ import java.util.HashMap;
 
 public abstract class AbstractStack implements IStack {
 
-	protected HDF5Image hdf5Image;
+	protected AbstractImage image;
 	protected String id;
 	protected String title;
 	protected HashMap<Integer,long[]> dimensions;
 	protected int valueLimit;
+	protected int scaleLevels;
 
 	
-	public AbstractStack( HDF5Image hdf5Image, String id, String title ) {
-		this.hdf5Image= hdf5Image;
+	public AbstractStack( AbstractImage image, String id, String title ) {
+		this.image = image;
 		this.id= id;
-		this.title= title;
+		this.title = title;
 		this.dimensions = new HashMap<Integer,long[]>();
-		this.valueLimit = hdf5Image.getValueLimit();
+		this.valueLimit = image.getValueLimit();
 	}
 	
-	public HDF5Image getHdf5Image() {
-		return hdf5Image;
+	public AbstractImage getImage() {
+		return image;
 	}
 	
 	public String getId() {
 		return id;
 	}
 	
+	public void setTitle( String title ) {
+		this.title = title;
+	}
+
 	public String getTitle() {
 		return title;
 	}
@@ -37,9 +42,13 @@ public abstract class AbstractStack implements IStack {
 	public int getValueLimit() {
 		return valueLimit;
 	}
+
+	public int getScaleLevels() {
+		return scaleLevels;
+	}
 	
 	@Override
 	public String toString() {
-		return id + " (" + hdf5Image + ")";
+		return id + " (" + image + ")";
 	}
 }
