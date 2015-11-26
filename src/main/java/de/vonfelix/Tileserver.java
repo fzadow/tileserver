@@ -26,14 +26,14 @@ public class Tileserver extends SpringBootServletInitializer {
 	private static HashMap<Long, Long> startTimes = new HashMap<Long, Long>();
 	
 	static String getProperty( String key ) {
-		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
+		if ( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
 			initProperties();
 		
 		return properties.getProperty( key );
 	}
 	
 	static boolean hasProperty( String key ) {
-		if( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true  )
+		if ( properties == null || Boolean.parseBoolean( properties.getProperty( "debug" ) ) == true )
 			initProperties();
 		
 		return properties.containsKey( key );
@@ -45,14 +45,14 @@ public class Tileserver extends SpringBootServletInitializer {
 		message = className + " : " + message;
 
 		if ( Boolean.parseBoolean( properties.getProperty( "debug_flush_log" ) ) ) {
+			System.out.println( message );
+		} else {
 			if ( log.containsKey( Thread.currentThread().getId() ) ) {
 				log.get( Thread.currentThread().getId() ).add( message );
 			} else {
 				startTimes.put( Thread.currentThread().getId(), System.nanoTime() );
 				log.put( Thread.currentThread().getId(), new ArrayList<>( Arrays.asList( message ) ) );
 			}
-
-			System.out.println( message );
 		}
 	}
 
@@ -75,7 +75,14 @@ public class Tileserver extends SpringBootServletInitializer {
 
 		// launch Spring application
 
-		ApplicationContext ctx = SpringApplication.run(Tileserver.class, args);
+		initProperties();
+
+		System.out.println();
+
+		ApplicationContext ctx = SpringApplication.run( Tileserver.class, args );
+		// System.out.println( "CONTEXT ::: " + ctx.getDisplayName() );
+		// System.out.println( "CONTEXT ::: " + ctx.getDisplayName() );
+		// System.out.println( "CONTEXT ::: " + ctx.getDisplayName() );
 
         // list provided beans
         
