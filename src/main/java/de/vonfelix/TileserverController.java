@@ -55,6 +55,40 @@ public class TileserverController {
 		Tileserver.log( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000 + " ms" );
 		return img;
 	}
+
+	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/small" )
+	@ResponseBody
+	public byte[] getImage( HttpServletResponse resp, @PathVariable( "image_name" ) String image_name,
+			@PathVariable( "stack_name" ) String stack_name, @PathVariable( "slice_index" ) int slice_index)
+					throws Exception {
+
+		long startTime = System.nanoTime();
+		Tileserver.log( "small.jpg for slice index " + slice_index );
+
+		resp.setHeader( "Content-Disposition", "inline" );
+		resp.setContentType( "image/jpg" );
+
+		IImage image = imageHandler.getImage( image_name );
+		IStack stack = image.getStack( stack_name );
+		int numScaleLevels = stack.getScaleLevels();
+		for ( int i = 0; i < numScaleLevels; i++ ) {
+			System.out.println( "DIM" + stack.getDimensions( i ) );
+		}
+
+		// TileCoordinates coordinates = new TileCoordinates(192, scale_level,
+		// row_index, column_index, slice_index);
+
+		// Tileserver.log( "getting tile at " + coordinates );
+
+		// byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name
+		// ).getStack( stack_name ), coordinates );
+		// long duration = ( System.nanoTime() - startTime );
+		// Tileserver.log( "Duration for " + image_name + " " + stack_name + " "
+		// + slice_index + " " + row_index + " " + column_index + " " +
+		// scale_level + " = " + duration / 1000000 + " ms" );
+		// return img;
+		return null;
+	}
 	
 	@ResponseStatus( value=HttpStatus.CONFLICT, reason="problem with HDF5 source file" )
 	@ExceptionHandler( Exception.class )
