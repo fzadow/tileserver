@@ -42,14 +42,14 @@ public class HDF5Stack extends SimpleStack {
 		int scaleLevel = coordinates.getScaleLevel();
 
 		// restrict block loading to image bounds
-		int width = offset_x + size > getDimensions( scaleLevel )[1] ? (int) ( getDimensions( scaleLevel )[1] - offset_x - 1) : size;
-		int height = offset_y + size > getDimensions( scaleLevel )[2] ? (int) ( getDimensions( scaleLevel )[2] - offset_y - 1 ) : size;
+		int width = offset_x + size > getDimensions( scaleLevel )[ 2 ] ? (int) ( getDimensions( scaleLevel )[ 2 ] - offset_x - 1 ) : size;
+		int height = offset_y + size > getDimensions( scaleLevel )[ 1 ] ? (int) ( getDimensions( scaleLevel )[ 1 ] - offset_y - 1 ) : size;
 		
 		//System.out.println( "Stack: getting " + width + "x" + height + " block from " + offset_x + "," + offset_y + " to "  + ( width + offset_x ) + "," + ( height + offset_y ) );
 		
 		MDShortArray i = image.getReader().uint16().readMDArrayBlockWithOffset( getFullName() + "/" + scaleLevel,
-				new int[] {1, width, height},
-				new long[] { offset_z, offset_x, offset_y } );
+ new int[] { 1, height, width },
+ new long[] { offset_z, offset_y, offset_x } );
 
 		return new Tile( i.getAsFlatArray(), width, height );
 	}

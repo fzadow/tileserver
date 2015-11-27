@@ -29,7 +29,7 @@ public class TileserverController {
 	
 	// TODO mapping for small.jpg
 
-	@RequestMapping(value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level:[\\d]+}" )
+	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{column_index}_{row_index}_{scale_level:[\\d]+}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
 			@PathVariable("image_name") String image_name,
@@ -46,7 +46,7 @@ public class TileserverController {
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
-		TileCoordinates coordinates = new TileCoordinates(512, scale_level, row_index, column_index, slice_index);
+		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
 
 		Tileserver.log( "getting tile at " + coordinates );
 		
