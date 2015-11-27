@@ -44,7 +44,7 @@ public class TileProxy {
 
 	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 
-		Tileserver.log( "getting tile " + stack + coordinates );
+		Tileserver.log( "getting tile " + stack + " @ " + coordinates );
 
 		// check if tile exists on disk
 		if ( bDiskRead ) {
