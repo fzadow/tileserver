@@ -81,10 +81,11 @@ public class TileGenerator {
 		int[] rgb = new int[ size * size ];
 
 		// fill overlap with black (or grey if in debug mode)
-		short fillpixel = (short) (debug_tile_overlap ? 30000 : 0 ) ; 
+		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
 
 		int[] grayMap = getGrayMap( simpleStack.getValueLimit() );
 		Tileserver.log( "getting grayscale tile " + simpleStack + ", limit=" + simpleStack.getValueLimit() );
+
 
 		for(int y = 0; y < size; ++y) {
 			for(int x= 0; x < size; ++x ) {
@@ -92,15 +93,12 @@ public class TileGenerator {
 				short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
 
 				if ( debug_tile_bounds ) {
-					if( ( x % 64 == 0 && y % 64 == 0 ) || ( (x-1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-1) % 64 == 0 ) || ( (x+1) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+1) % 64 == 0 ) || ( (x-2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y-2) % 64 == 0 ) || ( (x+2) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && (y+2) % 64 == 0 ) ) {
+					if ( ( x % 64 == 0 && y % 64 == 0 ) || ( ( x - 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 1 ) % 64 == 0 ) || ( ( x + 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 1 ) % 64 == 0 ) || ( ( x - 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 2 ) % 64 == 0 ) || ( ( x + 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 2 ) % 64 == 0 ) )
 						pixel = (short)30000;
-					}
-					if( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) ) {
+					if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
 						pixel = (short)40000;
-					}
-					if( ( x == size-1 && y % 4 == 0 ) || ( y == size-1 && x % 4 == 0 ) ) {
+					if ( ( x == size - 1 && y % 4 == 0 ) || ( y == size - 1 && x % 4 == 0 ) )
 						pixel = (short)50000;
-					}
 				}
 				int grayValue = grayMap[pixel & 0xffff ];
 
@@ -141,6 +139,9 @@ public class TileGenerator {
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];
 
+		// fill overlap with black (or grey if in debug mode)
+		short fillpixel = (short) ( debug_tile_overlap ? compositeStack.getValueLimit() / 2 : 0 );
+
 		Tileserver.log( "getting composite tile " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
 		// get data for all channels
@@ -158,7 +159,18 @@ public class TileGenerator {
 			for(int y = 0; y < size; ++y) {
 				for(int x= 0; x < size; ++x ) {
 					// fill overlap with black
-					short pixel = x >= tile_width || y >= tile_height ? 0 : flatdata[ tile_width * y + x ];
+					// System.out.println( x + " " + tile_width + " / " + y + "
+					// " + tile_height );
+					short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
+					if ( debug_tile_bounds ) {
+						if ( ( x % 64 == 0 && y % 64 == 0 ) || ( ( x - 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 1 ) % 64 == 0 ) || ( ( x + 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 1 ) % 64 == 0 ) || ( ( x - 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 2 ) % 64 == 0 ) || ( ( x + 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 2 ) % 64 == 0 ) )
+							pixel = (short) 30000;
+						if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
+							pixel = (short) 40000;
+						if ( ( x == size - 1 && y % 4 == 0 ) || ( y == size - 1 && x % 4 == 0 ) )
+							pixel = (short) 50000;
+					}
+
 					int grayValue = grayMap[pixel & 0xffff ];
 					rgb[ size*y + x ] = rgb[ size*y + x ] | ( ( grayValue << 16 ) | (grayValue << 8 ) | grayValue ) & colorMask;
 				}
@@ -188,11 +200,12 @@ public class TileGenerator {
 	public BufferedImage getTile( IStack stack, TileCoordinates coordinates ) throws Exception {
 		BufferedImage image;
 		switch ( stack.getClass().getSimpleName() ) {
-		case "Stack":
-			image = getTile( (SimpleStack)stack, coordinates );
-			break;
 		case "CompositeStack":
 			image = getTile( (CompositeStack)stack, coordinates );
+			break;
+		case "Stack":
+		case "HDF5Stack":
+			image = getTile( (SimpleStack) stack, coordinates );
 			break;
 		default:
 			return null;
