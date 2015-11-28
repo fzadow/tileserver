@@ -38,7 +38,7 @@ public class HDF5Stack extends SimpleStack {
 		long offset_x = coordinates.getX();
 		long offset_y = coordinates.getY();
 		long offset_z = coordinates.getZ();
-		int size = coordinates.getSize();
+		int size = coordinates.getWidth();
 		int scaleLevel = coordinates.getScaleLevel();
 
 		// restrict block loading to image bounds

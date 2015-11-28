@@ -68,7 +68,7 @@ public class TileGenerator {
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
 		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
 
-		int size = coordinates.getSize();
+		int size = coordinates.getWidth();
 		
 		// get tile as defined by coordinates. returned tile may be smaller
 		// than size*size if it overlaps the bounds of the image.
@@ -134,7 +134,7 @@ public class TileGenerator {
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
 		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
 		
-		int size = coordinates.getSize();
+		int size = coordinates.getWidth();
 
 		// create square rgb array of width 'size'
 		int[] rgb = new int[ size * size ];

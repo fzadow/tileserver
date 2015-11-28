@@ -9,22 +9,44 @@ package de.vonfelix;
 
 public class TileCoordinates {
 	
-	private int size;
+	private final int width;
+	private final int height;
 
-	private int scale_level;
-	private int slice_index;
-	private int row_index;
-	private int column_index;
+	private final int scale_level;
+	private final int column_index, row_index, slice_index;
+	private final int x, y, z;
 	
-	
+	/**
+	 * create tile coordinates with square dimensions and position specified as
+	 * column_index, row_index and slice_index
+	 * 
+	 * @param size
+	 * @param scale_level
+	 * @param column_index
+	 * @param row_index
+	 * @param slice_index
+	 */
 	public TileCoordinates( int size, int scale_level, int column_index, int row_index, int slice_index ) {
-		this.size = size;
+		this.width = this.height = size;
 		this.scale_level = scale_level;
 		this.column_index = column_index;
 		this.row_index = row_index;
-		this.slice_index = slice_index;
+		this.slice_index = this.z = slice_index;
+		this.x = column_index * size;
+		this.y = row_index * size;
 	}
 	
+	public TileCoordinates( int width, int height, int scale_level, int x, int y, int z ) {
+		this.width = width;
+		this.height = height;
+		this.scale_level = scale_level;
+		this.x = x;
+		this.y = y;
+		this.z = this.slice_index = z;
+		this.column_index = x / width;
+		this.row_index = y / height;
+	}
+
 	public int getScaleLevel() {
 		return scale_level;
 	}
@@ -42,19 +64,23 @@ public class TileCoordinates {
 	}
 	
 	public int getX() {
-		return size * column_index;
+		return x;
 	}
 
 	public int getY() {
-		return size * row_index;
+		return y;
 	}
 
 	public int getZ() {
-		return slice_index;
+		return z;
 	}
 
-	public int getSize() {
-		return size;
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 	
 	@Override
