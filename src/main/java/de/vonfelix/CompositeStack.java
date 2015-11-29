@@ -5,13 +5,22 @@ import java.util.HashMap;
 
 public class CompositeStack extends AbstractStack {
 	
-	HashMap<String, Channel> channels = new HashMap<String, Channel>();;
+	HashMap<String, Channel> channels = new HashMap<String, Channel>();
 	
 	public CompositeStack( AbstractImage image, String name, String title ) {
 		super( image, name, title );
 	}
 	
 	public void addChannel( Channel channel ) {
+
+		// if this is the first channel added, set scaleLevel and
+		if ( channels.isEmpty() ) {
+			this.scaleLevels = channel.getStack().getScaleLevels();
+			this.dimensions = channel.getStack().getDimensions();
+		}
+
+		// TODO make sure all added channels have the same dimensions
+
 		channels.put( channel.getStack().getId(), channel );
 	}
 	
@@ -20,13 +29,8 @@ public class CompositeStack extends AbstractStack {
 	}
 
 	@Override
-	public long[] getDimensions( int scaleLevel ) {
-		try {
-			return channels.values().iterator().next().getStack().getDimensions( scaleLevel );
-		}
-		catch ( Exception e ) {
-			e.printStackTrace();
-			return null;
-		}
+	public int getScaleLevels() {
+		// TODO Auto-generated method stub
+		return super.getScaleLevels();
 	}
 }
