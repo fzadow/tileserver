@@ -71,10 +71,11 @@ public class TileserverController {
 		Tileserver.log( String.valueOf( imageHandler.hashCode() ) );
 
 		IStack stack = imageHandler.getImage( image_name ).getStack( stack_name );
+
 		// go through scale levels (from small to big) to find the first scale
 		// level where either width or height is > 192 (most likely it's the
 		// first scale level)
-		int thumbnailSize = 192;
+		int thumbnailSize = Tileserver.hasProperty( "thumbnail_size" ) ? Integer.parseInt( Tileserver.getProperty( "thumbnail_size" ) ) : 192;
 		int stackWidth, thumbnailWidth, stackHeight, thumbnailHeight;
 		for ( int scaleLevel = stack.getScaleLevels() - 1; scaleLevel >= 0; --scaleLevel ) {
 			stackWidth = thumbnailWidth = (int) stack.getDimensions( scaleLevel )[ 2 ];
