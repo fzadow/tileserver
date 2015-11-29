@@ -68,7 +68,8 @@ public class TileGenerator {
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
 		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
 
-		int size = coordinates.getWidth();
+		int width = coordinates.getWidth();
+		int height = coordinates.getHeight();
 		
 		// get tile as defined by coordinates. returned tile may be smaller
 		// than size*size if it overlaps the bounds of the image.
@@ -77,8 +78,8 @@ public class TileGenerator {
 		int tile_height = tile.getHeight();
 		short[] flatdata = tile.getTile();
 		
-		// create square rgb array of width 'size'
-		int[] rgb = new int[ size * size ];
+		// create rgb array
+		int[] rgb = new int[ width * height ];
 
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
@@ -86,9 +87,8 @@ public class TileGenerator {
 		int[] grayMap = getGrayMap( simpleStack.getValueLimit() );
 		Tileserver.log( "getting grayscale tile " + simpleStack + ", limit=" + simpleStack.getValueLimit() );
 
-
-		for(int y = 0; y < size; ++y) {
-			for(int x= 0; x < size; ++x ) {
+		for ( int y = 0; y < height; ++y ) {
+			for ( int x = 0; x < width; ++x ) {
 
 				short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
 
@@ -97,18 +97,18 @@ public class TileGenerator {
 						pixel = (short)30000;
 					if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
 						pixel = (short)40000;
-					if ( ( x == size - 1 && y % 4 == 0 ) || ( y == size - 1 && x % 4 == 0 ) )
+					if ( ( x == width - 1 && y % 4 == 0 ) || ( y == height - 1 && x % 4 == 0 ) )
 						pixel = (short)50000;
 				}
 				int grayValue = grayMap[pixel & 0xffff ];
 
-				rgb[ size*y + x ] = grayValue << 16 | grayValue << 8 | grayValue;
+				rgb[ width * y + x ] = grayValue << 16 | grayValue << 8 | grayValue;
 			}
 		}
 		
-		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR);
+		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_3BYTE_BGR );
 
-		img.setRGB(0, 0, size, size, rgb, 0, size);
+		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
 		Tileserver.log( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
@@ -134,10 +134,11 @@ public class TileGenerator {
 		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
 		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
 		
-		int size = coordinates.getWidth();
+		int width = coordinates.getWidth();
+		int height = coordinates.getHeight();
 
 		// create square rgb array of width 'size'
-		int[] rgb = new int[ size * size ];
+		int[] rgb = new int[ width * height ];
 
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? compositeStack.getValueLimit() / 2 : 0 );
@@ -156,8 +157,8 @@ public class TileGenerator {
 
 			Tileserver.log( "  channel " + channel + ", limit=" + channel.getStack().getValueLimit() );
 
-			for(int y = 0; y < size; ++y) {
-				for(int x= 0; x < size; ++x ) {
+			for ( int y = 0; y < height; ++y ) {
+				for ( int x = 0; x < width; ++x ) {
 					// fill overlap with black
 					// System.out.println( x + " " + tile_width + " / " + y + "
 					// " + tile_height );
@@ -167,18 +168,18 @@ public class TileGenerator {
 							pixel = (short) 30000;
 						if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
 							pixel = (short) 40000;
-						if ( ( x == size - 1 && y % 4 == 0 ) || ( y == size - 1 && x % 4 == 0 ) )
+						if ( ( x == width - 1 && y % 4 == 0 ) || ( y == height - 1 && x % 4 == 0 ) )
 							pixel = (short) 50000;
 					}
 
 					int grayValue = grayMap[pixel & 0xffff ];
-					rgb[ size*y + x ] = rgb[ size*y + x ] | ( ( grayValue << 16 ) | (grayValue << 8 ) | grayValue ) & colorMask;
+					rgb[ width * y + x ] = rgb[ width * y + x ] | ( ( grayValue << 16 ) | ( grayValue << 8 ) | grayValue ) & colorMask;
 				}
 			}
 		}
-		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR);
+		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_3BYTE_BGR );
 
-		img.setRGB(0, 0, size, size, rgb, 0, size);
+		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
 		Tileserver.log( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
