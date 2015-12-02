@@ -26,10 +26,6 @@ public class HDF5Stack extends SimpleStack {
 		return getPath() + "/" + getId();
 	}
 
-	public long[] getDimensions( int scaleLevel ) {
-		return dimensions.get( scaleLevel );
-	}
-
 	public Tile getTile( TileCoordinates coordinates ) {
 		long offset_x = coordinates.getX();
 		long offset_y = coordinates.getY();

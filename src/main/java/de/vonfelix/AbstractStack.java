@@ -46,7 +46,15 @@ public abstract class AbstractStack implements IStack {
 	public int getScaleLevels() {
 		return scaleLevels;
 	}
-	
+
+	public HashMap<Integer, long[]> getDimensions() {
+		return dimensions;
+	}
+
+	public long[] getDimensions( int scale_level ) {
+		return dimensions.get( scale_level );
+	}
+
 	@Override
 	public String toString() {
 		return id + " (" + image + ")";
