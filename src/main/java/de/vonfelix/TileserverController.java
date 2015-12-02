@@ -27,8 +27,6 @@ public class TileserverController {
 	@Autowired
 	ServletContext servletContext;
 	
-	// TODO mapping for small.jpg
-
 	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level:[\\d]+}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
@@ -52,6 +50,7 @@ public class TileserverController {
 		
 		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates );
 		long duration = ( System.nanoTime() - startTime );
+		resp.setHeader( "Generation-Time", duration + "" );
 		Tileserver.log( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000 + " ms" );
 		return img;
 	}
