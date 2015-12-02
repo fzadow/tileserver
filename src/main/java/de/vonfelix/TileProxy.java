@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.imgscalr.Scalr;
 
 public class TileProxy {
 
@@ -43,6 +44,10 @@ public class TileProxy {
 	}
 
 	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
+		return getJpegTile( stack, coordinates, 0, 0 );
+	}
+
+	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates, int width, int height ) throws Exception {
 
 		Tileserver.log( "getting tile " + stack + " @ " + coordinates );
 
@@ -61,7 +66,14 @@ public class TileProxy {
 		}
 
 		// get tile from tile generator
-		BufferedImage tile = tileGenerator.getTile( stack, coordinates );
+		BufferedImage tile = (BufferedImage) tileGenerator.getTile( stack, coordinates );
+		if ( width > 0 ) {
+			Tileserver.log( "scaling down to " + width + "," + height );
+			long startTime = System.nanoTime();
+			tile = Scalr.resize( tile, Scalr.Method.BALANCED, width, height );
+			Tileserver.log( "scaling took " + ( System.nanoTime() - startTime ) / 1000 + "µs" );
+
+		}
 
 		// get as JPEG
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
