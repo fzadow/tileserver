@@ -80,7 +80,7 @@ public class HDF5Image extends AbstractImage {
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
 					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
 					HDF5Stack stack = (HDF5Stack) stacks.get( c.getChildText( "stack_id", ns ) );
-					Channel channel = new Channel( stack, Channel.Color.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
+					Channel channel = new Channel( stack, Color.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
 					if ( c.getChildText( "value_limit", ns ) != null ) {
 						channel.setValueLimit( Integer.parseInt( c.getChildText( "value_limit", ns ) ) );
 					}

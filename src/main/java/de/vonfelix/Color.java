@@ -1,0 +1,22 @@
+package de.vonfelix;
+
+public enum Color {
+	RED(0b111111110000000000000000),
+	GREEN(0b000000001111111100000000),
+	BLUE(0b000000000000000011111111),
+	CYAN(0b000000001111111111111111),
+	MAGENTA(0b111111110000000011111111),
+	YELLOW(0b111111111111111100000000),
+	GRAYS(0b111111111111111111111111);
+
+	private final int value;
+
+	Color( int value ) {
+		this.value = value;
+	}
+
+	int value() {
+		return value;
+	}
+
+}

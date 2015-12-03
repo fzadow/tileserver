@@ -1,7 +1,5 @@
 package de.vonfelix;
 
-import de.vonfelix.Channel.Color;
-
 /*
  * An array for each Parameter
  * 
