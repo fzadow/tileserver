@@ -12,11 +12,8 @@ import java.util.HashMap;
 public class TileGenerator {
 	
 	int[] colormap;
-	HashMap<Integer,int[]> grayMaps = new HashMap<Integer,int[]>();
+	HashMap<String, int[]> grayMaps = new HashMap<>();
 
-	public TileGenerator() {
-	}
-	
 	/**
 	 * return a gray map that maps pixel values from 0..65535 to 0..limit. if a
 	 * map for a specific limit value has not been generated before, generate
@@ -25,8 +22,9 @@ public class TileGenerator {
 	 * @param limit
 	 * @return gray map for that limit
 	 */
-	private int[] getGrayMap( int limit ) {
-		if( ! grayMaps.containsKey( limit ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
+	private int[] getGrayMap( int min, int max ) {
+		String key = min + ":" + max;
+		if ( !grayMaps.containsKey( key ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
 			long startTime = System.nanoTime();
 
 			// exponent for the adjustment curve, default 1
@@ -37,19 +35,21 @@ public class TileGenerator {
 
 			int[] grayMap = new int[65536];
 			for ( int i = 0; i < 65536; ++i ) {
-				if( i < limit ) {
-					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
+				// no need to check for i < min, primitive array values are
+				// already 0 anyway.
+				if ( i > min && i < max ) {
+					int c = (int) ( Math.pow( ( (double) i / max ), (double) exp ) * target );
 					grayMap[ i ] = c;
 				} else {
 					// overexposed pixels;
 					grayMap[ i ] = 0b11111111;
 				}
 			}
-			grayMaps.put( limit, grayMap );
+			grayMaps.put( key, grayMap );
 
-			Tileserver.log( "new colormap with adjustment=" + exp + " and limit=" + limit + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 		}
-		return grayMaps.get( limit );
+		return grayMaps.get( key );
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class TileGenerator {
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
 
-		int[] grayMap = getGrayMap( ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit() );
+		int[] grayMap = getGrayMap( ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ 0 ] : 0, ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit() );
 
 		Tileserver.log( "getting grayscale tile " + simpleStack );
 
@@ -164,7 +164,7 @@ public class TileGenerator {
 			short[] flatdata = tile.getTile();
 			
 			int colorMask = ( c < parameters.getColors().length ) ? parameters.getColors()[ c ].value() : channel.getColor().value();
-			int[] grayMap = getGrayMap( ( c < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit() );
+			int[] grayMap = getGrayMap( ( c < parameters.getMinValues().length ) ? parameters.getMinValues()[ c ] : 0, ( c < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit() );
 
 			Tileserver.log( "  channel " + channel );
 
