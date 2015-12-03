@@ -81,10 +81,6 @@ public class TileGenerator {
 		int tile_width = tile.getWidth();
 		int tile_height = tile.getHeight();
 		short[] flatdata = tile.getTile();
-		
-		if ( parameters.getMaxValues().length > 0 ) {
-			simpleStack.setValueLimit( parameters.getMaxValues()[ 0 ] );
-		}
 
 		// create rgb array
 		int[] rgb = new int[ width * height ];
@@ -92,8 +88,9 @@ public class TileGenerator {
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
 
-		int[] grayMap = getGrayMap( simpleStack.getValueLimit() );
-		Tileserver.log( "getting grayscale tile " + simpleStack + ", limit=" + simpleStack.getValueLimit() );
+		int[] grayMap = getGrayMap( ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit() );
+
+		Tileserver.log( "getting grayscale tile " + simpleStack );
 
 		for ( int y = 0; y < height; ++y ) {
 			for ( int x = 0; x < width; ++x ) {
@@ -161,22 +158,15 @@ public class TileGenerator {
 		for( Channel channel : compositeStack.channels() ) {
 			c++;
 
-			if ( c < parameters.getColors().length ) {
-				channel.setColor( parameters.getColors()[ c ] );
-			}
-			if ( c < parameters.getMaxValues().length ) {
-				channel.setValueLimit( parameters.getMaxValues()[ c ] );
-			}
-
 			Tile tile = channel.getStack().getTile( coordinates );
 			int tile_width = tile.getWidth();
 			int tile_height = tile.getHeight();
 			short[] flatdata = tile.getTile();
 			
-			int colorMask = channel.getColorValue();
-			int[] grayMap = getGrayMap( channel.getValueLimit() );
+			int colorMask = ( c < parameters.getColors().length ) ? parameters.getColors()[ c ].value() : channel.getColor().value();
+			int[] grayMap = getGrayMap( ( c < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit() );
 
-			Tileserver.log( "  channel " + channel + ", limit=" + channel.getValueLimit() );
+			Tileserver.log( "  channel " + channel );
 
 			for ( int y = 0; y < height; ++y ) {
 				for ( int x = 0; x < width; ++x ) {
