@@ -60,7 +60,11 @@ public class TileGenerator {
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( SimpleStack simpleStack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile(
+			SimpleStack simpleStack,
+			TileCoordinates coordinates,
+			TileParameters parameters )
+			throws Exception {
 		
 		long startTime = System.nanoTime();
 
@@ -78,6 +82,10 @@ public class TileGenerator {
 		int tile_height = tile.getHeight();
 		short[] flatdata = tile.getTile();
 		
+		if ( parameters.getMaxValues().length > 0 ) {
+			simpleStack.setValueLimit( parameters.getMaxValues()[ 0 ] );
+		}
+
 		// create rgb array
 		int[] rgb = new int[ width * height ];
 
@@ -126,7 +134,10 @@ public class TileGenerator {
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( CompositeStack compositeStack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile(
+			CompositeStack compositeStack,
+			TileCoordinates coordinates,
+			TileParameters parameters ) throws Exception {
 
 		long startTime = System.nanoTime();
 
@@ -145,8 +156,18 @@ public class TileGenerator {
 
 		Tileserver.log( "getting composite tile " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
+		int c = -1;
 		// get data for all channels
 		for( Channel channel : compositeStack.channels() ) {
+			c++;
+
+			if ( c < parameters.getColors().length ) {
+				channel.setColor( parameters.getColors()[ c ] );
+			}
+			if ( c < parameters.getMaxValues().length ) {
+				channel.setValueLimit( parameters.getMaxValues()[ c ] );
+			}
+
 			Tile tile = channel.getStack().getTile( coordinates );
 			int tile_width = tile.getWidth();
 			int tile_height = tile.getHeight();
@@ -155,13 +176,10 @@ public class TileGenerator {
 			int colorMask = channel.getColorValue();
 			int[] grayMap = getGrayMap( channel.getValueLimit() );
 
-			Tileserver.log( "  channel " + channel + ", limit=" + channel.getStack().getValueLimit() );
+			Tileserver.log( "  channel " + channel + ", limit=" + channel.getValueLimit() );
 
 			for ( int y = 0; y < height; ++y ) {
 				for ( int x = 0; x < width; ++x ) {
-					// fill overlap with black
-					// System.out.println( x + " " + tile_width + " / " + y + "
-					// " + tile_height );
 					short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
 					if ( debug_tile_bounds ) {
 						if ( ( x % 64 == 0 && y % 64 == 0 ) || ( ( x - 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 1 ) % 64 == 0 ) || ( ( x + 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 1 ) % 64 == 0 ) || ( ( x - 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 2 ) % 64 == 0 ) || ( ( x + 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 2 ) % 64 == 0 ) )
@@ -198,15 +216,16 @@ public class TileGenerator {
 	 * @return
 	 * @throws Exception
 	 */
-	public BufferedImage getTile( IStack stack, TileCoordinates coordinates ) throws Exception {
+	public BufferedImage getTile( IStack stack, TileCoordinates coordinates, TileParameters parameters )
+			throws Exception {
 		BufferedImage image;
 		switch ( stack.getClass().getSimpleName() ) {
 		case "CompositeStack":
-			image = getTile( (CompositeStack)stack, coordinates );
+			image = getTile( (CompositeStack) stack, coordinates, parameters );
 			break;
 		case "Stack":
 		case "HDF5Stack":
-			image = getTile( (SimpleStack) stack, coordinates );
+			image = getTile( (SimpleStack) stack, coordinates, parameters );
 			break;
 		default:
 			return null;

@@ -2,7 +2,9 @@ package de.vonfelix;
 
 import java.util.HashMap;
 
-public class Channel implements ValueLimit {
+import org.apache.commons.lang.NotImplementedException;
+
+public class Channel implements ValueLimit, Adjustable {
 
 	public enum Color {
 		RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, GRAYS
@@ -33,6 +35,10 @@ public class Channel implements ValueLimit {
 		return simpleStack;
 	}
 
+	public void setColor( Color color ) {
+		this.color = color;
+	}
+
 	public Color getColor() {
 		return color;
 	}
@@ -57,5 +63,27 @@ public class Channel implements ValueLimit {
 	@Override
 	public String toString() {
 		return simpleStack + "(" + color + ")";
+	}
+
+	@Override
+	public void setAdjustment( Adjustment adjustment, Object value ) {
+		switch ( adjustment ) {
+		case COLOR:
+			this.color = (Color) value;
+			break;
+		case CONTRAST_EXPONENT:
+			throw new NotImplementedException(
+					"CONTRAST_EXPONENT adjustment not yet implemented in" + this.getClass() );
+			// break;
+		case MAX_VALUE:
+			this.valueLimit = (int) value;
+			break;
+		case MIN_VALUE:
+			throw new NotImplementedException( "MIN_VALUE adjustment not yet implemented in" + this.getClass() );
+			// break;
+		default:
+			break;
+		}
+
 	}
 }

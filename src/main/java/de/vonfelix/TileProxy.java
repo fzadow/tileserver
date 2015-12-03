@@ -43,11 +43,46 @@ public class TileProxy {
 
 	}
 
-	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
-		return getJpegTile( stack, coordinates, 0, 0 );
+	/**
+	 * get a JPEG tile at the given coordinates with the given parameters
+	 * 
+	 * @param stack
+	 * @param coordinates
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates, TileParameters parameters ) throws Exception {
+		return getJpegTile( stack, coordinates, parameters, 0, 0 );
 	}
 
-	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates, int width, int height ) throws Exception {
+	/**
+	 * get a JPEG tile at the given coordinates
+	 * 
+	 * @param stack
+	 * @param coordinates
+	 * @return
+	 * @throws Exception
+	 */
+	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
+		return getJpegTile( stack, coordinates, null, 0, 0 );
+	}
+
+	/**
+	 * get a scaled (width x height) JPEG tile
+	 * 
+	 * @param stack
+	 * @param coordinates
+	 * @param width
+	 * @param height
+	 * @return
+	 * @throws Exception
+	 */
+	public byte[] getJpegTile( IStack stack,
+			TileCoordinates coordinates,
+			TileParameters parameters,
+			int width,
+			int height ) throws Exception {
 
 		Tileserver.log( "getting tile " + stack + " @ " + coordinates );
 
@@ -66,10 +101,12 @@ public class TileProxy {
 		}
 
 		// get tile from tile generator
-		BufferedImage tile = (BufferedImage) tileGenerator.getTile( stack, coordinates );
+		BufferedImage tile = (BufferedImage) tileGenerator.getTile( stack, coordinates, parameters );
+
+		// if width was specified, scale image (down) to width*height.
 		if ( width > 0 ) {
-			Tileserver.log( "scaling down to " + width + "," + height );
 			long startTime = System.nanoTime();
+			Tileserver.log( "scaling down to " + width + "," + height );
 			tile = Scalr.resize( tile, Scalr.Method.BALANCED, width, height );
 			Tileserver.log( "scaling took " + ( System.nanoTime() - startTime ) / 1000 + "µs" );
 

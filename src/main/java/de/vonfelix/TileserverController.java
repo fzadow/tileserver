@@ -1,5 +1,7 @@
 package de.vonfelix;
 
+import java.util.ArrayList;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,9 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.vonfelix.Channel.Color;
 
 @RestController
 public class TileserverController {
@@ -27,38 +32,51 @@ public class TileserverController {
 	@Autowired
 	ServletContext servletContext;
 	
-	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index}_{column_index}_{scale_level:[\\d]+}" )
+	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index:[\\d]+}_{column_index:[\\d]+}_{scale_level:[\\d]+}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
-			@PathVariable("image_name") String image_name,
-			@PathVariable("stack_name") String stack_name,
-			@PathVariable("slice_index") int slice_index,
-			@PathVariable("row_index") int row_index,
-			@PathVariable("column_index") int column_index,
-			@PathVariable("scale_level") int scale_level
+			@PathVariable( "image_name" ) String image_name,
+			@PathVariable( "stack_name" ) String stack_name,
+			@PathVariable( "slice_index" ) int slice_index,
+			@PathVariable( "row_index" ) int row_index,
+			@PathVariable( "column_index" ) int column_index,
+			@PathVariable( "scale_level" ) int scale_level,
+			@RequestParam( value = "colors", required = false ) String adjCol,
+			@RequestParam( value = "min_vals", required = false ) String adjMin,
+			@RequestParam( value = "max_vals", required = false ) String adjMax,
+			@RequestParam( value = "exponents", required = false ) String adjExp
 			) throws Exception {
 		
 		long startTime = System.nanoTime();
+		
 		Tileserver.log( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
 		resp.setHeader("Content-Disposition", "inline");
 		resp.setContentType("image/jpg");
 		
+		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
 
-		Tileserver.log( "getting tile at " + coordinates );
+		Tileserver.log( "getting tile @ " + coordinates + " with parameters " );
 		
-		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates );
+		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
+		
 		long duration = ( System.nanoTime() - startTime );
 		resp.setHeader( "Generation-Time", duration + "" );
 		Tileserver.log( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000 + " ms" );
+
 		return img;
 	}
 
 	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/small" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp, @PathVariable( "image_name" ) String image_name,
-			@PathVariable( "stack_name" ) String stack_name, @PathVariable( "slice_index" ) int slice_index)
+			@PathVariable( "stack_name" ) String stack_name,
+			@PathVariable( "slice_index" ) int slice_index,
+			@RequestParam( value = "colors", required = false ) String adjCol,
+			@RequestParam( value = "min_vals", required = false ) String adjMin,
+			@RequestParam( value = "max_vals", required = false ) String adjMax,
+			@RequestParam( value = "exponents", required = false ) String adjExp)
 					throws Exception {
 
 		long startTime = System.nanoTime();
@@ -90,10 +108,11 @@ public class TileserverController {
 				}
 				System.out.println( "thumbnail dimensions: " + thumbnailWidth + "x" + thumbnailHeight );
 
+				TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 				TileCoordinates coordinates = new TileCoordinates( stackWidth, stackHeight, scaleLevel, 0, 0, slice_index );
 				Tileserver.log( "getting thumbnail tile at " + coordinates );
 
-				byte[] img = tileProxy.getJpegTile( stack, coordinates, thumbnailWidth, thumbnailHeight );
+				byte[] img = tileProxy.getJpegTile( stack, coordinates, parameters, thumbnailWidth, thumbnailHeight );
 
 				// TODO scale down to 192
 
@@ -111,6 +130,77 @@ public class TileserverController {
 		return null;
 	}
 	
+	private TileParameters parseParameters( String adjCol, String adjMin, String adjMax, String adjExp ) {
+		ArrayList<Color> colors = new ArrayList<>();
+		ArrayList<Integer> min_values = new ArrayList<>();
+		ArrayList<Integer> max_values = new ArrayList<>();
+		ArrayList<Float> exponents = new ArrayList<>();
+
+		// insert LAMBDAs here... (?)
+
+		if ( adjCol != null ) {
+			for ( String e : adjCol.split( "\\s*,\\s*" ) ) {
+				switch ( e.toLowerCase() ) {
+				case "red":
+				case "r":
+					colors.add( Color.RED );
+					break;
+				case "green":
+				case "g":
+					colors.add( Color.GREEN );
+					break;
+				case "blue":
+				case "b":
+					colors.add( Color.BLUE );
+					break;
+				case "cyan":
+				case "c":
+					colors.add( Color.CYAN );
+					break;
+				case "magenta":
+				case "m":
+					colors.add( Color.MAGENTA );
+					break;
+				case "yellow":
+				case "y":
+					colors.add( Color.YELLOW );
+					break;
+				case "grays":
+				case "gray":
+				case "greys":
+				case "grey":
+				case "whites":
+				case "white":
+				case "w":
+					colors.add( Color.GRAYS );
+					break;
+				}
+			}
+		}
+		if ( adjMin != null ) {
+			for ( String e : adjMin.split( "\\s*,\\s*" ) ) {
+				min_values.add( Integer.parseInt( e ) );
+			}
+		}
+		if ( adjMax != null ) {
+			for ( String e : adjMax.split( "\\s*,\\s*" ) ) {
+				max_values.add( Integer.parseInt( e ) );
+			}
+		}
+		if ( adjExp != null ) {
+			for ( String e : adjExp.split( "\\s*,\\s*" ) ) {
+				exponents.add( Float.parseFloat( e ) );
+			}
+		}
+
+		Tileserver.log( "parameters: " + colors + ", " + min_values + ", " + max_values + ", " + exponents );
+
+		return new TileParameters( colors.toArray( new Color[ colors.size() ] ),
+				min_values.toArray( new Integer[ min_values.size() ] ),
+				max_values.toArray( new Integer[ max_values.size() ] ),
+				exponents.toArray( new Float[ exponents.size() ] ) );
+	}
+
 	@ResponseStatus( value=HttpStatus.CONFLICT, reason="problem with HDF5 source file" )
 	@ExceptionHandler( Exception.class )
 	public void conflict() {
