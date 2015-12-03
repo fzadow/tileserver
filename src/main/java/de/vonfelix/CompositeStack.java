@@ -1,11 +1,11 @@
 package de.vonfelix;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class CompositeStack extends AbstractStack {
 	
-	HashMap<String, Channel> channels = new HashMap<String, Channel>();
+	LinkedHashMap<String, Channel> channels = new LinkedHashMap<>();
 	
 	public CompositeStack( AbstractImage image, String name, String title ) {
 		super( image, name, title );
