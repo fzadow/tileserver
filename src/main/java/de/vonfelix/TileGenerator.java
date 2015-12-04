@@ -1,7 +1,9 @@
 package de.vonfelix;
 
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import org.openjdk.jol.info.GraphLayout;
 
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
@@ -11,13 +13,24 @@ import java.util.HashMap;
 
 public class TileGenerator {
 	
-	int[] colormap;
-	HashMap<String, int[]> grayMaps = new HashMap<>();
+	/*
+	 * create a custom LinkedHashMap that holds 40 entries (~10 MB) and discards the last recently
+	 * used one when full
+	 */
+	LinkedHashMap<String, int[]> grayMaps = new LinkedHashMap<String, int[]>( 40, 1f, true) {
+		private static final long serialVersionUID = 560852434281381905L;
+
+		@Override
+		protected boolean removeEldestEntry( java.util.Map.Entry<String, int[]> eldest ) {
+			return size( ) > 40;
+		}
+	};
 
 	/**
-	 * return a gray map that maps pixel values from 0..65535 to 0..limit. if a
-	 * map for a specific limit value has not been generated before, generate
-	 * it.
+	 * return a gray map that maps pixel values from 0..65535 to min..max.
+	 * 
+	 * The 40 most recent maps (about 10 MB) are kept in memory. If a map is not
+	 * in memory, it will be generated.
 	 * 
 	 * @param min
 	 * @param max
@@ -50,7 +63,8 @@ public class TileGenerator {
 			}
 			grayMaps.put( key, grayMap );
 
-			Tileserver.log( "new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "generated new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (took " + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "size of all " + grayMaps.size() + " colormaps: " + ( GraphLayout.parseInstance( grayMaps ).totalSize() / 1024 ) + "KB" );
 		}
 		return grayMaps.get( key );
 	}
