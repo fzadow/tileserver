@@ -9,13 +9,13 @@ public class TileParameters {
 	private Color[] colors;
 	private Integer[] min_values;
 	private Integer[] max_values;
-	private Float[] exponents;
+	private Double[] exponents;
 
-	public TileParameters( Color[] colors, Integer[] min_values, Integer[] max_values, Float[] exponents ) {
-		this.colors = colors;
-		this.min_values = min_values;
-		this.max_values = max_values;
-		this.exponents = exponents;
+	public TileParameters( Color[] colors, Integer[] min_values, Integer[] max_values, Double[] exponents ) {
+		this.colors = colors == null ? new Color[] {} : colors;
+		this.min_values = min_values == null ? new Integer[] {} : min_values;
+		this.max_values = max_values == null ? new Integer[] {} : max_values;
+		this.exponents = exponents == null ? new Double[] {} : exponents;
 	}
 
 	public Color[] getColors() {
@@ -30,7 +30,7 @@ public class TileParameters {
 		return max_values;
 	}
 
-	public Float[] getExponents() {
+	public Double[] getExponents() {
 		return exponents;
 	}
 }

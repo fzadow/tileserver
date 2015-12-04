@@ -19,16 +19,19 @@ public class TileGenerator {
 	 * map for a specific limit value has not been generated before, generate
 	 * it.
 	 * 
-	 * @param limit
+	 * @param min
+	 * @param max
+	 * @param exp
+	 *            Exponent for the mapping (1 = linar)
 	 * @return gray map for that limit
 	 */
-	private int[] getGrayMap( int min, int max ) {
-		String key = min + ":" + max;
+	private int[] getGrayMap( int min, int max, double exp ) {
+
+		// key to identify map
+		String key = min + ":" + max + ":" + exp;
+
 		if ( !grayMaps.containsKey( key ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
 			long startTime = System.nanoTime();
-
-			// exponent for the adjustment curve, default 1
-			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
 
 			// map to 8 bit
 			int target = 256;
@@ -88,9 +91,13 @@ public class TileGenerator {
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
 
-		int[] grayMap = getGrayMap( ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ 0 ] : 0, ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit() );
+		int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ 0 ] : 0;
+		int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit();
+		double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ 0 ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+		
+		int[] grayMap = getGrayMap( min, max, exp );
 
-		Tileserver.log( "getting grayscale tile " + simpleStack );
+		Tileserver.log( "getting grayscale tile " + simpleStack + ", range " + min + "-" + max + ", exp " + exp );
 
 		for ( int y = 0; y < height; ++y ) {
 			for ( int x = 0; x < width; ++x ) {
@@ -164,7 +171,12 @@ public class TileGenerator {
 			short[] flatdata = tile.getTile();
 			
 			int colorMask = ( c < parameters.getColors().length ) ? parameters.getColors()[ c ].value() : channel.getColor().value();
-			int[] grayMap = getGrayMap( ( c < parameters.getMinValues().length ) ? parameters.getMinValues()[ c ] : 0, ( c < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit() );
+
+			int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ c ] : 0;
+			int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit();
+			double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ c ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+
+			int[] grayMap = getGrayMap( min, max, exp );
 
 			Tileserver.log( "  channel " + channel );
 
