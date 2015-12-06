@@ -34,7 +34,7 @@ public class TileProxy {
 				writableTileDir = new File( Tileserver.getProperty( "writable_tile_dir" ) );
 				System.out.println( "TileProxy: Found writable_tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) );
 			} else {
-				System.out.println( "TileProxy: ERROR: writable_file_dir not writable (or not a directory)" );
+				System.out.println( "TileProxy: ERROR: writable_file_dir ("+ Tileserver.getProperty("writable_tile_dir")+") not writable (or not a directory)" );
 			}
 		}
 
