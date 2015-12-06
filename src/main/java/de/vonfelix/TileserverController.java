@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.vonfelix.Channel.Color;
-
 @RestController
 public class TileserverController {
 
@@ -134,7 +132,7 @@ public class TileserverController {
 		ArrayList<Color> colors = new ArrayList<>();
 		ArrayList<Integer> min_values = new ArrayList<>();
 		ArrayList<Integer> max_values = new ArrayList<>();
-		ArrayList<Float> exponents = new ArrayList<>();
+		ArrayList<Double> exponents = new ArrayList<>();
 
 		// insert LAMBDAs here... (?)
 
@@ -189,7 +187,7 @@ public class TileserverController {
 		}
 		if ( adjExp != null ) {
 			for ( String e : adjExp.split( "\\s*,\\s*" ) ) {
-				exponents.add( Float.parseFloat( e ) );
+				exponents.add( Double.parseDouble( e ) );
 			}
 		}
 
@@ -198,7 +196,7 @@ public class TileserverController {
 		return new TileParameters( colors.toArray( new Color[ colors.size() ] ),
 				min_values.toArray( new Integer[ min_values.size() ] ),
 				max_values.toArray( new Integer[ max_values.size() ] ),
-				exponents.toArray( new Float[ exponents.size() ] ) );
+				exponents.toArray( new Double[ exponents.size() ] ) );
 	}
 
 	@ResponseStatus( value=HttpStatus.CONFLICT, reason="problem with HDF5 source file" )

@@ -1,7 +1,9 @@
 package de.vonfelix;
 
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import org.openjdk.jol.info.GraphLayout;
 
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
@@ -11,45 +13,60 @@ import java.util.HashMap;
 
 public class TileGenerator {
 	
-	int[] colormap;
-	HashMap<Integer,int[]> grayMaps = new HashMap<Integer,int[]>();
+	/*
+	 * create a custom LinkedHashMap that holds 40 entries (~10 MB) and discards the last recently
+	 * used one when full
+	 */
+	LinkedHashMap<String, int[]> grayMaps = new LinkedHashMap<String, int[]>( 40, 1f, true) {
+		private static final long serialVersionUID = 560852434281381905L;
 
-	public TileGenerator() {
-	}
-	
+		@Override
+		protected boolean removeEldestEntry( java.util.Map.Entry<String, int[]> eldest ) {
+			return size( ) > 40;
+		}
+	};
+
 	/**
-	 * return a gray map that maps pixel values from 0..65535 to 0..limit. if a
-	 * map for a specific limit value has not been generated before, generate
-	 * it.
+	 * return a gray map that maps pixel values from 0..65535 to min..max.
 	 * 
-	 * @param limit
+	 * The 40 most recent maps (about 10 MB) are kept in memory. If a map is not
+	 * in memory, it will be generated.
+	 * 
+	 * @param min
+	 * @param max
+	 * @param exp
+	 *            Exponent for the mapping (1 = linar)
 	 * @return gray map for that limit
 	 */
-	private int[] getGrayMap( int limit ) {
-		if( ! grayMaps.containsKey( limit ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
-			long startTime = System.nanoTime();
+	private int[] getGrayMap( int min, int max, double exp ) {
 
-			// exponent for the adjustment curve, default 1
-			double exp = Tileserver.hasProperty("contrast_adj_exp") ? Double.parseDouble( Tileserver.getProperty("contrast_adj_exp") ) : 1;
+		// key to identify map
+		String key = min + ":" + max + ":" + exp;
+
+		if ( !grayMaps.containsKey( key ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
+			long startTime = System.nanoTime();
 
 			// map to 8 bit
 			int target = 256;
 
 			int[] grayMap = new int[65536];
 			for ( int i = 0; i < 65536; ++i ) {
-				if( i < limit ) {
-					int c = (int)( Math.pow( ((double)i/limit), (double)exp ) * target );
+				// no need to check for i < min, primitive array values are
+				// already 0 anyway.
+				if ( i > min && i < max ) {
+					int c = (int) ( Math.pow( ( (double) i / max ), (double) exp ) * target );
 					grayMap[ i ] = c;
 				} else {
 					// overexposed pixels;
 					grayMap[ i ] = 0b11111111;
 				}
 			}
-			grayMaps.put( limit, grayMap );
+			grayMaps.put( key, grayMap );
 
-			Tileserver.log( "new colormap with adjustment=" + exp + " and limit=" + limit + " (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "generated new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (took " + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+			Tileserver.log( "size of all " + grayMaps.size() + " colormaps: " + ( GraphLayout.parseInstance( grayMaps ).totalSize() / 1024 ) + "KB" );
 		}
-		return grayMaps.get( limit );
+		return grayMaps.get( key );
 	}
 	
 	/**
@@ -81,10 +98,6 @@ public class TileGenerator {
 		int tile_width = tile.getWidth();
 		int tile_height = tile.getHeight();
 		short[] flatdata = tile.getTile();
-		
-		if ( parameters.getMaxValues().length > 0 ) {
-			simpleStack.setValueLimit( parameters.getMaxValues()[ 0 ] );
-		}
 
 		// create rgb array
 		int[] rgb = new int[ width * height ];
@@ -92,8 +105,13 @@ public class TileGenerator {
 		// fill overlap with black (or grey if in debug mode)
 		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
 
-		int[] grayMap = getGrayMap( simpleStack.getValueLimit() );
-		Tileserver.log( "getting grayscale tile " + simpleStack + ", limit=" + simpleStack.getValueLimit() );
+		int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ 0 ] : 0;
+		int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit();
+		double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ 0 ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+		
+		int[] grayMap = getGrayMap( min, max, exp );
+
+		Tileserver.log( "getting grayscale tile " + simpleStack + ", range " + min + "-" + max + ", exp " + exp );
 
 		for ( int y = 0; y < height; ++y ) {
 			for ( int x = 0; x < width; ++x ) {
@@ -161,22 +179,20 @@ public class TileGenerator {
 		for( Channel channel : compositeStack.channels() ) {
 			c++;
 
-			if ( c < parameters.getColors().length ) {
-				channel.setColor( parameters.getColors()[ c ] );
-			}
-			if ( c < parameters.getMaxValues().length ) {
-				channel.setValueLimit( parameters.getMaxValues()[ c ] );
-			}
-
 			Tile tile = channel.getStack().getTile( coordinates );
 			int tile_width = tile.getWidth();
 			int tile_height = tile.getHeight();
 			short[] flatdata = tile.getTile();
 			
-			int colorMask = channel.getColorValue();
-			int[] grayMap = getGrayMap( channel.getValueLimit() );
+			int colorMask = ( c < parameters.getColors().length ) ? parameters.getColors()[ c ].value() : channel.getColor().value();
 
-			Tileserver.log( "  channel " + channel + ", limit=" + channel.getValueLimit() );
+			int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ c ] : 0;
+			int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit();
+			double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ c ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+
+			int[] grayMap = getGrayMap( min, max, exp );
+
+			Tileserver.log( "  channel " + channel );
 
 			for ( int y = 0; y < height; ++y ) {
 				for ( int x = 0; x < width; ++x ) {
