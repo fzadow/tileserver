@@ -174,43 +174,90 @@ public class TileGenerator {
 
 		Tileserver.log( "getting composite tile " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
-		int c = -1;
+		int numberOfChannels = compositeStack.numberOfChannels();
+		short[][] pixels = new short[ numberOfChannels ][];
+		int[] colorMasks = new int[ numberOfChannels ];
+		int[] rs = new int[ numberOfChannels ];
+		int[] gs = new int[ numberOfChannels ];
+		int[] bs = new int[ numberOfChannels ];
+		int[][] grayMaps = new int[ numberOfChannels ][];
+		int tile_width = 0;
+		int tile_height = 0;
+		int min, max;
+		double exp;
+
+		int i = -1;
 		// get data for all channels
 		for( Channel channel : compositeStack.channels() ) {
-			c++;
+			i++;
 
+			// get pixels
 			Tile tile = channel.getStack().getTile( coordinates );
-			int tile_width = tile.getWidth();
-			int tile_height = tile.getHeight();
-			short[] flatdata = tile.getTile();
-			
-			int colorMask = ( c < parameters.getColors().length ) ? parameters.getColors()[ c ].value() : channel.getColor().value();
+			tile_width = tile.getWidth();
+			tile_height = tile.getHeight();
+			pixels[ i ] = tile.getTile();
 
-			int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ c ] : 0;
-			int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ c ] : channel.getValueLimit();
-			double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ c ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+			// get color
+			Color color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
+			colorMasks[ i ] = color.value();
+			rs[ i ] = color.r();
+			gs[ i ] = color.g();
+			bs[ i ] = color.b();
 
-			int[] grayMap = getGrayMap( min, max, exp );
+			// min, max
+			min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
+			max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
+			exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
 
-			Tileserver.log( "  channel " + channel );
+			grayMaps[ i ] = getGrayMap( min, max, exp );
+		}
 
-			for ( int y = 0; y < height; ++y ) {
-				for ( int x = 0; x < width; ++x ) {
-					short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
-					if ( debug_tile_bounds ) {
-						if ( ( x % 64 == 0 && y % 64 == 0 ) || ( ( x - 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 1 ) % 64 == 0 ) || ( ( x + 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 1 ) % 64 == 0 ) || ( ( x - 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 2 ) % 64 == 0 ) || ( ( x + 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 2 ) % 64 == 0 ) )
-							pixel = (short) 30000;
-						if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
-							pixel = (short) 40000;
-						if ( ( x == width - 1 && y % 4 == 0 ) || ( y == height - 1 && x % 4 == 0 ) )
-							pixel = (short) 50000;
-					}
 
-					int grayValue = grayMap[pixel & 0xffff ];
-					rgb[ width * y + x ] = rgb[ width * y + x ] | ( ( grayValue << 16 ) | ( grayValue << 8 ) | grayValue ) & colorMask;
+		//int pixel;
+		int r, g, b;
+
+		for ( int y = 0; y < height; ++y ) {
+			for ( int x = 0; x < width; ++x ) {
+				//pixel = 0;
+				r = g = b = 0;
+				for ( int c = 0; c < numberOfChannels; ++c ) {
+					short p = x >= tile_width || y >= tile_height ? fillpixel : pixels[ c ][ tile_width * y + x ];
+
+					int grayValue = grayMaps[ c ][ p & 0xffff ];
+					//int newPixel = ( ( grayValue << 16 ) | ( grayValue << 8 ) | grayValue ) & colorMasks[ c ];
+					//int newPixel = ( grayValue & rs[ c ] ) << 16 | ( grayValue & gs[ c ] ) << 8 | ( grayValue & bs[ c ] );
+
+					// Bitwise OR blend mode
+					//r = r | grayValue & rs[ c ];
+					//g = g | grayValue & gs[ c ];
+					//b = b | grayValue & bs[ c ];
+
+					// SCREEN blend mode
+					//r = 255 - ( ( 255 - r ) * ( 255 - ( grayValue & rs[ c ] ) ) ) / 255;
+					//g = 255 - ( ( 255 - g ) * ( 255 - ( grayValue & gs[ c ] ) ) ) / 255;
+					//b = 255 - ( ( 255 - b ) * ( 255 - ( grayValue & bs[ c ] ) ) ) / 255;
+
+					// MULTIPLY blend mode <- useless, discards channels
+					//r = r * ( grayValue & rs[ c ] ) / 255;
+					//g = g * ( grayValue & gs[ c ] ) / 255;
+					//b = b * ( grayValue & bs[ c ] ) / 255;
+
+					// ADD blend mode
+					//r = Math.min( r + ( grayValue & rs[ c ] ), 255 );
+					//g = Math.min( g + ( grayValue & gs[ c ] ), 255 );
+					//b = Math.min( b + ( grayValue & bs[ c ] ), 255 );
+
+					// LIGHTEN ONLY blend mode
+					r = Math.max( r, ( grayValue & rs[ c ] ) );
+					g = Math.max( g, ( grayValue & gs[ c ] ) );
+					b = Math.max( b, ( grayValue & bs[ c ] ) );
+
+					//pixel = pixel | newPixel;
 				}
+				rgb[ width * y + x ] = r << 16 | g << 8 | b;
 			}
 		}
+
 		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_3BYTE_BGR );
 
 		img.setRGB( 0, 0, width, height, rgb, 0, width );
