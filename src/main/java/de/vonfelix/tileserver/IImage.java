@@ -1,5 +1,7 @@
 package de.vonfelix.tileserver;
 
+import de.vonfelix.tileserver.exception.StackNotFoundException;
+
 public interface IImage extends ValueLimit {
 
 	String getName();
@@ -8,5 +10,6 @@ public interface IImage extends ValueLimit {
 	int getValueLimit();
 	
 	int getNumStacks();
-	IStack getStack( String name );
+
+	IStack getStack( String name ) throws StackNotFoundException;
 }

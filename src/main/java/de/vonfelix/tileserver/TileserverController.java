@@ -6,13 +6,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -197,11 +194,5 @@ public class TileserverController {
 				min_values.toArray( new Integer[ min_values.size() ] ),
 				max_values.toArray( new Integer[ max_values.size() ] ),
 				exponents.toArray( new Double[ exponents.size() ] ) );
-	}
-
-	@ResponseStatus( value=HttpStatus.CONFLICT, reason="problem with HDF5 source file" )
-	@ExceptionHandler( Exception.class )
-	public void conflict() {
-		
 	}
 }

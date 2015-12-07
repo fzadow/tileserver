@@ -2,6 +2,8 @@ package de.vonfelix.tileserver;
 
 import java.util.HashMap;
 
+import de.vonfelix.tileserver.exception.StackNotFoundException;
+
 public abstract class AbstractImage implements IImage {
 
 	protected String name;
@@ -18,7 +20,10 @@ public abstract class AbstractImage implements IImage {
 	}
 
 	@Override
-	public IStack getStack( String name ) {
+	public IStack getStack( String name ) throws StackNotFoundException {
+		if ( stacks.get( name ) == null ) {
+			throw new StackNotFoundException( name );
+		}
 		return stacks.get( name );
 	};
 
