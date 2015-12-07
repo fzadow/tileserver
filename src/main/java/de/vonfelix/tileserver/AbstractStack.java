@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import java.util.HashMap;
 
@@ -57,6 +57,6 @@ public abstract class AbstractStack implements IStack {
 
 	@Override
 	public String toString() {
-		return id + " (" + image + ")";
+		return id;
 	}
 }

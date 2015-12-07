@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 public enum Color {
 	RED(0b111111110000000000000000, 0b11111111, 0b00000000, 0b00000000),

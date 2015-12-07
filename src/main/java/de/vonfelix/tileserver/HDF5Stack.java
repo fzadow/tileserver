@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 

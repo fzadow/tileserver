@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import java.io.File;
 import java.util.HashMap;

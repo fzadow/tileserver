@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 /**
  * Describes the location and dimensions of a tile inside a Stack

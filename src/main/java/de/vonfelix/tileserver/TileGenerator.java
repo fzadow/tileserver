@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;

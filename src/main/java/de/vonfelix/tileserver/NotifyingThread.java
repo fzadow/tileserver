@@ -1,4 +1,4 @@
-package de.vonfelix;
+package de.vonfelix.tileserver;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
