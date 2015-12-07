@@ -3,8 +3,6 @@ package de.vonfelix;
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 
-import org.openjdk.jol.info.GraphLayout;
-
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
 // TODO different contrast curves?
@@ -53,7 +51,7 @@ public class TileGenerator {
 			for ( int i = 0; i < 65536; ++i ) {
 				// no need to check for i < min, primitive array values are
 				// already 0 anyway.
-				if ( i > min && i < max ) {
+				if ( i >= min && i < max ) {
 					int c = (int) ( Math.pow( ( (double) i / max ), (double) exp ) * target );
 					grayMap[ i ] = c;
 				} else {
@@ -64,7 +62,7 @@ public class TileGenerator {
 			grayMaps.put( key, grayMap );
 
 			Tileserver.log( "generated new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (took " + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
-			Tileserver.log( "size of all " + grayMaps.size() + " colormaps: " + ( GraphLayout.parseInstance( grayMaps ).totalSize() / 1024 ) + "KB" );
+			//			Tileserver.log( "size of all " + grayMaps.size() + " colormaps: " + ( GraphLayout.parseInstance( grayMaps ).totalSize() / 1024 ) + "KB" );
 		}
 		return grayMaps.get( key );
 	}
@@ -159,20 +157,11 @@ public class TileGenerator {
 
 		long startTime = System.nanoTime();
 
-		final boolean debug = Boolean.parseBoolean( Tileserver.getProperty("debug") );
-		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
-		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
-		
 		int width = coordinates.getWidth();
 		int height = coordinates.getHeight();
 
-		// create square rgb array of width 'size'
+		// create rgb array
 		int[] rgb = new int[ width * height ];
-
-		// fill overlap with black (or grey if in debug mode)
-		short fillpixel = (short) ( debug_tile_overlap ? compositeStack.getValueLimit() / 2 : 0 );
-
-		Tileserver.log( "getting composite tile " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
 		int numberOfChannels = compositeStack.numberOfChannels();
 		short[][] pixels = new short[ numberOfChannels ][];
@@ -192,6 +181,7 @@ public class TileGenerator {
 			i++;
 
 			// get pixels
+			Tileserver.log( "getting " + compositeStack + ": " + channel + ", limit=" + compositeStack.getValueLimit() );
 			Tile tile = channel.getStack().getTile( coordinates );
 			tile_width = tile.getWidth();
 			tile_height = tile.getHeight();
@@ -204,7 +194,7 @@ public class TileGenerator {
 			gs[ i ] = color.g();
 			bs[ i ] = color.b();
 
-			// min, max
+			// determine parameters
 			min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
 			max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
 			exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
@@ -212,54 +202,33 @@ public class TileGenerator {
 			grayMaps[ i ] = getGrayMap( min, max, exp );
 		}
 
-
-		//int pixel;
 		int r, g, b;
+		int grayValue;
+		int pixel_index;
+		int row_index;
 
-		for ( int y = 0; y < height; ++y ) {
-			for ( int x = 0; x < width; ++x ) {
-				//pixel = 0;
+		for ( int y = 0; y < tile_height; ++y ) {
+			row_index = tile_width * y;
+			for ( int x = 0; x < tile_width; ++x ) {
 				r = g = b = 0;
+				pixel_index = row_index + x;
 				for ( int c = 0; c < numberOfChannels; ++c ) {
-					short p = x >= tile_width || y >= tile_height ? fillpixel : pixels[ c ][ tile_width * y + x ];
-
-					int grayValue = grayMaps[ c ][ p & 0xffff ];
-					//int newPixel = ( ( grayValue << 16 ) | ( grayValue << 8 ) | grayValue ) & colorMasks[ c ];
-					//int newPixel = ( grayValue & rs[ c ] ) << 16 | ( grayValue & gs[ c ] ) << 8 | ( grayValue & bs[ c ] );
-
-					// Bitwise OR blend mode
-					//r = r | grayValue & rs[ c ];
-					//g = g | grayValue & gs[ c ];
-					//b = b | grayValue & bs[ c ];
-
-					// SCREEN blend mode
-					//r = 255 - ( ( 255 - r ) * ( 255 - ( grayValue & rs[ c ] ) ) ) / 255;
-					//g = 255 - ( ( 255 - g ) * ( 255 - ( grayValue & gs[ c ] ) ) ) / 255;
-					//b = 255 - ( ( 255 - b ) * ( 255 - ( grayValue & bs[ c ] ) ) ) / 255;
-
-					// MULTIPLY blend mode <- useless, discards channels
-					//r = r * ( grayValue & rs[ c ] ) / 255;
-					//g = g * ( grayValue & gs[ c ] ) / 255;
-					//b = b * ( grayValue & bs[ c ] ) / 255;
+					grayValue = grayMaps[ c ][ pixels[ c ][ pixel_index ] & 0xffff ];
 
 					// ADD blend mode
-					//r = Math.min( r + ( grayValue & rs[ c ] ), 255 );
-					//g = Math.min( g + ( grayValue & gs[ c ] ), 255 );
-					//b = Math.min( b + ( grayValue & bs[ c ] ), 255 );
-
-					// LIGHTEN ONLY blend mode
-					r = Math.max( r, ( grayValue & rs[ c ] ) );
-					g = Math.max( g, ( grayValue & gs[ c ] ) );
-					b = Math.max( b, ( grayValue & bs[ c ] ) );
-
-					//pixel = pixel | newPixel;
+					r += grayValue & rs[ c ];
+					g += grayValue & gs[ c ];
+					b += grayValue & bs[ c ];
 				}
+				r = Math.min( r, 255 );
+				g = Math.min( g, 255 );
+				b = Math.min( b, 255 );
 				rgb[ width * y + x ] = r << 16 | g << 8 | b;
+				//img.setRGB( x, y, r << 16 | g << 8 | b );
 			}
 		}
 
-		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_3BYTE_BGR );
-
+		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
 		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
 		Tileserver.log( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
