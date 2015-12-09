@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="error">
+	<Properties>
+		<Property name="level">INFO</Property>
+	</Properties>
+
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<!--<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />-->
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%-11.11t] %highlight{%level{length=1}} %-22.22logger{1}  %style{%msg}{bright}%n"/>
 		</Console>
  
@@ -18,10 +21,10 @@
  
 	</Appenders>
 	<Loggers>
-		<Logger name="de.vonfelix.tileserver" level="trace" additivity="false">
+		<Logger name="de.vonfelix.tileserver" level="${sys:level}" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
-		<Root level="WARN">
+		<Root level="warn">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="RollingFile" />
 		</Root>
