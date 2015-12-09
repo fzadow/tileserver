@@ -3,6 +3,8 @@ package de.vonfelix.tileserver;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -14,19 +16,21 @@ import ch.systemsx.cisd.hdf5.IHDF5Reader;
 
 public class HDF5Image extends AbstractImage {
 
+	static Logger logger = LogManager.getLogger();
+
 	private	IHDF5Reader reader;
 	private Document imageDesc;
 	
 	public HDF5Image( String name ){
 		super( name );
 		
-		Tileserver.log( "reading hdf5" );
+		logger.debug( "reading hdf5 for " + name );
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( Tileserver.getProperty("source_image_dir") + name + ".h5" );
 		
 		// read image info from XML
 		try {
-			Tileserver.log( "reading xml" );
+			logger.debug( "reading xml for " + name );
 
 			imageDesc = new SAXBuilder().build( Tileserver.getProperty("source_image_dir") + name + ".xml" );
 			Element root = imageDesc.getRootElement();
@@ -47,18 +51,17 @@ public class HDF5Image extends AbstractImage {
 	}
 	
 	private HashMap<String, IStack> loadStacks() {
-		Tileserver.log( "reading stacks" );
 
 		if ( imageDesc != null ) {
 			// TODO sanity checks when loading channels (no dupes, only sane
 			// composites)
-			Tileserver.log( "reading stack info for " + name );
+			logger.debug( "reading stack info for " + name );
 			Element root = imageDesc.getRootElement();
 			Namespace ns = root.getNamespace();
 
 			// load all normal Stacks (children of <Stacks> in xml)
 			for ( Element s : root.getChild( "Stacks", ns ).getChildren() ) {
-				Tileserver.log( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "value_limit", ns ) );
+				logger.debug( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "value_limit", ns ) );
 				// Stack st = new Stack( this, s.getChildText( "path", ns ),
 				// s.getChildText( "id", ns ) );
 
@@ -75,10 +78,10 @@ public class HDF5Image extends AbstractImage {
 
 			// load all composite Stacks (children of <CompositeStacks> in xml)
 			for ( Element s : root.getChild( "CompositeStacks", ns ).getChildren() ) {
-				Tileserver.log( "  composite stack " + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
+				logger.debug( "  composite stack " + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
 				CompositeStack cs = new CompositeStack( this, s.getChildText( "id", ns ), s.getChildText( "title", ns ) );
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
-					Tileserver.log( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
+					logger.debug( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
 					HDF5Stack stack = (HDF5Stack) stacks.get( c.getChildText( "stack_id", ns ) );
 					Channel channel = new Channel( stack, Color.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
 					if ( c.getChildText( "value_limit", ns ) != null ) {
@@ -89,11 +92,11 @@ public class HDF5Image extends AbstractImage {
 				stacks.put( cs.getId(), cs );
 			}
 		} else {
-			Tileserver.log( "No image description XML loaded!" );
+			logger.warn( "No image description XML loaded!" );
 		}
 
 		if ( stacks.size() == 0 ) {
-			Tileserver.log( "No stacks found!" );
+			logger.warn( "No stacks found for image " + name );
 		}
 		
 		return stacks;

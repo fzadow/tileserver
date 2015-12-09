@@ -17,7 +17,7 @@ public class LoggingInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public void postHandle( HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView ) throws Exception {
-		Tileserver.finishLog( Thread.currentThread().getId() );
+		//Tileserver.finishLog( Thread.currentThread().getId() );
 		super.postHandle( request, response, handler, modelAndView );
 	}
 

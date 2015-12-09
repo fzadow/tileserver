@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.imgscalr.Scalr;
 
 public class TileProxy {
@@ -20,21 +22,23 @@ public class TileProxy {
 
 	private TileGenerator tileGenerator = new TileGenerator();
 
+	static Logger logger = LogManager.getLogger( TileProxy.class.getName() );
+
 	// TODO also try reading files from writable_tile_dir if possible
 
 	public TileProxy() {
 		if ( Tileserver.hasProperty( "tile_dir" ) ) {
 			if ( Files.isDirectory( Paths.get( Tileserver.getProperty( "tile_dir" ) ) ) ) {
 				tileDir = new File( Tileserver.getProperty( "tile_dir" ) );
-				System.out.println( "TileProxy: Found tile_dir: " + Tileserver.getProperty( "tile_dir" ) );
+				logger.info( "Using tile_dir: " + Tileserver.getProperty( "tile_dir" ) );
 			}
 		}
 		if ( Tileserver.hasProperty( "writable_tile_dir" ) ) {
 			if ( Files.isWritable( Paths.get( Tileserver.getProperty( "writable_tile_dir" ) ) ) && Files.isDirectory( Paths.get( Tileserver.getProperty( "writable_tile_dir" ) ) ) ) {
 				writableTileDir = new File( Tileserver.getProperty( "writable_tile_dir" ) );
-				System.out.println( "TileProxy: Found writable_tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) );
+				logger.info( "Using writable tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) );
 			} else {
-				System.out.println( "TileProxy: ERROR: writable_file_dir ("+ Tileserver.getProperty("writable_tile_dir")+") not writable (or not a directory)" );
+				logger.error( "writable_tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) + " is not writable (or not a directory" );
 			}
 		}
 
@@ -84,7 +88,7 @@ public class TileProxy {
 			int width,
 			int height ) throws Exception {
 
-		Tileserver.log( "getting tile " + stack + " @ " + coordinates );
+		logger.debug( "getting tile " + stack + " @ " + coordinates );
 
 		// check if tile exists on disk
 		if ( bDiskRead ) {
@@ -95,7 +99,7 @@ public class TileProxy {
 			if ( Files.isReadable( path ) ) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				Files.copy( path, baos );
-				Tileserver.log( "found file for " + coordinates );
+				logger.debug( "found file for " + coordinates );
 				return baos.toByteArray();
 			}
 		}
@@ -106,10 +110,9 @@ public class TileProxy {
 		// if width was specified, scale image (down) to width*height.
 		if ( width > 0 ) {
 			long startTime = System.nanoTime();
-			Tileserver.log( "scaling down to " + width + "," + height );
+			logger.debug( "scaling image from " + coordinates.getWidth() + "x" + coordinates.getHeight() + " to " + width + "x" + height );
 			tile = Scalr.resize( tile, Scalr.Method.BALANCED, width, height );
-			Tileserver.log( "scaling took " + ( System.nanoTime() - startTime ) / 1000 + "µs" );
-
+			logger.trace( "scaling took " + ( System.nanoTime() - startTime ) / 1000000 + "ms" );
 		}
 
 		// get as JPEG
@@ -122,7 +125,7 @@ public class TileProxy {
 			File outFile = new File( writableTileDir.getAbsolutePath() + "/" + stack.getImage().getName() + "/" + stack.getId() + "/" + String.valueOf( coordinates.getSliceIndex() ) + "/" + String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() ) + "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
 			outFile.getParentFile().mkdirs();
 			ImageIO.write( tile, "jpg", outFile );
-			Tileserver.log( "saved file (" + ( ( System.nanoTime() - startTime ) / 1000000 ) + "ms)" );
+			logger.debug( "saved file (" + ( ( System.nanoTime() - startTime ) / 1000000 ) + "ms)" );
 		}
 
 		return baos.toByteArray();

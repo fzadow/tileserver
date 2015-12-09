@@ -3,6 +3,9 @@ package de.vonfelix.tileserver;
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
 // TODO different contrast curves?
@@ -10,7 +13,9 @@ import java.util.LinkedHashMap;
 // TODO automatic contrast
 
 public class TileGenerator {
-	
+
+	static Logger logger = LogManager.getLogger();
+
 	/*
 	 * create a custom LinkedHashMap that holds 40 entries (~10 MB) and discards the last recently
 	 * used one when full
@@ -61,8 +66,7 @@ public class TileGenerator {
 			}
 			grayMaps.put( key, grayMap );
 
-			Tileserver.log( "generated new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (took " + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
-			//			Tileserver.log( "size of all " + grayMaps.size() + " colormaps: " + ( GraphLayout.parseInstance( grayMaps ).totalSize() / 1024 ) + "KB" );
+			logger.trace( "generated new colormap with adjustment=" + exp + " and range=" + min + "-" + max + " (took " + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 		}
 		return grayMaps.get( key );
 	}
@@ -109,7 +113,7 @@ public class TileGenerator {
 		
 		int[] grayMap = getGrayMap( min, max, exp );
 
-		Tileserver.log( "getting grayscale tile " + simpleStack + ", range " + min + "-" + max + ", exp " + exp );
+		logger.debug( "getting grayscale tile " + simpleStack + ", range " + min + "-" + max + ", exp " + exp );
 
 		for ( int y = 0; y < height; ++y ) {
 			for ( int x = 0; x < width; ++x ) {
@@ -134,7 +138,7 @@ public class TileGenerator {
 
 		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
-		Tileserver.log( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		logger.debug( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}
@@ -156,6 +160,8 @@ public class TileGenerator {
 			TileParameters parameters ) throws Exception {
 
 		long startTime = System.nanoTime();
+
+		logger.debug( "getting composite tile: " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
 
 		int width = coordinates.getWidth();
 		int height = coordinates.getHeight();
@@ -181,7 +187,7 @@ public class TileGenerator {
 			i++;
 
 			// get pixels
-			Tileserver.log( "getting " + compositeStack + ": " + channel + ", limit=" + compositeStack.getValueLimit() );
+			logger.debug( "  channel: " + channel + ", limit=" + channel.getValueLimit() );
 			Tile tile = channel.getStack().getTile( coordinates );
 			tile_width = tile.getWidth();
 			tile_height = tile.getHeight();
@@ -231,7 +237,7 @@ public class TileGenerator {
 		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
 		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
-		Tileserver.log( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		logger.debug( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}

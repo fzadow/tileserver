@@ -10,10 +10,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SimpleCORSFilter implements Filter {
+
+	static Logger logger = LogManager.getLogger();
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException { }
@@ -21,7 +25,7 @@ public class SimpleCORSFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
 			throws IOException, ServletException {
-		Tileserver.log( "Setting CORS Headers" );
+		logger.trace( "Setting CORS Headers" );
 		HttpServletResponse response = (HttpServletResponse) res;
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TileserverController {
+
+	static Logger logger = LogManager.getLogger();
 
 	private ImageHandler imageHandler;
 	private TileProxy tileProxy;
@@ -43,22 +47,27 @@ public class TileserverController {
 			) throws Exception {
 		
 		long startTime = System.nanoTime();
+
 		
-		Tileserver.log( image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
-		
-		resp.setHeader("Content-Disposition", "inline");
-		resp.setContentType("image/jpg");
+		//ThreadContext.push( "mesage" );
+		//ThreadContext.put( "thread", Thread.currentThread().getName() );
+
+		logger.debug( "Request for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
 		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
 
-		Tileserver.log( "getting tile @ " + coordinates + " with parameters " );
+		logger.debug( "getting tile @ " + coordinates + " with parameters " );
 		
 		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
 		
 		long duration = ( System.nanoTime() - startTime );
+		resp.setHeader( "Content-Disposition", "inline" );
+		resp.setContentType( "image/jpg" );
 		resp.setHeader( "Generation-Time", duration + "" );
-		Tileserver.log( "Duration for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + "  =  " + duration / 1000000 + " ms" );
+		logger.info( "Tile " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + " generated (" + duration / 1000000 + "ms)" );
+
+		//ThreadContext.clearAll();
 
 		return img;
 	}
@@ -75,12 +84,12 @@ public class TileserverController {
 					throws Exception {
 
 		long startTime = System.nanoTime();
-		Tileserver.log( "small.jpg for " + image_name + "/" + stack_name + " slice index " + slice_index );
+		logger.debug( "small.jpg for " + image_name + "/" + stack_name + " slice index " + slice_index );
 
 		resp.setHeader( "Content-Disposition", "inline" );
 		resp.setContentType( "image/jpg" );
 
-		Tileserver.log( String.valueOf( imageHandler.hashCode() ) );
+		logger.trace( String.valueOf( imageHandler.hashCode() ) );
 
 		IStack stack = imageHandler.getImage( image_name ).getStack( stack_name );
 
@@ -101,11 +110,11 @@ public class TileserverController {
 					thumbnailWidth = ( thumbnailWidth * thumbnailSize ) / thumbnailHeight;
 					thumbnailHeight = thumbnailSize;
 				}
-				System.out.println( "thumbnail dimensions: " + thumbnailWidth + "x" + thumbnailHeight );
+				logger.trace( "Request for thumbnail with dimensions: " + thumbnailWidth + "x" + thumbnailHeight );
 
 				TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 				TileCoordinates coordinates = new TileCoordinates( stackWidth, stackHeight, scaleLevel, 0, 0, slice_index );
-				Tileserver.log( "getting thumbnail tile at " + coordinates );
+				logger.debug( "getting thumbnail tile at " + coordinates );
 
 				byte[] img = tileProxy.getJpegTile( stack, coordinates, parameters, thumbnailWidth, thumbnailHeight );
 
@@ -188,7 +197,7 @@ public class TileserverController {
 			}
 		}
 
-		Tileserver.log( "parameters: " + colors + ", " + min_values + ", " + max_values + ", " + exponents );
+		logger.debug( "received parameters: " + colors + ", " + min_values + ", " + max_values + ", " + exponents );
 
 		return new TileParameters( colors.toArray( new Color[ colors.size() ] ),
 				min_values.toArray( new Integer[ min_values.size() ] ),

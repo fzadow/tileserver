@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="error">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<!--<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />-->
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%-11.11t] %highlight{%level{length=1}} %-22.22logger{1}  %style{%msg}{bright}%n"/>
+		</Console>
+ 
+		<RollingFile name="RollingFile" filename="log/tileserver.log"
+			filepattern="${logPath}/%d{YYYYMMddHHmmss}-fargo.log">
+			<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{3}:%L - %msg%n" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20" />
+		</RollingFile>
+		
+ 
+	</Appenders>
+	<Loggers>
+		<Logger name="de.vonfelix.tileserver" level="trace" additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Root level="WARN">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="RollingFile" />
+		</Root>
+	</Loggers>
+</Configuration>

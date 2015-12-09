@@ -3,6 +3,11 @@ package de.vonfelix.tileserver;
 import java.io.File;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.vonfelix.tileserver.exception.ImageNotFoundException;
+
 /**
  * This class handles loading and returning of {@link AbstractImage}s
  * 
@@ -11,27 +16,26 @@ import java.util.HashMap;
  */
 public class ImageHandler {
 
+	static Logger logger = LogManager.getLogger();
+
 	HashMap<String, AbstractImage> images = new HashMap<>();
 	
 	public AbstractImage getImage( String name ) {
 
-		Tileserver.log( "getting image " + name );
+		logger.debug( "getting image " + name );
 
 		if( ! images.containsKey( name ) ||
 				( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) &&
 				Boolean.parseBoolean( Tileserver.getProperty( "debug_reload_image" ) ) ) ) {
-			Tileserver.log( "not loaded before" );
 			if( ! new File( Tileserver.getProperty("source_image_dir") + name + ".h5" ).exists() ) {
-				Tileserver.log( "Error! File " + Tileserver.getProperty( "source_image_dir" ) + name + ".h5" + " does not exist." );
-				return null;
+				throw new ImageNotFoundException( name );
 			}
-			Tileserver.log( "loading " + name + "" );
+			logger.info( "loading image " + name );
 
 			//
 			// assume for now that all Images come from a HDF5 source
 			//
 			images.put( name, new HDF5Image( name ) );
-			Tileserver.log( "File " + name + " loaded." );
 		}
 
 		return images.get( name );
