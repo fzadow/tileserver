@@ -7,17 +7,40 @@ public abstract class AbstractStack implements IStack {
 	protected AbstractImage image;
 	protected String id;
 	protected String title;
-	protected HashMap<Integer,long[]> dimensions;
+	protected HashMap<Integer, long[]> dimensions;
 	protected int valueLimit;
 	protected int scaleLevels;
 
-	
 	public AbstractStack( AbstractImage image, String id, String title ) {
 		this.image = image;
-		this.id= id;
+		this.id = id;
 		this.title = title;
-		this.dimensions = new HashMap<Integer,long[]>();
+		this.dimensions = new HashMap<Integer, long[]>();
 		this.valueLimit = image.getValueLimit();
+	}
+
+	@Override
+	public long getWidth( int scaleLevel ) {
+		if ( dimensions.containsKey( scaleLevel ) ) {
+			return dimensions.get( scaleLevel )[ 2 ];
+		}
+		return 0;
+	}
+
+	@Override
+	public long getHeight( int scaleLevel ) {
+		if ( dimensions.containsKey( scaleLevel ) ) {
+			return dimensions.get( scaleLevel )[ 1 ];
+		}
+		return 0;
+	}
+
+	@Override
+	public long getDepth( int scaleLevel ) {
+		if ( dimensions.containsKey( scaleLevel ) ) {
+			return dimensions.get( scaleLevel )[ 0 ];
+		}
+		return 0;
 	}
 	
 	public AbstractImage getImage() {
@@ -47,7 +70,7 @@ public abstract class AbstractStack implements IStack {
 		return scaleLevels;
 	}
 
-	public HashMap<Integer, long[]> getDimensions() {
+	protected HashMap<Integer, long[]> getDimensions() {
 		return dimensions;
 	}
 

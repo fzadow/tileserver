@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.vonfelix.tileserver.exception.TileOutOfBoundsException;
+
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
 // TODO different contrast curves?
@@ -256,6 +258,13 @@ public class TileGenerator {
 	 */
 	public BufferedImage getTile( IStack stack, TileCoordinates coordinates, TileParameters parameters )
 			throws Exception {
+
+		// check if requested tile is out of bounds
+		int scaleLevel = coordinates.getScaleLevel();
+		if ( coordinates.getX() >= stack.getWidth( scaleLevel ) || coordinates.getY() >= stack.getHeight( scaleLevel ) || coordinates.getZ() >= stack.getDepth( scaleLevel ) ) {
+			throw new TileOutOfBoundsException( stack, coordinates );
+		}
+
 		BufferedImage image;
 		switch ( stack.getClass().getSimpleName() ) {
 		case "CompositeStack":

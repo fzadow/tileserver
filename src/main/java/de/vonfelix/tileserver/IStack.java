@@ -18,12 +18,9 @@ public interface IStack extends ValueLimit {
 	 */
 	public int getScaleLevels();
 
-	// public long getWidth();
+	public long getWidth( int scaleLevel );
 
-	// public long getWidth( int scaleLevel );
+	public long getHeight( int scaleLevel );
 
-	// public long getHeight();
-
-	// public long getHeight( int scaleLevel );
-
+	public long getDepth( int scaleLevel );
 }

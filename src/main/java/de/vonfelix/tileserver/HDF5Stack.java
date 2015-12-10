@@ -1,6 +1,7 @@
 package de.vonfelix.tileserver;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
+import ncsa.hdf.hdf5lib.exceptions.HDF5JavaException;
 
 public class HDF5Stack extends SimpleStack {
 
@@ -26,7 +27,7 @@ public class HDF5Stack extends SimpleStack {
 		return getPath() + "/" + getId();
 	}
 
-	public Tile getTile( TileCoordinates coordinates ) {
+	public Tile getTile( TileCoordinates coordinates ) throws HDF5JavaException {
 		long offset_x = coordinates.getX();
 		long offset_y = coordinates.getY();
 		long offset_z = coordinates.getZ();
@@ -35,12 +36,8 @@ public class HDF5Stack extends SimpleStack {
 		// restrict block loading to image bounds
 		int width = offset_x + coordinates.getWidth() > getDimensions( scaleLevel )[ 2 ] ? (int) ( getDimensions( scaleLevel )[ 2 ] - offset_x - 1 ) : coordinates.getWidth();
 		int height = offset_y + coordinates.getHeight() > getDimensions( scaleLevel )[ 1 ] ? (int) ( getDimensions( scaleLevel )[ 1 ] - offset_y - 1 ) : coordinates.getHeight();
-		
-		//System.out.println( "Stack: getting " + width + "x" + height + " block from " + offset_x + "," + offset_y + " to "  + ( width + offset_x ) + "," + ( height + offset_y ) );
-		
-		MDShortArray i = ( (HDF5Image) image ).getReader().uint16().readMDArrayBlockWithOffset( getFullName() + "/" + scaleLevel,
- new int[] { 1, height, width },
- new long[] { offset_z, offset_y, offset_x } );
+
+		MDShortArray i = ( (HDF5Image) image ).getReader().uint16().readMDArrayBlockWithOffset( getFullName() + "/" + scaleLevel, new int[] { 1, height, width }, new long[] { offset_z, offset_y, offset_x } );
 
 		return new Tile( i.getAsFlatArray(), width, height );
 	}

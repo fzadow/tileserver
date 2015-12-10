@@ -25,7 +25,7 @@ public abstract class AbstractImage implements IImage {
 			throw new StackNotFoundException( name );
 		}
 		return stacks.get( name );
-	};
+	}
 
 	@Override
 	public String getName() {
