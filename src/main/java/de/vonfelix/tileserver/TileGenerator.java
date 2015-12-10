@@ -73,97 +73,20 @@ public class TileGenerator {
 		return grayMaps.get( key );
 	}
 	
-	/**
-	 * get a single channel tile
-	 * @param simpleStack
-	 * @param scaleLevel
-	 * @param coordinates
-	 * @return
-	 * @throws Exception
-	 */
 	public BufferedImage getTile(
-			SimpleStack simpleStack,
-			TileCoordinates coordinates,
-			TileParameters parameters )
-			throws Exception {
-		
-		long startTime = System.nanoTime();
-
-		final boolean debug = Boolean.parseBoolean( Tileserver.getProperty("debug") );
-		final boolean debug_tile_overlap = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_overlap") );
-		final boolean debug_tile_bounds = debug && Boolean.parseBoolean( Tileserver.getProperty("debug_tile_bounds") );
-
-		int width = coordinates.getWidth();
-		int height = coordinates.getHeight();
-		
-		// get tile as defined by coordinates. returned tile may be smaller
-		// than size*size if it overlaps the bounds of the image.
-		Tile tile = simpleStack.getTile( coordinates );
-		int tile_width = tile.getWidth();
-		int tile_height = tile.getHeight();
-		short[] flatdata = tile.getTile();
-
-		// create rgb array
-		int[] rgb = new int[ width * height ];
-
-		// fill overlap with black (or grey if in debug mode)
-		short fillpixel = (short) ( debug_tile_overlap ? simpleStack.getValueLimit() / 2 : 0 );
-
-		int min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ 0 ] : 0;
-		int max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ 0 ] : simpleStack.getValueLimit();
-		double exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ 0 ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
-		
-		int[] grayMap = getGrayMap( min, max, exp );
-
-		logger.debug( "getting grayscale tile " + simpleStack + ", range " + min + "-" + max + ", exp " + exp );
-
-		for ( int y = 0; y < height; ++y ) {
-			for ( int x = 0; x < width; ++x ) {
-
-				short pixel = x >= tile_width || y >= tile_height ? fillpixel : flatdata[ tile_width * y + x ];
-
-				if ( debug_tile_bounds ) {
-					if ( ( x % 64 == 0 && y % 64 == 0 ) || ( ( x - 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 1 ) % 64 == 0 ) || ( ( x + 1 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 1 ) % 64 == 0 ) || ( ( x - 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y - 2 ) % 64 == 0 ) || ( ( x + 2 ) % 64 == 0 && y % 64 == 0 ) || ( x % 64 == 0 && ( y + 2 ) % 64 == 0 ) )
-						pixel = (short)30000;
-					if ( ( x == 0 && y % 4 == 0 ) || ( y == 0 && x % 4 == 0 ) )
-						pixel = (short)40000;
-					if ( ( x == width - 1 && y % 4 == 0 ) || ( y == height - 1 && x % 4 == 0 ) )
-						pixel = (short)50000;
-				}
-				int grayValue = grayMap[pixel & 0xffff ];
-
-				rgb[ width * y + x ] = grayValue << 16 | grayValue << 8 | grayValue;
-			}
-		}
-		
-		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_3BYTE_BGR );
-
-		img.setRGB( 0, 0, width, height, rgb, 0, width );
-
-		logger.debug( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
-
-		return img;
-	}
-	
-
-	/**
-	 * create a composite tile by reading all component channels and assembling
-	 * them according to their colors
-	 * 
-	 * @param compositeStack
-	 * @param scaleLevel
-	 * @param coordinates
-	 * @return
-	 * @throws Exception
-	 */
-	public BufferedImage getTile(
-			CompositeStack compositeStack,
+			IStack stack,
 			TileCoordinates coordinates,
 			TileParameters parameters ) throws Exception {
 
 		long startTime = System.nanoTime();
 
-		logger.debug( "getting composite tile: " + compositeStack + ", limit=" + compositeStack.getValueLimit() );
+		boolean composite = false;
+
+		// check if requested tile is out of bounds
+		int scaleLevel = coordinates.getScaleLevel();
+		if ( coordinates.getX() >= stack.getWidth( scaleLevel ) || coordinates.getY() >= stack.getHeight( scaleLevel ) || coordinates.getZ() >= stack.getDepth( scaleLevel ) ) {
+			throw new TileOutOfBoundsException( stack, coordinates );
+		}
 
 		int width = coordinates.getWidth();
 		int height = coordinates.getHeight();
@@ -171,44 +94,59 @@ public class TileGenerator {
 		// create rgb array
 		int[] rgb = new int[ width * height ];
 
-		int numberOfChannels = compositeStack.numberOfChannels();
+		if ( stack.getClass().getSimpleName().equals( "CompositeStack" ) ) {
+			composite = true;
+		}
+
+		logger.debug( "generating " + ( composite ? "composite " : "" ) + "tile for " + stack + " at " + coordinates );
+
+		int numberOfChannels = composite ? ( (CompositeStack) stack ).numberOfChannels() : 1;
+
 		short[][] pixels = new short[ numberOfChannels ][];
-		int[] colorMasks = new int[ numberOfChannels ];
 		int[] rs = new int[ numberOfChannels ];
 		int[] gs = new int[ numberOfChannels ];
 		int[] bs = new int[ numberOfChannels ];
 		int[][] grayMaps = new int[ numberOfChannels ][];
-		int tile_width = 0;
-		int tile_height = 0;
 		int min, max;
 		double exp;
 
-		int i = -1;
-		// get data for all channels
-		for( Channel channel : compositeStack.channels() ) {
-			i++;
+		Tile tile = null;
+		Color color = null;
+		
+		for( int i= 0; i < numberOfChannels; ++i ) {
+			exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
 
-			// get pixels
-			logger.debug( "  channel: " + channel + ", limit=" + channel.getValueLimit() );
-			Tile tile = channel.getStack().getTile( coordinates );
-			tile_width = tile.getWidth();
-			tile_height = tile.getHeight();
+			if( composite ) {
+				Channel channel = ( (CompositeStack) stack ).getChannel( i );
+				tile = channel.getStack().getTile( coordinates );
+
+				color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
+				min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
+				max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
+				logger.trace( "  channel: " + channel + ", dyn.range=" + min + ".." + max + " exp=" + exp + " color=" + color );
+
+			}
+			else {
+				tile =  ( (SimpleStack) stack ).getTile( coordinates );
+				color = Color.GRAYS;
+				min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
+				max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : stack.getValueLimit();
+				logger.trace( "  stack: " + stack + ", dyn. range=" + min + ".." + max + " exp=" + exp );
+			}
+
 			pixels[ i ] = tile.getTile();
 
-			// get color
-			Color color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
-			colorMasks[ i ] = color.value();
 			rs[ i ] = color.r();
 			gs[ i ] = color.g();
 			bs[ i ] = color.b();
 
-			// determine parameters
-			min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
-			max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
-			exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
-
 			grayMaps[ i ] = getGrayMap( min, max, exp );
+
 		}
+		
+
+		int tile_width = tile.getWidth();
+		int tile_height = tile.getHeight();
 
 		int r, g, b;
 		int grayValue;
@@ -239,45 +177,8 @@ public class TileGenerator {
 		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
 		img.setRGB( 0, 0, width, height, rgb, 0, width );
 
-		logger.debug( "composite tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
+		logger.debug( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
 		return img;
 	}
-	
-//	public byte[] getTileAsByteArray( IStack stack, int scaleLevel, TileCoordinates coordinates ) throws Exception {
-//		return ((DataBufferByte) getTile( stack, scaleLevel, coordinates ).getRaster().getDataBuffer()).getData();
-//	}
-	
-	/**
-	 * generates a BufferedImage tile
-	 * 
-	 * @param stack
-	 * @param coordinates
-	 * @return
-	 * @throws Exception
-	 */
-	public BufferedImage getTile( IStack stack, TileCoordinates coordinates, TileParameters parameters )
-			throws Exception {
-
-		// check if requested tile is out of bounds
-		int scaleLevel = coordinates.getScaleLevel();
-		if ( coordinates.getX() >= stack.getWidth( scaleLevel ) || coordinates.getY() >= stack.getHeight( scaleLevel ) || coordinates.getZ() >= stack.getDepth( scaleLevel ) ) {
-			throw new TileOutOfBoundsException( stack, coordinates );
-		}
-
-		BufferedImage image;
-		switch ( stack.getClass().getSimpleName() ) {
-		case "CompositeStack":
-			image = getTile( (CompositeStack) stack, coordinates, parameters );
-			break;
-		case "Stack":
-		case "HDF5Stack":
-			image = getTile( (SimpleStack) stack, coordinates, parameters );
-			break;
-		default:
-			return null;
-		}
-		return image;
-	}
-	
 }

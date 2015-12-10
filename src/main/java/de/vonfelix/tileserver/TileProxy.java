@@ -88,7 +88,7 @@ public class TileProxy {
 			int width,
 			int height ) throws Exception {
 
-		logger.debug( "getting tile " + stack + " @ " + coordinates );
+		logger.debug( "getting tile for " + stack + " at " + coordinates );
 
 		// check if tile exists on disk
 		if ( bDiskRead ) {

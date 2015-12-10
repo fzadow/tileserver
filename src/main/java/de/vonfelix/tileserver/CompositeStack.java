@@ -32,6 +32,10 @@ public class CompositeStack extends AbstractStack {
 		return channels.size();
 	}
 
+	public Channel getChannel( int index ) {
+		return (Channel) channels.values().toArray()[ index ];
+	}
+
 	@Override
 	public int getScaleLevels() {
 		// TODO Auto-generated method stub

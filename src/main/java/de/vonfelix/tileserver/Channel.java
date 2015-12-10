@@ -40,7 +40,7 @@ public class Channel implements ValueLimit, Adjustable {
 
 	@Override
 	public String toString() {
-		return simpleStack + "(" + color + ")";
+		return simpleStack.toString();
 	}
 
 	@Override

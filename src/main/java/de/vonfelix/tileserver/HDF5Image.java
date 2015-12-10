@@ -55,13 +55,13 @@ public class HDF5Image extends AbstractImage {
 		if ( imageDesc != null ) {
 			// TODO sanity checks when loading channels (no dupes, only sane
 			// composites)
-			logger.debug( "reading stack info for " + name );
+			logger.trace( "reading stack info for " + name );
 			Element root = imageDesc.getRootElement();
 			Namespace ns = root.getNamespace();
 
 			// load all normal Stacks (children of <Stacks> in xml)
 			for ( Element s : root.getChild( "Stacks", ns ).getChildren() ) {
-				logger.debug( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "value_limit", ns ) );
+				logger.trace( "  stack " + s.getChildText( "path", ns ) + "" + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + "), value limit: " + s.getChildText( "value_limit", ns ) );
 				// Stack st = new Stack( this, s.getChildText( "path", ns ),
 				// s.getChildText( "id", ns ) );
 
@@ -78,10 +78,10 @@ public class HDF5Image extends AbstractImage {
 
 			// load all composite Stacks (children of <CompositeStacks> in xml)
 			for ( Element s : root.getChild( "CompositeStacks", ns ).getChildren() ) {
-				logger.debug( "  composite stack " + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
+				logger.trace( "  composite stack " + s.getChildText( "id", ns ) + " (" + s.getChildText( "title", ns ) + ")" );
 				CompositeStack cs = new CompositeStack( this, s.getChildText( "id", ns ), s.getChildText( "title", ns ) );
 				for ( Element c : s.getChild( "Channels", ns ).getChildren() ) {
-					logger.debug( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
+					logger.trace( "    " + c.getChildText( "stack_id", ns ) + " : " + c.getChildText( "color", ns ) + ", value limit: " + c.getChildText( "value_limit", ns ) );
 					HDF5Stack stack = (HDF5Stack) stacks.get( c.getChildText( "stack_id", ns ) );
 					Channel channel = new Channel( stack, Color.valueOf( c.getChildText( "color", ns ).toUpperCase() ) );
 					if ( c.getChildText( "value_limit", ns ) != null ) {
