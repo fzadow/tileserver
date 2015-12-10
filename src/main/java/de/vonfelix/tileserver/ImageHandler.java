@@ -20,7 +20,7 @@ public class ImageHandler {
 
 	HashMap<String, AbstractImage> images = new HashMap<>();
 	
-	public AbstractImage getImage( String name ) {
+	public synchronized AbstractImage getImage( String name ) {
 
 		logger.debug( "getting image " + name );
 
@@ -37,7 +37,7 @@ public class ImageHandler {
 			//
 			images.put( name, new HDF5Image( name ) );
 		}
-
+		//logger.trace( "current size of images map: " + GraphLayout.parseInstance( images ).totalSize() / 1024 + "kb" );
 		return images.get( name );
 	}
 }
