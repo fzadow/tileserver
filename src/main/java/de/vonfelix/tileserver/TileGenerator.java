@@ -114,15 +114,15 @@ public class TileGenerator {
 		Color color = null;
 		
 		for( int i= 0; i < numberOfChannels; ++i ) {
-			exp = ( parameters.getExponents().length > 0 ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+			exp = ( i < parameters.getExponents().length ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
 
 			if( composite ) {
 				Channel channel = ( (CompositeStack) stack ).getChannel( i );
 				tile = channel.getStack().getTile( coordinates );
 
 				color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
-				min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
-				max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
+				min = ( i < parameters.getMinValues().length ) ? parameters.getMinValues()[ i ] : 0;
+				max = ( i < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
 				logger.trace( "  channel: " + channel + ", dyn.range=" + min + ".." + max + " exp=" + exp + " color=" + color );
 
 			}

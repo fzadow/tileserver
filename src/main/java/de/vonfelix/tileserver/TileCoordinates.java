@@ -85,7 +85,7 @@ public class TileCoordinates {
 	
 	@Override
 	public String toString() {
-		return "[x" + column_index + "/" + getX() + ", y" + row_index + "/" + getY() + ", z" + slice_index + "]";
+		return "[x" + column_index + "/" + getX() + ", y" + row_index + "/" + getY() + ", z" + slice_index + ", " + ( 100 / Math.floor( Math.pow( 2, scale_level ) ) ) + "%]";
 
 	}
 	
