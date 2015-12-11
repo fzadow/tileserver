@@ -48,10 +48,10 @@ public class TileserverController {
 		
 		long startTime = System.nanoTime();
 
-		logger.trace( "Request for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
-		
 		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
+
+		logger.trace( "Request for " + image_name + "/" + stack_name + " " + coordinates + " " + parameters );
 
 		byte[] img = tileProxy.getJpegTile( imageProxy.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
 		
@@ -179,8 +179,6 @@ public class TileserverController {
 				exponents.add( Double.parseDouble( e ) );
 			}
 		}
-
-		logger.debug( "received parameters: " + colors + ", " + min_values + ", " + max_values + ", " + exponents );
 
 		return new TileParameters( colors.toArray( new Color[ colors.size() ] ),
 				min_values.toArray( new Integer[ min_values.size() ] ),

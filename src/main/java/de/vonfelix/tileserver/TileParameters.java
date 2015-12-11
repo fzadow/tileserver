@@ -1,5 +1,7 @@
 package de.vonfelix.tileserver;
 
+import java.util.Arrays;
+
 /*
  * An array for each Parameter
  * 
@@ -32,5 +34,11 @@ public class TileParameters {
 
 	public Double[] getExponents() {
 		return exponents;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString( colors ) + Arrays.toString( min_values ) + Arrays.toString( max_values ) + Arrays.toString( exponents );
+		//return "[" + Arrays.stream( colors ).forEach(Color::name ) + "|" + min_values + "|" + max_values + "|" + exponents + "]";
 	}
 }
