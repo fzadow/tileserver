@@ -14,12 +14,25 @@ import de.vonfelix.tileserver.exception.ImageNotFoundException;
  * @author felix
  *
  */
-public class ImageHandler {
+public class ImageProxy {
 
 	static Logger logger = LogManager.getLogger();
 
+	private static ImageProxy instance;
+
+	private ImageProxy() {
+	}
+
+	public static synchronized ImageProxy getInstance() {
+		if ( ImageProxy.instance == null ) {
+			ImageProxy.instance = new ImageProxy();
+		}
+		return ImageProxy.instance;
+	}
+
 	HashMap<String, AbstractImage> images = new HashMap<>();
 	
+
 	public synchronized AbstractImage getImage( String name ) {
 
 		logger.debug( "getting image " + name );

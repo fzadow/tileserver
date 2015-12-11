@@ -14,9 +14,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 
-// TODO when several simultaneous requests for 1 image that has not been loaded before are made, some may not yet have the HDF5Image object.
-//
-
 @SpringBootApplication
 public class Tileserver extends SpringBootServletInitializer {
 

@@ -19,13 +19,13 @@ public class TileserverController {
 
 	static Logger logger = LogManager.getLogger();
 
-	private ImageHandler imageHandler;
+	private ImageProxy imageProxy;
 	private TileProxy tileProxy;
 
 	public TileserverController() throws Exception {
 		super();
-		this.imageHandler = new ImageHandler();
-		this.tileProxy = new TileProxy();
+		this.imageProxy = ImageProxy.getInstance();
+		this.tileProxy = TileProxy.getInstance();
 	}
 
 	@Autowired
@@ -53,7 +53,7 @@ public class TileserverController {
 		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
 
-		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
+		byte[] img = tileProxy.getJpegTile( imageProxy.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
 		
 		long duration = ( System.nanoTime() - startTime );
 		resp.setHeader( "Content-Disposition", "inline" );
@@ -82,9 +82,9 @@ public class TileserverController {
 		resp.setHeader( "Content-Disposition", "inline" );
 		resp.setContentType( "image/jpg" );
 
-		logger.trace( String.valueOf( imageHandler.hashCode() ) );
+		logger.trace( String.valueOf( imageProxy.hashCode() ) );
 
-		IStack stack = imageHandler.getImage( image_name ).getStack( stack_name );
+		IStack stack = imageProxy.getImage( image_name ).getStack( stack_name );
 
 		// go through scale levels (from small to big) to find the first scale
 		// level where either width or height is > 192 (most likely it's the
@@ -111,19 +111,9 @@ public class TileserverController {
 
 				byte[] img = tileProxy.getJpegTile( stack, coordinates, parameters, thumbnailWidth, thumbnailHeight );
 
-				// TODO scale down to 192
-
 				return img;
 			}
 		}
-
-		// byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name
-		// ).getStack( stack_name ), coordinates );
-		// long duration = ( System.nanoTime() - startTime );
-		// Tileserver.log( "Duration for " + image_name + " " + stack_name + " "
-		// + slice_index + " " + row_index + " " + column_index + " " +
-		// scale_level + " = " + duration / 1000000 + " ms" );
-		// return img;
 		return null;
 	}
 	

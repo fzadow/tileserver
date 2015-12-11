@@ -24,9 +24,18 @@ public class TileProxy {
 
 	static Logger logger = LogManager.getLogger( TileProxy.class.getName() );
 
+	private static TileProxy instance;
+
+	public static synchronized TileProxy getInstance() {
+		if ( TileProxy.instance == null ) {
+			TileProxy.instance = new TileProxy();
+		}
+		return TileProxy.instance;
+	}
+
 	// TODO also try reading files from writable_tile_dir if possible
 
-	public TileProxy() {
+	private TileProxy() {
 		if ( Tileserver.hasProperty( "tile_dir" ) ) {
 			if ( Files.isDirectory( Paths.get( Tileserver.getProperty( "tile_dir" ) ) ) ) {
 				tileDir = new File( Tileserver.getProperty( "tile_dir" ) );

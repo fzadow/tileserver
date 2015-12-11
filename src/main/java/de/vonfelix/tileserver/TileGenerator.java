@@ -10,8 +10,6 @@ import de.vonfelix.tileserver.exception.TileOutOfBoundsException;
 
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
-// TODO different contrast curves?
-
 // TODO automatic contrast
 
 public class TileGenerator {
