@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -20,9 +20,10 @@ import org.springframework.context.ApplicationContext;
 @SpringBootApplication
 public class Tileserver extends SpringBootServletInitializer {
 
+	static Logger logger = LogManager.getLogger();
+
 	private static Properties properties;
-	private static HashMap<Long, ArrayList<String>> log = new HashMap<Long, ArrayList<String>>();
-	private static HashMap<Long, Long> startTimes = new HashMap<Long, Long>();
+	private static int count = 0;
 	
 	static String getProperty( String key ) {
 		return properties.getProperty( key );
@@ -64,6 +65,13 @@ public class Tileserver extends SpringBootServletInitializer {
         //*/
     }
 	
+	public static synchronized void countTile() {
+		count++;
+		if ( count % 1000 == 0 ) {
+			logger.info( "Yay, just served my " + count + "th tile" );
+		}
+	}
+
 	private static void initProperties() {
 		properties = new Properties();
 		InputStream input = null;

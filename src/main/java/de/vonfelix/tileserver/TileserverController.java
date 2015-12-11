@@ -48,26 +48,19 @@ public class TileserverController {
 		
 		long startTime = System.nanoTime();
 
-		
-		//ThreadContext.push( "mesage" );
-		//ThreadContext.put( "thread", Thread.currentThread().getName() );
-
-		logger.debug( "Request for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
+		logger.trace( "Request for " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level );
 		
 		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
 		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
 
-		logger.debug( "getting tile @ " + coordinates + " with parameters " );
-		
 		byte[] img = tileProxy.getJpegTile( imageHandler.getImage( image_name ).getStack( stack_name ), coordinates, parameters );
 		
 		long duration = ( System.nanoTime() - startTime );
 		resp.setHeader( "Content-Disposition", "inline" );
 		resp.setContentType( "image/jpg" );
 		resp.setHeader( "Generation-Time", duration + "" );
-		logger.info( "Tile " + image_name + " " + stack_name + " " + slice_index + " " + row_index + " " + column_index + " " + scale_level + " generated (" + duration / 1000000 + "ms)" );
-
-		//ThreadContext.clearAll();
+		logger.info( "serving tile " + image_name + "/" + stack_name + " " + coordinates + " (" + duration / 1000000 + "ms)" );
+		Tileserver.countTile();
 
 		return img;
 	}
