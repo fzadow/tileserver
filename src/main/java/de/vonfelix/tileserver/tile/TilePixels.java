@@ -1,13 +1,13 @@
 package de.vonfelix.tileserver.tile;
 
-public class Tile {
+public class TilePixels {
 
 	short[] tile;
 
 	Coordinates coordinates;
 	int width, height;
 
-	public Tile( short[] tileArray, int width, int height ) {
+	public TilePixels( short[] tileArray, int width, int height ) {
 		this.tile = tileArray;
 		this.width = width;
 		this.height = height;

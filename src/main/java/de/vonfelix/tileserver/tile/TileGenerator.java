@@ -114,7 +114,7 @@ public class TileGenerator {
 		int min, max;
 		double exp;
 
-		Tile tile = null;
+		TilePixels tilePixels = null;
 		Color color = null;
 		
 		for( int i= 0; i < numberOfChannels; ++i ) {
@@ -122,7 +122,7 @@ public class TileGenerator {
 
 			if( composite ) {
 				Channel channel = ( (CompositeStack) stack ).getChannel( i );
-				tile = channel.getStack().getTile( coordinates );
+				tilePixels = channel.getStack().getTilePixels( coordinates );
 
 				color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
 				min = ( i < parameters.getMinValues().length ) ? parameters.getMinValues()[ i ] : 0;
@@ -131,14 +131,14 @@ public class TileGenerator {
 
 			}
 			else {
-				tile =  ( (SimpleStack) stack ).getTile( coordinates );
+				tilePixels =  ( (SimpleStack) stack ).getTilePixels( coordinates );
 				color = Color.GRAYS;
 				min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
 				max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : stack.getValueLimit();
 				logger.trace( "  stack: " + stack + ", dyn. range=" + min + ".." + max + " exp=" + exp );
 			}
 
-			pixels[ i ] = tile.getTile();
+			pixels[ i ] = tilePixels.getTile();
 
 			rs[ i ] = color.r();
 			gs[ i ] = color.g();
@@ -149,8 +149,8 @@ public class TileGenerator {
 		}
 		
 
-		int tile_width = tile.getWidth();
-		int tile_height = tile.getHeight();
+		int tile_width = tilePixels.getWidth();
+		int tile_height = tilePixels.getHeight();
 
 		int r, g, b;
 		int grayValue;

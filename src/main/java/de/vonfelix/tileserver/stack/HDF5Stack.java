@@ -2,7 +2,7 @@ package de.vonfelix.tileserver.stack;
 
 import ch.systemsx.cisd.base.mdarray.MDShortArray;
 import de.vonfelix.tileserver.image.HDF5Image;
-import de.vonfelix.tileserver.tile.Tile;
+import de.vonfelix.tileserver.tile.TilePixels;
 import de.vonfelix.tileserver.tile.Coordinates;
 import ncsa.hdf.hdf5lib.exceptions.HDF5JavaException;
 
@@ -30,7 +30,7 @@ public class HDF5Stack extends SimpleStack {
 		return getPath() + "/" + getId();
 	}
 
-	public Tile getTile( Coordinates coordinates ) throws HDF5JavaException {
+	public TilePixels getTilePixels( Coordinates coordinates ) throws HDF5JavaException {
 		long offset_x = coordinates.getX();
 		long offset_y = coordinates.getY();
 		long offset_z = coordinates.getZ();
@@ -42,7 +42,7 @@ public class HDF5Stack extends SimpleStack {
 
 		MDShortArray i = ( (HDF5Image) image ).getReader().uint16().readMDArrayBlockWithOffset( getFullName() + "/" + scaleLevel, new int[] { 1, height, width }, new long[] { offset_z, offset_y, offset_x } );
 
-		return new Tile( i.getAsFlatArray(), width, height );
+		return new TilePixels( i.getAsFlatArray(), width, height );
 	}
 
 

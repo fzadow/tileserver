@@ -1,7 +1,7 @@
 package de.vonfelix.tileserver.stack;
 
 import de.vonfelix.tileserver.image.AbstractImage;
-import de.vonfelix.tileserver.tile.Tile;
+import de.vonfelix.tileserver.tile.TilePixels;
 import de.vonfelix.tileserver.tile.Coordinates;
 
 /**
@@ -20,6 +20,6 @@ public abstract class SimpleStack extends AbstractStack {
 		super( image, id, title );
 	}
 
-	public abstract Tile getTile( Coordinates coordinates );
+	public abstract TilePixels getTilePixels( Coordinates coordinates );
 
 }
