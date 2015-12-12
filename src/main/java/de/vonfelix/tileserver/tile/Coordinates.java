@@ -1,4 +1,4 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.tile;
 
 /**
  * Describes the location and dimensions of a tile inside a Stack
@@ -7,7 +7,7 @@ package de.vonfelix.tileserver;
  *
  */
 
-public class TileCoordinates {
+public class Coordinates {
 	
 	private final int width;
 	private final int height;
@@ -26,7 +26,7 @@ public class TileCoordinates {
 	 * @param row_index
 	 * @param slice_index
 	 */
-	public TileCoordinates( int size, int scale_level, int column_index, int row_index, int slice_index ) {
+	public Coordinates( int size, int scale_level, int column_index, int row_index, int slice_index ) {
 		this.width = this.height = size;
 		this.scale_level = scale_level;
 		this.column_index = column_index;
@@ -36,7 +36,7 @@ public class TileCoordinates {
 		this.y = row_index * size;
 	}
 	
-	public TileCoordinates( int width, int height, int scale_level, int x, int y, int z ) {
+	public Coordinates( int width, int height, int scale_level, int x, int y, int z ) {
 		this.width = width;
 		this.height = height;
 		this.scale_level = scale_level;

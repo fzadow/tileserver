@@ -1,4 +1,4 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.image;
 
 import java.io.File;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.ImageNotFoundException;
 
 /**

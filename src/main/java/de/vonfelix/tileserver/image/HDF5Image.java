@@ -1,4 +1,4 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.image;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,6 +13,12 @@ import org.jdom2.input.SAXBuilder;
 
 import ch.systemsx.cisd.hdf5.HDF5Factory;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
+import de.vonfelix.tileserver.Color;
+import de.vonfelix.tileserver.Tileserver;
+import de.vonfelix.tileserver.stack.Channel;
+import de.vonfelix.tileserver.stack.CompositeStack;
+import de.vonfelix.tileserver.stack.HDF5Stack;
+import de.vonfelix.tileserver.stack.IStack;
 
 public class HDF5Image extends AbstractImage {
 

@@ -21,19 +21,19 @@ public enum Color {
 		this.b = b;
 	}
 
-	int value() {
+	public int value() {
 		return value;
 	}
 
-	int r() {
+	public int r() {
 		return r;
 	}
 
-	int g() {
+	public int g() {
 		return g;
 	}
 
-	int b() {
+	public int b() {
 		return b;
 	}
 

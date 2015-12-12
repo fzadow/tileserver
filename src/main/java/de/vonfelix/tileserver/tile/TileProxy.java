@@ -1,4 +1,4 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.tile;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -12,6 +12,9 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imgscalr.Scalr;
+
+import de.vonfelix.tileserver.Tileserver;
+import de.vonfelix.tileserver.stack.IStack;
 
 public class TileProxy {
 
@@ -65,7 +68,7 @@ public class TileProxy {
 	 * @return
 	 * @throws Exception
 	 */
-	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates, TileParameters parameters ) throws Exception {
+	public byte[] getJpegTile( IStack stack, Coordinates coordinates, Parameters parameters ) throws Exception {
 		return getJpegTile( stack, coordinates, parameters, 0, 0 );
 	}
 
@@ -77,7 +80,7 @@ public class TileProxy {
 	 * @return
 	 * @throws Exception
 	 */
-	public byte[] getJpegTile( IStack stack, TileCoordinates coordinates ) throws Exception {
+	public byte[] getJpegTile( IStack stack, Coordinates coordinates ) throws Exception {
 		return getJpegTile( stack, coordinates, null, 0, 0 );
 	}
 
@@ -92,8 +95,8 @@ public class TileProxy {
 	 * @throws Exception
 	 */
 	public byte[] getJpegTile( IStack stack,
-			TileCoordinates coordinates,
-			TileParameters parameters,
+			Coordinates coordinates,
+			Parameters parameters,
 			int width,
 			int height ) throws Exception {
 

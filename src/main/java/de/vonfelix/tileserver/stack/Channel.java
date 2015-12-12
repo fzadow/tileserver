@@ -1,6 +1,10 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.stack;
 
 import org.apache.commons.lang.NotImplementedException;
+
+import de.vonfelix.tileserver.Adjustable;
+import de.vonfelix.tileserver.Color;
+import de.vonfelix.tileserver.ValueLimit;
 
 public class Channel implements ValueLimit, Adjustable {
 

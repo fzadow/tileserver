@@ -1,6 +1,8 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.stack;
 
 import java.util.HashMap;
+
+import de.vonfelix.tileserver.image.AbstractImage;
 
 public abstract class AbstractStack implements IStack {
 

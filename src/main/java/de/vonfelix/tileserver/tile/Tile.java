@@ -1,10 +1,10 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.tile;
 
 public class Tile {
 
 	short[] tile;
 
-	TileCoordinates coordinates;
+	Coordinates coordinates;
 	int width, height;
 
 	public Tile( short[] tileArray, int width, int height ) {

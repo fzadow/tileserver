@@ -1,4 +1,7 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.stack;
+
+import de.vonfelix.tileserver.ValueLimit;
+import de.vonfelix.tileserver.image.IImage;
 
 public interface IStack extends ValueLimit {
 

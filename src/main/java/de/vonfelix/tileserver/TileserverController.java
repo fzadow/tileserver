@@ -1,7 +1,5 @@
 package de.vonfelix.tileserver;
 
-import java.util.ArrayList;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.vonfelix.tileserver.image.ImageProxy;
+import de.vonfelix.tileserver.stack.IStack;
+import de.vonfelix.tileserver.tile.Coordinates;
+import de.vonfelix.tileserver.tile.Parameters;
+import de.vonfelix.tileserver.tile.TileProxy;
 
 @RestController
 public class TileserverController {
@@ -48,8 +52,8 @@ public class TileserverController {
 		
 		long startTime = System.nanoTime();
 
-		TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
-		TileCoordinates coordinates = new TileCoordinates( 512, scale_level, column_index, row_index, slice_index );
+		Parameters parameters = new Parameters( adjCol, adjMin, adjMax, adjExp );
+		Coordinates coordinates = new Coordinates( 512, scale_level, column_index, row_index, slice_index );
 
 		logger.trace( "Request for " + image_name + "/" + stack_name + " " + coordinates + " " + parameters );
 
@@ -105,8 +109,8 @@ public class TileserverController {
 				}
 				logger.trace( "Request for thumbnail with dimensions: " + thumbnailWidth + "x" + thumbnailHeight );
 
-				TileParameters parameters = parseParameters( adjCol, adjMin, adjMax, adjExp );
-				TileCoordinates coordinates = new TileCoordinates( stackWidth, stackHeight, scaleLevel, 0, 0, slice_index );
+				Parameters parameters = new Parameters( adjCol, adjMin, adjMax, adjExp );
+				Coordinates coordinates = new Coordinates( stackWidth, stackHeight, scaleLevel, 0, 0, slice_index );
 				logger.debug( "getting thumbnail tile at " + coordinates );
 
 				byte[] img = tileProxy.getJpegTile( stack, coordinates, parameters, thumbnailWidth, thumbnailHeight );
@@ -115,74 +119,5 @@ public class TileserverController {
 			}
 		}
 		return null;
-	}
-	
-	private TileParameters parseParameters( String adjCol, String adjMin, String adjMax, String adjExp ) {
-		ArrayList<Color> colors = new ArrayList<>();
-		ArrayList<Integer> min_values = new ArrayList<>();
-		ArrayList<Integer> max_values = new ArrayList<>();
-		ArrayList<Double> exponents = new ArrayList<>();
-
-		// insert LAMBDAs here... (?)
-
-		if ( adjCol != null ) {
-			for ( String e : adjCol.split( "\\s*,\\s*" ) ) {
-				switch ( e.toLowerCase() ) {
-				case "red":
-				case "r":
-					colors.add( Color.RED );
-					break;
-				case "green":
-				case "g":
-					colors.add( Color.GREEN );
-					break;
-				case "blue":
-				case "b":
-					colors.add( Color.BLUE );
-					break;
-				case "cyan":
-				case "c":
-					colors.add( Color.CYAN );
-					break;
-				case "magenta":
-				case "m":
-					colors.add( Color.MAGENTA );
-					break;
-				case "yellow":
-				case "y":
-					colors.add( Color.YELLOW );
-					break;
-				case "grays":
-				case "gray":
-				case "greys":
-				case "grey":
-				case "whites":
-				case "white":
-				case "w":
-					colors.add( Color.GRAYS );
-					break;
-				}
-			}
-		}
-		if ( adjMin != null ) {
-			for ( String e : adjMin.split( "\\s*,\\s*" ) ) {
-				min_values.add( Integer.parseInt( e ) );
-			}
-		}
-		if ( adjMax != null ) {
-			for ( String e : adjMax.split( "\\s*,\\s*" ) ) {
-				max_values.add( Integer.parseInt( e ) );
-			}
-		}
-		if ( adjExp != null ) {
-			for ( String e : adjExp.split( "\\s*,\\s*" ) ) {
-				exponents.add( Double.parseDouble( e ) );
-			}
-		}
-
-		return new TileParameters( colors.toArray( new Color[ colors.size() ] ),
-				min_values.toArray( new Integer[ min_values.size() ] ),
-				max_values.toArray( new Integer[ max_values.size() ] ),
-				exponents.toArray( new Double[ exponents.size() ] ) );
 	}
 }

@@ -1,4 +1,4 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.tile;
 
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
@@ -6,7 +6,13 @@ import java.util.LinkedHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.vonfelix.tileserver.Color;
+import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.TileOutOfBoundsException;
+import de.vonfelix.tileserver.stack.Channel;
+import de.vonfelix.tileserver.stack.CompositeStack;
+import de.vonfelix.tileserver.stack.IStack;
+import de.vonfelix.tileserver.stack.SimpleStack;
 
 // TODO add simple downscaling algorithm (in case scale level is not available)
 
@@ -73,8 +79,8 @@ public class TileGenerator {
 	
 	public BufferedImage getTile(
 			IStack stack,
-			TileCoordinates coordinates,
-			TileParameters parameters ) throws Exception {
+			Coordinates coordinates,
+			Parameters parameters ) throws Exception {
 
 		long startTime = System.nanoTime();
 

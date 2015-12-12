@@ -22,11 +22,11 @@ public class Tileserver extends SpringBootServletInitializer {
 	private static Properties properties;
 	private static int count = 0;
 	
-	static String getProperty( String key ) {
+	public static String getProperty( String key ) {
 		return properties.getProperty( key );
 	}
 	
-	static boolean hasProperty( String key ) {
+	public static boolean hasProperty( String key ) {
 		return properties.containsKey( key );
 	}
 	

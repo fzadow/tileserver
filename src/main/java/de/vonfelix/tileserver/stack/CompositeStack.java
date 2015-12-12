@@ -1,7 +1,9 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.stack;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+
+import de.vonfelix.tileserver.image.AbstractImage;
 
 public class CompositeStack extends AbstractStack {
 	

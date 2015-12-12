@@ -1,8 +1,10 @@
-package de.vonfelix.tileserver;
+package de.vonfelix.tileserver.image;
 
 import java.util.HashMap;
 
+import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.StackNotFoundException;
+import de.vonfelix.tileserver.stack.IStack;
 
 public abstract class AbstractImage implements IImage {
 
