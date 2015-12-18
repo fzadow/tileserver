@@ -52,7 +52,7 @@ public class TileserverController {
 		
 		long startTime = System.nanoTime();
 
-		Parameters parameters = new Parameters( adjCol, adjMin, adjMax, adjExp );
+		Parameters parameters = new Parameters.Builder().colors( adjCol ).min_values( adjMin ).max_values( adjMax ).exponents( adjExp ).build();
 		Coordinates coordinates = new Coordinates( 512, scale_level, column_index, row_index, slice_index );
 
 		logger.trace( "Request for " + image_name + "/" + stack_name + " " + coordinates + " " + parameters );
@@ -109,7 +109,7 @@ public class TileserverController {
 				}
 				logger.trace( "Request for thumbnail with dimensions: " + thumbnailWidth + "x" + thumbnailHeight );
 
-				Parameters parameters = new Parameters( adjCol, adjMin, adjMax, adjExp );
+				Parameters parameters = new Parameters.Builder().colors( adjCol ).min_values( adjMin ).max_values( adjMax ).dimensions( thumbnailWidth, thumbnailHeight ).build();
 				Coordinates coordinates = new Coordinates( stackWidth, stackHeight, scaleLevel, 0, 0, slice_index );
 				logger.debug( "getting thumbnail tile at " + coordinates );
 

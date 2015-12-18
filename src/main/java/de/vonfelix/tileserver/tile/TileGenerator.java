@@ -1,5 +1,7 @@
 package de.vonfelix.tileserver.tile;
 
+import static de.vonfelix.tileserver.tile.Parameters.Parameter.*;
+
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 
@@ -77,7 +79,7 @@ public class TileGenerator {
 		return grayMaps.get( key );
 	}
 	
-	public BufferedImage getTile(
+	public Tile getTile(
 			IStack stack,
 			Coordinates coordinates,
 			Parameters parameters ) throws Exception {
@@ -118,23 +120,23 @@ public class TileGenerator {
 		Color color = null;
 		
 		for( int i= 0; i < numberOfChannels; ++i ) {
-			exp = ( i < parameters.getExponents().length ) ? parameters.getExponents()[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+			exp = ( parameters.has( EXPONENTS ) && i < parameters.<Double[]> get( EXPONENTS ).length ) ? parameters.<Double[]> get( EXPONENTS )[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
 
 			if( composite ) {
 				Channel channel = ( (CompositeStack) stack ).getChannel( i );
 				tilePixels = channel.getStack().getTilePixels( coordinates );
 
-				color = ( i < parameters.getColors().length ) ? parameters.getColors()[ i ] : channel.getColor();
-				min = ( i < parameters.getMinValues().length ) ? parameters.getMinValues()[ i ] : 0;
-				max = ( i < parameters.getMaxValues().length ) ? parameters.getMaxValues()[ i ] : channel.getValueLimit();
+				color = ( parameters.has( COLORS ) && i < parameters.<Color[]> get( COLORS ).length ) ? parameters.<Color[]> get( COLORS )[ i ] : channel.getColor();
+				min = ( parameters.has( MINVALUES ) && i < parameters.<Integer[]> get( MINVALUES ).length ) ? parameters.<Integer[]> get( MINVALUES )[ i ] : 0;
+				max = ( parameters.has( MAXVALUES ) && i < parameters.<Integer[]> get( MAXVALUES ).length ) ? parameters.<Integer[]> get( MAXVALUES )[ i ] : channel.getValueLimit();
 				logger.trace( "  channel: " + channel + ", dyn.range=" + min + ".." + max + " exp=" + exp + " color=" + color );
 
 			}
 			else {
 				tilePixels =  ( (SimpleStack) stack ).getTilePixels( coordinates );
 				color = Color.GRAYS;
-				min = ( parameters.getMinValues().length > 0 ) ? parameters.getMinValues()[ i ] : 0;
-				max = ( parameters.getMaxValues().length > 0 ) ? parameters.getMaxValues()[ i ] : stack.getValueLimit();
+				min = ( parameters.has( MINVALUES ) && parameters.<Integer[]> get( MINVALUES ).length > 0 ) ? parameters.<Integer[]> get( MINVALUES )[ i ] : 0;
+				max = ( parameters.has(MAXVALUES) && parameters.<Integer[]>get(MAXVALUES).length > 0 ) ? parameters.<Integer[]>get(MAXVALUES)[ i ] : stack.getValueLimit();
 				logger.trace( "  stack: " + stack + ", dyn. range=" + min + ".." + max + " exp=" + exp );
 			}
 
@@ -183,6 +185,6 @@ public class TileGenerator {
 
 		logger.debug( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 
-		return img;
+		return new Tile( img, coordinates, parameters );
 	}
 }

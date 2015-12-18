@@ -85,7 +85,7 @@ public class Coordinates {
 	
 	@Override
 	public String toString() {
-		return "[x" + column_index + "/" + getX() + ", y" + row_index + "/" + getY() + ", z" + slice_index + ", " + ( 100 / Math.floor( Math.pow( 2, scale_level ) ) ) + "%]";
+		return "[" + column_index + "/" + getX() + ", " + row_index + "/" + getY() + ", " + slice_index + ", " + scale_level + "/" + new Float( 100 / Math.pow( 2, scale_level ) ).toString().replaceAll( "\\.?0*$", "" ) + "%]";
 
 	}
 	

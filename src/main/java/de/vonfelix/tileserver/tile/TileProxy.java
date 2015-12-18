@@ -24,6 +24,7 @@ public class TileProxy {
 	private boolean bDiskWrite;
 
 	private TileGenerator tileGenerator = new TileGenerator();
+	private TileLog tileLog = TileLog.getInstance();
 
 	static Logger logger = LogManager.getLogger( TileProxy.class.getName() );
 
@@ -117,26 +118,28 @@ public class TileProxy {
 		}
 
 		// get tile from tile generator
-		BufferedImage tile = (BufferedImage) tileGenerator.getTile( stack, coordinates, parameters );
+		Tile tile = tileGenerator.getTile( stack, coordinates, parameters );
+
+		BufferedImage image = tile.getImage();
 
 		// if width was specified, scale image (down) to width*height.
 		if ( width > 0 ) {
 			long startTime = System.nanoTime();
 			logger.debug( "scaling image from " + coordinates.getWidth() + "x" + coordinates.getHeight() + " to " + width + "x" + height );
-			tile = Scalr.resize( tile, Scalr.Method.BALANCED, width, height );
+			image = Scalr.resize( image, Scalr.Method.BALANCED, width, height );
 			logger.trace( "scaling took " + ( System.nanoTime() - startTime ) / 1000000 + "ms" );
 		}
 
 		// get as JPEG
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( tile, "jpg", baos );
+		ImageIO.write( image, "jpg", baos );
 
 		// save to disk
 		if ( bDiskWrite ) {
 			long startTime = System.nanoTime();
 			File outFile = new File( writableTileDir.getAbsolutePath() + "/" + stack.getImage().getName() + "/" + stack.getId() + "/" + String.valueOf( coordinates.getSliceIndex() ) + "/" + String.valueOf( coordinates.getRowIndex() ) + "_" + String.valueOf( coordinates.getColumnIndex() ) + "_" + String.valueOf( coordinates.getScaleLevel() ) + ".jpg" );
 			outFile.getParentFile().mkdirs();
-			ImageIO.write( tile, "jpg", outFile );
+			ImageIO.write( image, "jpg", outFile );
 			logger.debug( "saved file (" + ( ( System.nanoTime() - startTime ) / 1000000 ) + "ms)" );
 		}
 
