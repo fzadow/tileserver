@@ -35,7 +35,7 @@ public class TileserverController {
 	@Autowired
 	ServletContext servletContext;
 	
-	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/{row_index:[\\d]+}_{column_index:[\\d]+}_{scale_level:[\\d]+}" )
+	@RequestMapping( value = "/{image_name}/{stack_name}/{slice_index:[\\d]+}/{row_index:[\\d]+}_{column_index:[\\d]+}_{scale_level:[\\d]+}" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp,
 			@PathVariable( "image_name" ) String image_name,
@@ -44,10 +44,10 @@ public class TileserverController {
 			@PathVariable( "row_index" ) int row_index,
 			@PathVariable( "column_index" ) int column_index,
 			@PathVariable( "scale_level" ) int scale_level,
-			@RequestParam( value = "colors", required = false ) String adjCol,
-			@RequestParam( value = "min_vals", required = false ) String adjMin,
-			@RequestParam( value = "max_vals", required = false ) String adjMax,
-			@RequestParam( value = "exponents", required = false ) String adjExp
+			@RequestParam( value = "color", required = false ) String adjCol,
+			@RequestParam( value = "min", required = false ) String adjMin,
+			@RequestParam( value = "max", required = false ) String adjMax,
+			@RequestParam( value = "gamma", required = false ) String adjExp
 			) throws Exception {
 		
 		long startTime = System.nanoTime();
@@ -69,15 +69,15 @@ public class TileserverController {
 		return img;
 	}
 
-	@RequestMapping( value = "/{image_name}-{stack_name}/{slice_index:[\\d]+}/small" )
+	@RequestMapping( value = "/{image_name}/{stack_name}/{slice_index:[\\d]+}/small" )
 	@ResponseBody
 	public byte[] getImage( HttpServletResponse resp, @PathVariable( "image_name" ) String image_name,
 			@PathVariable( "stack_name" ) String stack_name,
 			@PathVariable( "slice_index" ) int slice_index,
-			@RequestParam( value = "colors", required = false ) String adjCol,
-			@RequestParam( value = "min_vals", required = false ) String adjMin,
-			@RequestParam( value = "max_vals", required = false ) String adjMax,
-			@RequestParam( value = "exponents", required = false ) String adjExp)
+			@RequestParam( value = "color", required = false ) String adjCol,
+			@RequestParam( value = "min", required = false ) String adjMin,
+			@RequestParam( value = "max", required = false ) String adjMax,
+			@RequestParam( value = "gamma", required = false ) String adjExp)
 					throws Exception {
 
 		long startTime = System.nanoTime();
