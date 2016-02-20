@@ -27,6 +27,7 @@ public class ImageProxy {
 	public static synchronized ImageProxy getInstance() {
 		if ( ImageProxy.instance == null ) {
 			ImageProxy.instance = new ImageProxy();
+			logger.info( "ImageProxy initialized. Source directory: " + Tileserver.getProperty( "source_image_dir" ) );
 		}
 		return ImageProxy.instance;
 	}
@@ -46,10 +47,7 @@ public class ImageProxy {
 			}
 			logger.info( "loading image " + name );
 
-			//
-			// assume for now that all Images come from a HDF5 source
-			//
-			images.put( name, new HDF5Image( name ) );
+			images.put( name, new HDF5YAMLImage( name ) );
 		}
 		//logger.trace( "current size of images map: " + GraphLayout.parseInstance( images ).totalSize() / 1024 + "kb" );
 		return images.get( name );

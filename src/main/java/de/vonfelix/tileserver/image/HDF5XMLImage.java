@@ -20,14 +20,14 @@ import de.vonfelix.tileserver.stack.CompositeStack;
 import de.vonfelix.tileserver.stack.HDF5Stack;
 import de.vonfelix.tileserver.stack.IStack;
 
-public class HDF5Image extends AbstractImage {
+public class HDF5XMLImage extends AbstractImage {
 
 	static Logger logger = LogManager.getLogger();
 
 	private	IHDF5Reader reader;
 	private Document imageDesc;
 	
-	public HDF5Image( String name ){
+	public HDF5XMLImage( String name ){
 		super( name );
 		
 		logger.debug( "reading hdf5 for " + name );
