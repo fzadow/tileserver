@@ -1,7 +1,7 @@
 package de.vonfelix.tileserver.tile;
 
-import java.time.LocalDate;
-import java.time.Period;
+//import java.time.LocalDate;
+//import java.time.Period;
 import java.util.ArrayList;
 
 public class TileLog {
@@ -9,17 +9,17 @@ public class TileLog {
 	private class LogEntry {
 		Coordinates coordinates;
 		Parameters parameters;
-		LocalDate date;
+		//LocalDate date;
 
 		public LogEntry( Coordinates coordinates, Parameters parameters ) {
 			this.coordinates = coordinates;
 			this.parameters = parameters;
-			this.date = LocalDate.now();
+			//this.date = LocalDate.now();
 		}
 
-		public Period age() {
-			return Period.between( date, LocalDate.now() );
-		}
+		//public Period age() {
+		//	return Period.between( date, LocalDate.now() );
+		//}
 	}
 
 	private static TileLog instance;
