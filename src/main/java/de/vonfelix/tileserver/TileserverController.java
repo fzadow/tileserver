@@ -1,16 +1,26 @@
 package de.vonfelix.tileserver;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import de.vonfelix.tileserver.image.ImageProxy;
 import de.vonfelix.tileserver.stack.IStack;
@@ -120,4 +130,32 @@ public class TileserverController {
 		}
 		return null;
 	}
+
+	@RequestMapping( method=RequestMethod.GET,
+			value = {"/{image_name}/project.yaml", "/{image_name}.yaml"} )
+	@ResponseBody
+	public void getYaml( HttpServletResponse resp,
+			@PathVariable( "image_name" ) String image_name,
+			HttpServletRequest req
+			) {
+		
+		// get request file name from URL
+		String[] url = req.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE ).toString().split("/");
+		// set response file name to request file name (either project.yaml or {image_name}.yaml
+		resp.setHeader("Content-Disposition", "attachment;filename=" + url[ url.length - 1 ] );
+		
+		logger.debug( "YAML request for {}.", image_name );
+		
+		try {
+			InputStream is = new FileInputStream( new File( Tileserver.getProperty("source_image_dir") + image_name + ".yaml" ) );
+			org.apache.commons.io.IOUtils.copy(is, resp.getOutputStream() );
+			resp.flushBuffer();
+		} catch ( FileNotFoundException e ) {
+			logger.error( "File {}{}.yaml not found.", Tileserver.getProperty("source_image_dir"), image_name );
+		} catch (IOException e ) {
+			logger.error( "Error writing file to output stream ({})", image_name );
+		}
+
+	}
+
 }
