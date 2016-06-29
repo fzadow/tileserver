@@ -1,4 +1,5 @@
 package de.vonfelix.tileserver.tile;
+import static de.vonfelix.tileserver.tile.Parameters.Parameter.QUALITY;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -6,7 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +28,8 @@ public class TileProxy {
 	private File writableTileDir;
 	private boolean bDiskRead;
 	private boolean bDiskWrite;
+
+	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam( null );
 
 	private TileGenerator tileGenerator = new TileGenerator();
 	private TileLog tileLog = TileLog.getInstance();
@@ -57,6 +65,9 @@ public class TileProxy {
 
 		this.bDiskRead = tileDir != null && tileDir.isDirectory() && Tileserver.hasProperty( "read_from_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "read_from_disk" ) );
 		this.bDiskWrite = writableTileDir != null && writableTileDir.isDirectory() && Tileserver.hasProperty( "save_to_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "save_to_disk" ) );
+
+		jpegParams.setCompressionMode( ImageWriteParam.MODE_EXPLICIT );
+		jpegParams.setCompressionQuality( 0.0f );
 
 	}
 
@@ -132,7 +143,15 @@ public class TileProxy {
 
 		// get as JPEG
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( image, "jpg", baos );
+		// ImageIO.write( image, "jpg", baos );
+		Float jpegQuality = ( parameters.has( QUALITY ) && parameters.<Float> get( QUALITY ) != null )
+				? parameters.<Float> get( QUALITY ) : 1f;
+
+		jpegParams.setCompressionQuality( jpegQuality );
+		ImageWriter writer = ImageIO.getImageWritersByFormatName( "jpg" ).next();
+		writer.setOutput( new MemoryCacheImageOutputStream( baos ) );
+		writer.write( null, new IIOImage( image, null, null ), jpegParams );
+		baos.flush();
 
 		// save to disk
 		if ( bDiskWrite ) {

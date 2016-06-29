@@ -45,6 +45,7 @@ public class TileserverController {
 			@PathVariable( "column_index" ) int column_index,
 			@PathVariable( "scale_level" ) int scale_level,
 			@RequestParam( value = "tilesize", required = false, defaultValue = "512" ) int tilesize,
+			@RequestParam( value = "quality", required = false, defaultValue = "90" ) int quality,
 			@RequestParam( value = "color", required = false ) String adjCol,
 			@RequestParam( value = "min", required = false ) String adjMin,
 			@RequestParam( value = "max", required = false ) String adjMax,
@@ -53,9 +54,9 @@ public class TileserverController {
 		
 		long startTime = System.nanoTime();
 
+		float q = ( (float) quality ) / 100;
 
-
-		Parameters parameters = new Parameters.Builder().colors( adjCol ).min_values( adjMin ).max_values( adjMax ).exponents( adjExp ).build();
+		Parameters parameters = new Parameters.Builder().quality( q ).colors( adjCol ).min_values( adjMin ).max_values( adjMax ).exponents( adjExp ).build();
 
 		Coordinates coordinates = new Coordinates(
 				tilesize, scale_level, column_index, row_index, slice_index );
@@ -69,6 +70,7 @@ public class TileserverController {
 		resp.setContentType( "image/jpg" );
 		resp.setHeader( "Generation-Time", duration + "" );
 		logger.info( "serving tile " + image_name + "/" + stack_name + " " + coordinates + " (" + duration / 1000000 + "ms)" );
+		logger.debug( "ts=" + tilesize + " q=" + quality + " size:" + img.length );
 		Tileserver.countTile();
 
 		return img;

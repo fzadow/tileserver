@@ -19,6 +19,7 @@ public class Parameters {
 		MINVALUES(Integer[].class),
 		MAXVALUES(Integer[].class),
 		EXPONENTS(Double[].class),
+		QUALITY(Float.class),
 		WIDTH(Integer.class),
 		HEIGHT(Integer.class);
 
@@ -41,6 +42,7 @@ public class Parameters {
 		private Integer[] min_values;
 		private Integer[] max_values;
 		private Double[] exponents;
+		private Float quality;
 		private int width;
 		private int height;
 
@@ -145,6 +147,11 @@ public class Parameters {
 			return this;
 		}
 
+		public Builder quality( Float q ) {
+			this.quality = q;
+			return this;
+		}
+
 		public Builder dimensions( int width, int height ) {
 			this.width = width;
 			this.height = height;
@@ -157,6 +164,7 @@ public class Parameters {
 			p.set( Parameter.MINVALUES, min_values );
 			p.set( Parameter.MAXVALUES, max_values );
 			p.set( Parameter.EXPONENTS, exponents );
+			p.set( Parameter.QUALITY, quality );
 			p.set( Parameter.WIDTH, width );
 			p.set( Parameter.HEIGHT, height );
 			return p;
