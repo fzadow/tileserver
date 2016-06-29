@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -77,7 +79,14 @@ public class Tileserver extends SpringBootServletInitializer {
 			// local properties (configuration file in project)
 			if ( new File( "config.properties" ).exists() ) {
 				input = new FileInputStream( "config.properties" );
+				logger.debug("Properties loaded from internal config.properties");
 				properties.load( input );
+				
+				if( logger.getLevel().isLessSpecificThan(Level.DEBUG) ) {
+					for( Entry<Object, Object> e : properties.entrySet() ) {
+						logger.trace( "  " + e );
+					}
+				}
 			}
 			
 			// additionally load properties from system global configuration
@@ -85,7 +94,23 @@ public class Tileserver extends SpringBootServletInitializer {
 			if( new File("/opt/etc/tileserver/config.properties").exists() ) {
 				Properties system_properties = new Properties();
 				system_properties.load( new FileInputStream( "/opt/etc/tileserver/config.properties" ) );
+				logger.debug("Properties loaded from /opt/etc/tileserver/config.properties");
+				if( logger.getLevel().isLessSpecificThan(Level.DEBUG) ) {
+					for( Entry<Object, Object> e : system_properties.entrySet() ) {
+						if( properties.containsKey( e.getKey() ) ) {
+							if( ! e.getValue().equals( properties.get( e.getKey() ) ) )  {
+								logger.trace( "  " + e + " (CHANGED)" );
+							}
+							else {
+								logger.trace( "  " + e + " (NOT CHANGED)" );
+							}
+						} else {
+							logger.trace( "  " + e );
+						}
+					}
+				}
 				properties.putAll( system_properties );
+
 			}
 			
 		} catch ( IOException io ) {
