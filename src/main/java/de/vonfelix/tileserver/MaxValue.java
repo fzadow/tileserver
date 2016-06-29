@@ -1,9 +1,9 @@
 package de.vonfelix.tileserver;
 
-public interface ValueLimit {
+public interface MaxValue {
 
-	public void setValueLimit( int valueLimit );
+	public void setMax( int max );
 
-	public int getValueLimit();
+	public int getMax();
 
 }

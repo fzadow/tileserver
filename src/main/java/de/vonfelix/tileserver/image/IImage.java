@@ -1,10 +1,10 @@
 package de.vonfelix.tileserver.image;
 
-import de.vonfelix.tileserver.ValueLimit;
+import de.vonfelix.tileserver.MaxValue;
 import de.vonfelix.tileserver.exception.StackNotFoundException;
 import de.vonfelix.tileserver.stack.IStack;
 
-public interface IImage extends ValueLimit {
+public interface IImage extends MaxValue {
 
 	String getName();
 

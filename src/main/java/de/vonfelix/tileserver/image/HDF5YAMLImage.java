@@ -94,7 +94,7 @@ public class HDF5YAMLImage extends AbstractImage {
 
 					IStack sta = new HDF5Stack( this, path, id, title );
 					if ( max != null ) {
-						sta.setValueLimit( max );
+						sta.setMax( max );
 					}
 					stacks.put( sta.getId(), sta );
 				}

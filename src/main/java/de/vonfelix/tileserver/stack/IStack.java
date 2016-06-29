@@ -1,9 +1,9 @@
 package de.vonfelix.tileserver.stack;
 
-import de.vonfelix.tileserver.ValueLimit;
+import de.vonfelix.tileserver.MaxValue;
 import de.vonfelix.tileserver.image.IImage;
 
-public interface IStack extends ValueLimit {
+public interface IStack extends MaxValue {
 
 	public IImage getImage();
 	public String getId();

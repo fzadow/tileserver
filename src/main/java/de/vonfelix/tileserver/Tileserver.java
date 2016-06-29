@@ -99,10 +99,10 @@ public class Tileserver extends SpringBootServletInitializer {
 					for( Entry<Object, Object> e : system_properties.entrySet() ) {
 						if( properties.containsKey( e.getKey() ) ) {
 							if( ! e.getValue().equals( properties.get( e.getKey() ) ) )  {
-								logger.trace( "  " + e + " (CHANGED)" );
+								logger.trace( "  " + e + " (OVERWRITTEN)" );
 							}
 							else {
-								logger.trace( "  " + e + " (NOT CHANGED)" );
+								// logger.trace( " " + e + " (NOT CHANGED)" );
 							}
 						} else {
 							logger.trace( "  " + e );

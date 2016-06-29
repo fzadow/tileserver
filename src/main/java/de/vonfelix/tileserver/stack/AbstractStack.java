@@ -10,7 +10,7 @@ public abstract class AbstractStack implements IStack {
 	protected String id;
 	protected String title;
 	protected HashMap<Integer, long[]> dimensions;
-	protected int valueLimit;
+	protected int max;
 	protected int scaleLevels;
 
 	public AbstractStack( AbstractImage image, String id, String title ) {
@@ -18,7 +18,7 @@ public abstract class AbstractStack implements IStack {
 		this.id = id;
 		this.title = title;
 		this.dimensions = new HashMap<Integer, long[]>();
-		this.valueLimit = image.getValueLimit();
+		this.max = image.getMax();
 	}
 
 	@Override
@@ -61,11 +61,12 @@ public abstract class AbstractStack implements IStack {
 		return title;
 	}
 	
-	public void setValueLimit( int valueLimit ) {
-		this.valueLimit = valueLimit;
+	public void setMax( int valueLimit ) {
+		this.max = valueLimit;
 	}
-	public int getValueLimit() {
-		return valueLimit;
+
+	public int getMax() {
+		return max;
 	}
 
 	public int getScaleLevels() {

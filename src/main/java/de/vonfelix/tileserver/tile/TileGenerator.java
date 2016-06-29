@@ -128,7 +128,8 @@ public class TileGenerator {
 
 				color = ( parameters.has( COLORS ) && i < parameters.<Color[]> get( COLORS ).length ) ? parameters.<Color[]> get( COLORS )[ i ] : channel.getColor();
 				min = ( parameters.has( MINVALUES ) && i < parameters.<Integer[]> get( MINVALUES ).length ) ? parameters.<Integer[]> get( MINVALUES )[ i ] : 0;
-				max = ( parameters.has( MAXVALUES ) && i < parameters.<Integer[]> get( MAXVALUES ).length ) ? parameters.<Integer[]> get( MAXVALUES )[ i ] : channel.getValueLimit();
+				max = ( parameters.has( MAXVALUES ) && i < parameters.<Integer[]> get( MAXVALUES ).length )
+						? parameters.<Integer[]> get( MAXVALUES )[ i ] : channel.getMax();
 				logger.trace( "  channel: " + channel + ", dyn.range=" + min + ".." + max + " exp=" + exp + " color=" + color );
 
 			}
@@ -136,7 +137,8 @@ public class TileGenerator {
 				tilePixels =  ( (SimpleStack) stack ).getTilePixels( coordinates );
 				color = Color.GRAYS;
 				min = ( parameters.has( MINVALUES ) && parameters.<Integer[]> get( MINVALUES ).length > 0 ) ? parameters.<Integer[]> get( MINVALUES )[ i ] : 0;
-				max = ( parameters.has(MAXVALUES) && parameters.<Integer[]>get(MAXVALUES).length > 0 ) ? parameters.<Integer[]>get(MAXVALUES)[ i ] : stack.getValueLimit();
+				max = ( parameters.has( MAXVALUES ) && parameters.<Integer[]> get( MAXVALUES ).length > 0 )
+						? parameters.<Integer[]> get( MAXVALUES )[ i ] : stack.getMax();
 				logger.trace( "  stack: " + stack + ", dyn. range=" + min + ".." + max + " exp=" + exp );
 			}
 

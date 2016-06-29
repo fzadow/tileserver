@@ -4,9 +4,9 @@ import org.apache.commons.lang.NotImplementedException;
 
 import de.vonfelix.tileserver.Adjustable;
 import de.vonfelix.tileserver.Color;
-import de.vonfelix.tileserver.ValueLimit;
+import de.vonfelix.tileserver.MaxValue;
 
-public class Channel implements ValueLimit, Adjustable {
+public class Channel implements MaxValue, Adjustable {
 
 	private SimpleStack simpleStack;
 	private Color color;
@@ -30,14 +30,14 @@ public class Channel implements ValueLimit, Adjustable {
 	}
 
 	@Override
-	public void setValueLimit( int valueLimit ) {
-		this.valueLimit = valueLimit;
+	public void setMax( int max ) {
+		this.valueLimit = max;
 	}
 
 	@Override
-	public int getValueLimit() {
+	public int getMax() {
 		if ( valueLimit == 0 ) {
-			return simpleStack.getValueLimit();
+			return simpleStack.getMax();
 		}
 		return valueLimit;
 	}

@@ -9,7 +9,8 @@ import de.vonfelix.tileserver.stack.IStack;
 public abstract class AbstractImage implements IImage {
 
 	protected String name;
-	protected int valueLimit = Integer.parseInt( Tileserver.getProperty( "value_limit" ) );
+	protected int max = Integer.parseInt( Tileserver.getProperty( "max" ) );
+	protected int min = Integer.parseInt( Tileserver.getProperty( "min" ) );
 	protected HashMap<String, IStack> stacks = new HashMap<>();
 	
 	public AbstractImage( String name ) {
@@ -35,12 +36,12 @@ public abstract class AbstractImage implements IImage {
 	};
 	
 	@Override
-	public void setValueLimit( int valueLimit ) {
-		this.valueLimit = valueLimit;
+	public void setMax( int max ) {
+		this.max = max;
 	}
 	
 	@Override
-	public int getValueLimit() {
-		return valueLimit;
+	public int getMax() {
+		return max;
 	}
 }
