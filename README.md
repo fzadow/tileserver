@@ -3,14 +3,14 @@ This ist the TileBuilder tile server. It serves image tiles for [CATMAID](https:
 
 # Installation
 
-* Build with maven
+* Build with maven (recommended); alternatively use the [WAR provided in the repository](https://github.com/fzadow/tileserver/tree/master/target) (not necessarily up-to-date)
 * place WAR/JAR file on webserver
 * create `/opt/etc/tileserver/config.properties` or edit the `config.properties` within the WAR.
 * customize config.properties (see https://github.com/fzadow/tileserver/blob/master/config.properties):
 	* source_image_dir
 	* tile_dir
 	* writable_tile_dir
-* run with `java -jar tileserver.jar`
+* run with `java -jar tilebuilder.jar`
 
 # Usage
 
