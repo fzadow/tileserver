@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -163,6 +162,12 @@ public class TileserverController {
 			logger.error( "Error writing file to output stream ({})", image_name );
 		}
 
+	}
+
+	@RequestMapping( method=RequestMethod.GET, value = {"/list"}, produces = "application/json" )
+	@ResponseBody
+	public String getList( HttpServletResponse resp, HttpServletRequest req ) {
+		return imageProxy.getList();
 	}
 
 }

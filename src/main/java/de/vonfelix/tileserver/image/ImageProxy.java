@@ -1,10 +1,18 @@
 package de.vonfelix.tileserver.image;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.ImageNotFoundException;
@@ -51,5 +59,56 @@ public class ImageProxy {
 		}
 		//logger.trace( "current size of images map: " + GraphLayout.parseInstance( images ).totalSize() / 1024 + "kb" );
 		return images.get( name );
+	}
+
+	public String getList() {
+
+		logger.debug( "getting list of all images" );
+
+		FilenameFilter yamlFilter = new FilenameFilter() {
+			@Override
+			public boolean accept( File dir, String name ) {
+				if ( name.lastIndexOf( '.' ) > 0 ) {
+					// get last index for '.' char
+					int lastIndex = name.lastIndexOf( '.' );
+
+					// get extension
+					String str = name.substring( lastIndex );
+
+					// match path name extension
+					if ( str.equals( ".yaml" ) ) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+		File source_dir = new File( Tileserver.getProperty( "source_image_dir" ) );
+		ArrayList<File> files = new ArrayList<File>( Arrays.asList( source_dir.listFiles( yamlFilter ) ) );
+
+		ArrayList<Object> data = new ArrayList<Object>();
+
+		for ( File file : files ) {
+			try {
+				Yaml yaml = new Yaml();
+				data.add( yaml.load( new FileInputStream( file ) ) );
+
+				// list.put( file.getName(), new String( Files.readAllBytes(
+				// Paths.get( file.getPath() ) ) ) );
+			} catch ( IOException e ) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch ( ScannerException e ) {
+				logger.error( "Error loading YAML file: " + file.getName() );
+			}
+		}
+
+		DumperOptions options = new DumperOptions();
+		options.setExplicitStart( true );
+		options.setDefaultFlowStyle( DumperOptions.FlowStyle.BLOCK );
+		Yaml yaml = new Yaml( options );
+
+		return yaml.dumpAll( data.iterator() );
 	}
 }
