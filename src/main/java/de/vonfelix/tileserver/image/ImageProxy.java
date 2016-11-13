@@ -64,6 +64,7 @@ public class ImageProxy {
 	public String getList() {
 
 		logger.debug( "getting list of all images" );
+		long startTime = System.nanoTime();
 
 		FilenameFilter yamlFilter = new FilenameFilter() {
 			@Override
@@ -108,6 +109,9 @@ public class ImageProxy {
 		options.setExplicitStart( true );
 		options.setDefaultFlowStyle( DumperOptions.FlowStyle.BLOCK );
 		Yaml yaml = new Yaml( options );
+
+		long duration = ( System.nanoTime() - startTime );
+		logger.debug( "listing all images took " + ( duration / 1000000 ) + " ms" );
 
 		return yaml.dumpAll( data.iterator() );
 	}
