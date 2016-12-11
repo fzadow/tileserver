@@ -211,6 +211,16 @@ def getDataPart( job, data, lineStart ):
 		job.log("\tCould not find \"" + lineStart + "\"" )
 		return None
 
+class OutputSelectHandler(ActionListener):
+	def __init__(self, job, callback):
+		self.job = job
+		self.callback = callback
+
+	def actionPerformed(self, event):
+		self.job.askForOutputDir()
+		if self.callback:
+			self.callback()
+
 class CancelHandler(ActionListener):
 	def __init__(self, job, frame):
 		self.job = job
@@ -318,8 +328,20 @@ inputPanel.add(scaleLevelsTf)
 
 
 inputPanel.add(JLabel("Output Directory"))
+outputDirPanel = JPanel()
 outputDirTf = JTextField(job.outputDir)
-inputPanel.add(outputDirTf)
+outputDirPanel.add(outputDirTf)
+outputDirSelect = JButton("...")
+
+def refreshOutput():
+	if job.outputDir:
+		outputDirTf.setText(job.outputDir)
+	else:
+		outputDirTf.setText("")
+
+outputDirSelect.addActionListener(OutputSelectHandler(job, refreshOutput))
+outputDirPanel.add(outputDirSelect)
+inputPanel.add(outputDirPanel)
 
 # Generate default metadata string
 # mdList = []
