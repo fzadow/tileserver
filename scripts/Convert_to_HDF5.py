@@ -274,6 +274,12 @@ class StartHandler(ActionListener):
 			except:
 				print("ERR: invalid value for Scale Levels")
 
+		resolution = [float(r.strip()) for r in resolutionTf.getText().split(",")]
+		if len(resolution) != 3:
+			print("ERR: invalid resolution")
+			return
+		else:
+			job.resolution = resolution
 
 		self.job.metadata = [tf.getText() for tf in formMetadata]
 		self.job.colors = [tf.getSelectedItem() for tf in formColors]
@@ -342,7 +348,10 @@ scaleLevelsTf = JTextField()
 inputPanel.add(JLabel("Scale levels (empty=automatic)"))
 inputPanel.add(scaleLevelsTf)
 
-
+resolutionTf = JTextField()
+inputPanel.add(JLabel("Resolution"))
+inputPanel.add(resolutionTf)
+resolutionTf.setText("%s, %s, %s" % job.resolution)
 inputPanel.add(JLabel("Output Directory"))
 outputDirPanel = JPanel()
 outputDirTf = JTextField(job.outputDir)
