@@ -1,16 +1,24 @@
 
-This ist the TileBuilder tile server. It serves image tiles for [CATMAID](https://github.com/catmaid/CATMAID). TileBuilder is a self-contained Java application that launches a web server on port 8000. TileBuilder reads images in a specialized HDF5 format.
+This is the TileBuilder tile server. It serves image tiles for [CATMAID](https://github.com/catmaid/CATMAID). TileBuilder is a self-contained Java application that launches a web server on port 8000. TileBuilder reads images in a specialized HDF5 format which can be generated with the [Fiji plugin from the /scripts directory](https://github.com/fzadow/tileserver/tree/master/scripts).
 
-# Installation
+# Simple Installation
 
-* Build with maven (recommended); alternatively use the [WAR provided in the repository](https://github.com/fzadow/tileserver/tree/master/target) (not necessarily up-to-date)
-* place WAR/JAR file on webserver
+* Make sure Java 8 is installed on your server.
+* Download the [WAR file from the /target directory](https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war) to your server, for example by using the wget command
+
+  `wget https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war`.
 * create `/opt/etc/tileserver/config.properties` or edit the `config.properties` within the WAR.
 * customize config.properties (see https://github.com/fzadow/tileserver/blob/master/config.properties):
 	* source_image_dir
 	* tile_dir
 	* writable_tile_dir
-* run with `java -jar tilebuilder.jar`
+* run with `java -jar tilebuilder.war`
+
+# Command line options
+
+These command line options can be used when running tilebuilder:
+
+* `--server.port=9000` runs Tilebuilder on port 9000 instead of the default (8080)
 
 # Usage
 
