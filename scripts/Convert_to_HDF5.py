@@ -12,6 +12,7 @@ import math
 from ij import Prefs
 from ij import IJ
 from ij import Menus
+from ij.io import DirectoryChooser
 from ij.plugin.filter import Info
 from ij.gui import GenericDialog
 
@@ -51,11 +52,19 @@ class ConvertJob:
 			self.scaleLevels = scaleLevels
 		self.log("Number of scale levels: " + str(self.scaleLevels) + " (tilesize=" + str(self.tileSize) + ")")
 
+	def askForOutputDir(self):
+		outputDir = DirectoryChooser("Please select output directory").getDirectory()
+		if outputDir:
+			self.outputDir = outputDir
 
 	def log(self, message):
 		self.logMessages.append(message)
 		print(message)
 		time.sleep(0.001)
+
+	def validate(self):
+		if not self.outputDir:
+			raise ValueError("Need output directory")
 
 	def saveLog(self, path):
 		f = None
@@ -268,7 +277,15 @@ job.slices = imp.getNSlices()
 job.channels = imp.getNChannels()
 job.projectName = imp.getShortTitle()
 
-job.outputDir = imp.getOriginalFileInfo().directory
+fileInfo = imp.getOriginalFileInfo()
+
+if not fileInfo:
+	# Ask for ourput dir
+	job.askForOutputDir()
+else:
+	job.outputDir = fileInfo.directory
+
+job.validate()
 
 #imgInfo = Info()
 #p = imp.getChannelProcessor()
