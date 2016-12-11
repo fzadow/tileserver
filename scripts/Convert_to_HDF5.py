@@ -354,8 +354,9 @@ inputPanel.add(resolutionTf)
 resolutionTf.setText("%s, %s, %s" % job.resolution)
 inputPanel.add(JLabel("Output Directory"))
 outputDirPanel = JPanel()
+outputDirPanel.setLayout(BorderLayout())
 outputDirTf = JTextField(job.outputDir)
-outputDirPanel.add(outputDirTf)
+outputDirPanel.add(outputDirTf, BorderLayout.CENTER)
 outputDirSelect = JButton("...")
 
 def refreshOutput():
@@ -365,7 +366,7 @@ def refreshOutput():
 		outputDirTf.setText("")
 
 outputDirSelect.addActionListener(OutputSelectHandler(job, refreshOutput))
-outputDirPanel.add(outputDirSelect)
+outputDirPanel.add(outputDirSelect, BorderLayout.EAST)
 inputPanel.add(outputDirPanel)
 
 # Generate default metadata string
