@@ -47,7 +47,7 @@ class ConvertJob:
 		self.projectName = imp.getShortTitle()
 
 		self.resolution = self.getResolution()
-		print(self.resolution)
+		self.metadata = ''
 
 	def setScaleLevels(self, scaleLevels):
 		if not self.image:
@@ -129,7 +129,7 @@ class ConvertJob:
 				context_channels = {
 					'num' : c,
 					'name' : "Channel " + str( c ),
-					'metadata' : "...",
+					'metadata' : self.metadata[c],
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
 					'dimz' : self.image.dimensions[3],
