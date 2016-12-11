@@ -111,18 +111,19 @@ class ConvertJob:
 			f = open( path, 'w')
 
 			template_channels = """
-    - folder: "channel%(num)d"
-      name: "%(name)s"
-      metadata: "%(metadata)s"
-      dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
-      resolution: "(%(resx)d,%(resy)d,%(resz)d)"
-      zoomlevels: %(zoomlevels)d"""
+		- folder: "channel%(num)d"
+			name: "%(name)s"
+			metadata: "%(metadata)s"
+			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
+			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
+			zoomlevels: %(zoomlevels)d"""
 
 			template_composite_channels = """
-      - stack: "channel%(num)d"
-        color: "%(color)s\""""
+			- stack: "channel%(num)d"
+				color: "%(color)s\""""
 
 			channels_string = ""
+
 			composite_channels_string = ""
 			for c in range( 0, self.channels ):
 				context_channels = {
@@ -147,8 +148,8 @@ class ConvertJob:
 			channels_string = channels_string + """
 		- folder: "composite"
 			name: "Composite"
-			dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
-			resolution: "(%(resx)d,%(resy)d,%(resz)d)"
+			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
+			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
 			channels:%(composite_channels)s""" % {
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
@@ -163,8 +164,8 @@ class ConvertJob:
 			# Generate main YAML string
 
 			yaml_string = """project:
-  name: "%(name)s"
-  stacks:%(channels)s""" % {
+	name: "%(name)s"
+	stacks:%(channels)s""" % {
 				'name' : self.projectName,
 				'channels' : channels_string
 			}
