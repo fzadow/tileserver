@@ -34,10 +34,20 @@ from ij.gui import GenericDialog
 
 
 class ConvertJob:
-	def __init__(self):
+	def __init__(self, imp):
 		self.logMessages = []
 		self.projectName = ""
 		self.tileSize = 512
+
+		self.image = imp
+		self.width = imp.width
+		self.height = imp.height
+		self.slices = imp.getNSlices()
+		self.channels = imp.getNChannels()
+		self.projectName = imp.getShortTitle()
+
+		self.resolution = self.getResolution()
+		print(self.resolution)
 
 	def setScaleLevels(self, scaleLevels):
 		if not self.image:
@@ -81,6 +91,17 @@ class ConvertJob:
 	def saveProperties(self):
 		self.pset("projectName", self.projectName)
 
+	def getResolution(self):
+		if not self.image:
+			raise ValueError('Need image')
+
+		clb = self.image.getCalibration()
+
+		if clb:
+			return clb.pixelWidth, clb.pixelHeight, clb.pixelDepth
+		else:
+			return 1.0, 1.0, 1.0
+			
 	def saveYaml(self):
 		f = None
 		path = self.outputPathWithoutExtension + ".yaml"
@@ -111,9 +132,9 @@ class ConvertJob:
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
 					'dimz' : self.image.dimensions[3],
-					'resx' : 100,
-					'resy' : 100,
-					'resz' : 100,
+					'resx' : self.resolution[0],
+					'resy' : self.resolution[1],
+					'resz' : self.resolution[2],
 					'zoomlevels' : self.scaleLevels,
 					'color' : self.colors[c]
 				}
@@ -124,17 +145,17 @@ class ConvertJob:
 			# Add composite channel to YAML string
 
 			channels_string = channels_string + """
-    - folder: "composite"
-      name: "Composite"
-      dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
-      resolution: "(%(resx)d,%(resy)d,%(resz)d)"
-      channels:%(composite_channels)s""" % {
+		- folder: "composite"
+			name: "Composite"
+			dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
+			resolution: "(%(resx)d,%(resy)d,%(resz)d)"
+			channels:%(composite_channels)s""" % {
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
 					'dimz' : self.image.dimensions[3],
-					'resx' : 100,
-					'resy' : 100,
-					'resz' : 100,
+					'resx' : self.resolution[0],
+					'resy' : self.resolution[1],
+					'resz' : self.resolution[2],
 					'composite_channels' : composite_channels_string
 				}
 
@@ -279,13 +300,7 @@ imp = IJ.getImage()
 
 print( "Using open image: " + str(imp))
 
-job = ConvertJob()
-job.image = imp
-job.width = imp.width
-job.height = imp.height
-job.slices = imp.getNSlices()
-job.channels = imp.getNChannels()
-job.projectName = imp.getShortTitle()
+job = ConvertJob(imp)
 
 fileInfo = imp.getOriginalFileInfo()
 
