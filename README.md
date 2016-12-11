@@ -36,3 +36,9 @@ Here, `imagename` identifies the HDF5 file containing the image data (imagename.
 `z` is the zoom level.
 
 To display an image with TileBuilder in CATMAID, import it via the [Importer admin tool](http://catmaid.readthedocs.io/en/stable/importing_data.html) in CATMAID.
+
+# Compilation
+
+Maven 3 is used to manage dependencies and compile the project. To create a new
+WAR file, use the following command: `mvn package`. The generated
+`tileserver.war` file can be found in the `target` folder.

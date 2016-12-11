@@ -10,8 +10,9 @@ import time
 import math
 
 from ij import Prefs
-from ij import IJ
+from ij import IJ, WindowManager
 from ij import Menus
+from ij.io import DirectoryChooser
 from ij.plugin.filter import Info
 from ij.gui import GenericDialog
 
@@ -33,10 +34,20 @@ from ij.gui import GenericDialog
 
 
 class ConvertJob:
-	def __init__(self):
+	def __init__(self, imp):
 		self.logMessages = []
 		self.projectName = ""
 		self.tileSize = 512
+
+		self.image = imp
+		self.width = imp.width
+		self.height = imp.height
+		self.slices = imp.getNSlices()
+		self.channels = imp.getNChannels()
+		self.projectName = imp.getShortTitle()
+
+		self.resolution = self.getResolution()
+		self.metadata = ''
 
 	def setScaleLevels(self, scaleLevels):
 		if not self.image:
@@ -51,11 +62,19 @@ class ConvertJob:
 			self.scaleLevels = scaleLevels
 		self.log("Number of scale levels: " + str(self.scaleLevels) + " (tilesize=" + str(self.tileSize) + ")")
 
+	def askForOutputDir(self):
+		outputDir = DirectoryChooser("Please select output directory").getDirectory()
+		if outputDir:
+			self.outputDir = outputDir
 
 	def log(self, message):
 		self.logMessages.append(message)
 		print(message)
 		time.sleep(0.001)
+
+	def validate(self):
+		if not self.outputDir:
+			raise ValueError("Need output directory")
 
 	def saveLog(self, path):
 		f = None
@@ -72,6 +91,17 @@ class ConvertJob:
 	def saveProperties(self):
 		self.pset("projectName", self.projectName)
 
+	def getResolution(self):
+		if not self.image:
+			raise ValueError('Need image')
+
+		clb = self.image.getCalibration()
+
+		if clb:
+			return clb.pixelWidth, clb.pixelHeight, clb.pixelDepth
+		else:
+			return 1.0, 1.0, 1.0
+			
 	def saveYaml(self):
 		f = None
 		path = self.outputPathWithoutExtension + ".yaml"
@@ -81,30 +111,31 @@ class ConvertJob:
 			f = open( path, 'w')
 
 			template_channels = """
-    - folder: "channel%(num)d"
-      name: "%(name)s"
-      metadata: "%(metadata)s"
-      dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
-      resolution: "(%(resx)d,%(resy)d,%(resz)d)"
-      zoomlevels: %(zoomlevels)d"""
+		- folder: "channel%(num)d"
+			name: "%(name)s"
+			metadata: "%(metadata)s"
+			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
+			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
+			zoomlevels: %(zoomlevels)d"""
 
 			template_composite_channels = """
-      - stack: "channel%(num)d"
-        color: "%(color)s\""""
+			- stack: "channel%(num)d"
+				color: "%(color)s\""""
 
 			channels_string = ""
+
 			composite_channels_string = ""
 			for c in range( 0, self.channels ):
 				context_channels = {
 					'num' : c,
 					'name' : "Channel " + str( c ),
-					'metadata' : "...",
+					'metadata' : self.metadata[c],
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
 					'dimz' : self.image.dimensions[3],
-					'resx' : 100,
-					'resy' : 100,
-					'resz' : 100,
+					'resx' : self.resolution[0],
+					'resy' : self.resolution[1],
+					'resz' : self.resolution[2],
 					'zoomlevels' : self.scaleLevels,
 					'color' : self.colors[c]
 				}
@@ -115,17 +146,17 @@ class ConvertJob:
 			# Add composite channel to YAML string
 
 			channels_string = channels_string + """
-    - folder: "composite"
-      name: "Composite"
-      dimension: "(%(dimx)d,%(dimy)d,%(dimz)d)"
-      resolution: "(%(resx)d,%(resy)d,%(resz)d)"
-      channels:%(composite_channels)s""" % {
+		- folder: "composite"
+			name: "Composite"
+			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
+			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
+			channels:%(composite_channels)s""" % {
 					'dimx' : self.image.dimensions[0],
 					'dimy' : self.image.dimensions[1],
 					'dimz' : self.image.dimensions[3],
-					'resx' : 100,
-					'resy' : 100,
-					'resz' : 100,
+					'resx' : self.resolution[0],
+					'resy' : self.resolution[1],
+					'resz' : self.resolution[2],
 					'composite_channels' : composite_channels_string
 				}
 
@@ -133,8 +164,8 @@ class ConvertJob:
 			# Generate main YAML string
 
 			yaml_string = """project:
-  name: "%(name)s"
-  stacks:%(channels)s""" % {
+	name: "%(name)s"
+	stacks:%(channels)s""" % {
 				'name' : self.projectName,
 				'channels' : channels_string
 			}
@@ -202,6 +233,16 @@ def getDataPart( job, data, lineStart ):
 		job.log("\tCould not find \"" + lineStart + "\"" )
 		return None
 
+class OutputSelectHandler(ActionListener):
+	def __init__(self, job, callback):
+		self.job = job
+		self.callback = callback
+
+	def actionPerformed(self, event):
+		self.job.askForOutputDir()
+		if self.callback:
+			self.callback()
+
 class CancelHandler(ActionListener):
 	def __init__(self, job, frame):
 		self.job = job
@@ -233,6 +274,12 @@ class StartHandler(ActionListener):
 			except:
 				print("ERR: invalid value for Scale Levels")
 
+		resolution = [float(r.strip()) for r in resolutionTf.getText().split(",")]
+		if len(resolution) != 3:
+			print("ERR: invalid resolution")
+			return
+		else:
+			job.resolution = resolution
 
 		self.job.metadata = [tf.getText() for tf in formMetadata]
 		self.job.colors = [tf.getSelectedItem() for tf in formColors]
@@ -255,20 +302,35 @@ class StartHandler(ActionListener):
 		self.frame.setVisible(False)
 		self.frame.dispose()
 
-# get Image
-imp = IJ.getImage()
+# Get Image
+def getImage():
+	"""Get first open image or open Bio-Formats importer if no image is
+	available."""
+	imp = WindowManager.getCurrentImage()
+	if not imp:
+		# Show bio formats open dialog
+		IJ.run("Bio-Formats")
+		imp = WindowManager.getCurrentImage()
+		print("Start")
+	if not imp:
+		IJ.noImage()
+		raise ValueError("Need image")	
+	return imp
 
+imp = getImage()
 print( "Using open image: " + str(imp))
 
-job = ConvertJob()
-job.image = imp
-job.width = imp.width
-job.height = imp.height
-job.slices = imp.getNSlices()
-job.channels = imp.getNChannels()
-job.projectName = imp.getShortTitle()
+job = ConvertJob(imp)
 
-job.outputDir = imp.getOriginalFileInfo().directory
+fileInfo = imp.getOriginalFileInfo()
+
+if not fileInfo:
+	# Ask for ourput dir
+	job.askForOutputDir()
+else:
+	job.outputDir = fileInfo.directory
+
+job.validate()
 
 #imgInfo = Info()
 #p = imp.getChannelProcessor()
@@ -299,10 +361,26 @@ scaleLevelsTf = JTextField()
 inputPanel.add(JLabel("Scale levels (empty=automatic)"))
 inputPanel.add(scaleLevelsTf)
 
-
+resolutionTf = JTextField()
+inputPanel.add(JLabel("Resolution"))
+inputPanel.add(resolutionTf)
+resolutionTf.setText("%s, %s, %s" % job.resolution)
 inputPanel.add(JLabel("Output Directory"))
+outputDirPanel = JPanel()
+outputDirPanel.setLayout(BorderLayout())
 outputDirTf = JTextField(job.outputDir)
-inputPanel.add(outputDirTf)
+outputDirPanel.add(outputDirTf, BorderLayout.CENTER)
+outputDirSelect = JButton("...")
+
+def refreshOutput():
+	if job.outputDir:
+		outputDirTf.setText(job.outputDir)
+	else:
+		outputDirTf.setText("")
+
+outputDirSelect.addActionListener(OutputSelectHandler(job, refreshOutput))
+outputDirPanel.add(outputDirSelect, BorderLayout.EAST)
+inputPanel.add(outputDirPanel)
 
 # Generate default metadata string
 # mdList = []
