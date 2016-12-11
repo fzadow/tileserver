@@ -10,7 +10,7 @@ import time
 import math
 
 from ij import Prefs
-from ij import IJ
+from ij import IJ, WindowManager
 from ij import Menus
 from ij.io import DirectoryChooser
 from ij.plugin.filter import Info
@@ -302,9 +302,22 @@ class StartHandler(ActionListener):
 		self.frame.setVisible(False)
 		self.frame.dispose()
 
-# get Image
-imp = IJ.getImage()
+# Get Image
+def getImage():
+	"""Get first open image or open Bio-Formats importer if no image is
+	available."""
+	imp = WindowManager.getCurrentImage()
+	if not imp:
+		# Show bio formats open dialog
+		IJ.run("Bio-Formats")
+		imp = WindowManager.getCurrentImage()
+		print("Start")
+	if not imp:
+		IJ.noImage()
+		raise ValueError("Need image")	
+	return imp
 
+imp = getImage()
 print( "Using open image: " + str(imp))
 
 job = ConvertJob(imp)
