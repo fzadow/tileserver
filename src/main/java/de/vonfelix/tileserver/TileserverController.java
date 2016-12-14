@@ -164,7 +164,7 @@ public class TileserverController {
 
 	}
 
-	@RequestMapping( method=RequestMethod.GET, value = {"/list"}, produces = "application/json" )
+	@RequestMapping( method = RequestMethod.GET, value = { "/list" }, produces = "application/yaml" )
 	@ResponseBody
 	public String getList( HttpServletResponse resp, HttpServletRequest req ) {
 		return imageProxy.getList();
