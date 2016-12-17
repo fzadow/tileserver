@@ -44,7 +44,9 @@ class ConvertJob:
 		self.height = imp.height
 		self.slices = imp.getNSlices()
 		self.channels = imp.getNChannels()
-		self.projectName = imp.getShortTitle()
+		self.imageName = imp.getShortTitle()
+		self.displayMin = imp.getDisplayRangeMin()
+		self.displayMax = imp.getDisplayRangeMax()
 
 		self.resolution = self.getResolution()
 		self.metadata = ''
@@ -121,7 +123,11 @@ class ConvertJob:
 			metadata: "%(metadata)s"
 			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
 			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
-			zoomlevels: %(zoomlevels)d"""
+			zoomlevels: %(zoomlevels)d
+			orientation: %(orientation)s
+			stackgroups:
+			- name: %(stackgroup)s
+			  relation: %(stackgroup_rel)s"""
 
 			template_composite_channels = """
 			- stack: "channel%(num)d"
@@ -129,9 +135,23 @@ class ConvertJob:
 
 			channels_string = ""
 
+			orientations = []
 			composite_channels_string = ""
 			zoomlevels = -1 if self.scaleLevelsGenerated else self.scaleLevels
 			for c in range( 0, self.channels ):
+				stackType = self.stackTypes[c]
+				if stackType == 'Image channel':
+					sg_rel = 'has_channel'
+					orientation = 'xy'
+				else:
+					sg_rel = 'has_view'
+					if stackType == 'XZ View':
+						orientation = 'xz'
+					elif stackType == 'ZY View':
+						orientation = 'zy'
+
+				orientations.append(orientation)
+
 				context_channels = {
 					'num' : c,
 					'name' : "Channel " + str( c ),
@@ -143,18 +163,31 @@ class ConvertJob:
 					'resy' : self.resolution[1],
 					'resz' : self.resolution[2],
 					'zoomlevels': zoomlevels,
-					'color' : self.colors[c]
+					'color' : self.colors[c],
+					'stackgroup': self.imageName,
+					'stackgroup_rel': sg_rel,
+					'orientation': orientation
 				}
 				channels_string = channels_string + template_channels % context_channels
 				composite_channels_string = composite_channels_string + template_composite_channels % context_channels
 
 
-			# Add composite channel to YAML string
+			
+			# Find consistently used orientation or default to 'xy'
+			dominant_orientation = reduce(lambda x, y: x if x == y else None, orientations)
+			if not dominant_orientation:
+				dominant_orientation = 'xy'
 
+			# Add composite channel to YAML string
 			channels_string = channels_string + """
 		- folder: "composite"
 			name: "Composite"
 			dimension: "(%(dimx)s,%(dimy)s,%(dimz)s)"
+			zoomlevels: %(zoomlevels)d
+			orientation: %(orientation)s
+			stackgroups:
+			- name: %(stackgroup)s
+			  relation: has_channel
 			resolution: "(%(resx)s,%(resy)s,%(resz)s)"
 			channels:%(composite_channels)s""" % {
 					'dimx' : self.image.dimensions[0],
@@ -163,16 +196,26 @@ class ConvertJob:
 					'resx' : self.resolution[0],
 					'resy' : self.resolution[1],
 					'resz' : self.resolution[2],
-					'composite_channels' : composite_channels_string
+					'composite_channels' : composite_channels_string,
+					'stackgroup': self.imageName,
+					'orientation': dominant_orientation,
+					'zoomlevels': zoomlevels
 				}
 
 
 			# Generate main YAML string
 
 			yaml_string = """project:
-	name: "%(name)s"
+	name: "%(project_name)s"
+	stackgroups:
+	  -name: "%(name)s"
+	   min: %(min)s
+	   max: %(max)s
 	stacks:%(channels)s""" % {
-				'name' : self.projectName,
+				'project_name' : self.projectName,
+				'name' : self.imageName,
+				'min': self.displayMin,
+				'max': self.displayMax,
 				'channels' : channels_string
 			}
 
@@ -270,7 +313,16 @@ class StartHandler(ActionListener):
 
 	def actionPerformed(self, event):
 #		global currently_asking
-		self.job.projectName = projectNameTf.getText()
+		self.job.projectName = projectNameTf.getText().strip()
+		if 0 == len(self.job.projectName):
+			print("ERR: invalid project name")
+			return
+
+		self.job.imageName = imageNameTf.getText().strip()
+		if 0 == len(self.job.imageName):
+			print("ERR: invalid image name")
+			return
+
 		scaleLevels = scaleLevelsTf.getText()
 		if scaleLevels == "":
 			self.job.setScaleLevels(0)
@@ -289,6 +341,7 @@ class StartHandler(ActionListener):
 
 		self.job.metadata = [tf.getText() for tf in formMetadata]
 		self.job.colors = [tf.getSelectedItem() for tf in formColors]
+		self.job.stackTypes = [tf.getSelectedItem() for tf in formType]
 
 		#self.job.
 		self.job.outputPathWithoutExtension = os.path.join( job.outputDir, job.projectName )
@@ -360,8 +413,13 @@ inputPanel.add(JLabel("Image Dimensions"))
 inputPanel.add(JLabel( str(job.width) + " x " + str(job.height) + ", " + str(job.slices) + " slices, " + str(job.channels) + " stacks" ))
 
 projectNameTf = JTextField(job.projectName)
-inputPanel.add(JLabel("Image Name"))
+inputPanel.add(JLabel("Project Name"))
 inputPanel.add(projectNameTf)
+
+imageNameTf = JTextField(job.imageName)
+inputPanel.add(JLabel("Image Name"))
+inputPanel.add(imageNameTf)
+
 
 scaleLevelsTf = JTextField()
 inputPanel.add(JLabel("Scale levels (empty=automatic)"))
@@ -371,6 +429,17 @@ resolutionTf = JTextField()
 inputPanel.add(JLabel("Resolution"))
 inputPanel.add(resolutionTf)
 resolutionTf.setText("%s, %s, %s" % job.resolution)
+
+defaultMinTf = JTextField()
+inputPanel.add(JLabel("Default display range min"))
+inputPanel.add(defaultMinTf)
+defaultMinTf.setText(str(job.displayMin))
+
+defaultMaxTf = JTextField()
+inputPanel.add(JLabel("Default display range max"))
+inputPanel.add(defaultMaxTf)
+defaultMaxTf.setText(str(job.displayMax))
+
 inputPanel.add(JLabel("Output Directory"))
 outputDirPanel = JPanel()
 outputDirPanel.setLayout(BorderLayout())
@@ -408,6 +477,7 @@ inputPanel.add(outputDirPanel)
 formChannelNames = []
 formMetadata = []
 formColors = []
+formType = []
 
 for i in range( 0, job.channels ):
 	inputPanel.add(JLabel("Stack " + str(i+1)))
@@ -433,6 +503,13 @@ for i in range( 0, job.channels ):
 	formColors[i].select(i)
 	inputPanel.add(formColors[i])
 
+	inputPanel.add(JLabel("  Type"))
+	formType.append(Choice())
+	formType[i].add("Image channel")
+	formType[i].add("XY View")
+	formType[i].add("XZ View")
+	formType[i].add("ZY View")
+	inputPanel.add(formType[i])
 
 controlPanel = JPanel()
 controlPanel.setLayout(GridLayout(1,3))
