@@ -37,7 +37,7 @@ class ConvertJob:
 	def __init__(self, imp):
 		self.logMessages = []
 		self.projectName = ""
-		self.tileSize = 512
+		self.tileSize = 16
 
 		self.image = imp
 		self.width = imp.width
