@@ -125,7 +125,7 @@ class ConvertJob:
 
 			template_composite_channels = """
 			- stack: "channel%(num)d"
-				color: "%(color)s\""""
+			  color: "%(color)s\""""
 
 			channels_string = ""
 
