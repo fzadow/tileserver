@@ -49,6 +49,9 @@ class ConvertJob:
 		self.resolution = self.getResolution()
 		self.metadata = ''
 
+		self.scaleLevels = -1
+		self.scaleLevelsGenerated = False
+
 	def setScaleLevels(self, scaleLevels):
 		if not self.image:
 			print("ERR: image not set")
@@ -56,7 +59,9 @@ class ConvertJob:
 		if not self.tileSize:
 			print("ERR: tile size not set")
 			return
-		if scaleLevels == 0:
+
+		self.scaleLevelsGenerated = (scaleLevels == 0)
+		if self.scaleLevelsGenerated:
 			self.scaleLevels = int( math.log( max( self.image.dimensions[0], self.image.dimensions[1] ) / self.tileSize, 2 ) ) + 1
 		else:
 			self.scaleLevels = scaleLevels
@@ -125,6 +130,7 @@ class ConvertJob:
 			channels_string = ""
 
 			composite_channels_string = ""
+			zoomlevels = -1 if self.scaleLevelsGenerated else self.scaleLevels
 			for c in range( 0, self.channels ):
 				context_channels = {
 					'num' : c,
@@ -136,7 +142,7 @@ class ConvertJob:
 					'resx' : self.resolution[0],
 					'resy' : self.resolution[1],
 					'resz' : self.resolution[2],
-					'zoomlevels' : self.scaleLevels,
+					'zoomlevels': zoomlevels,
 					'color' : self.colors[c]
 				}
 				channels_string = channels_string + template_channels % context_channels
