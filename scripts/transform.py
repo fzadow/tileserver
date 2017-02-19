@@ -16,12 +16,21 @@ data['project']['name'] = "DOT"
 
 # Stackgroups eintragen
 if not 'stackgroups' in data['project']:
-	data['project']['stackgroups'] = [{'name': name, 'min': 0, 'max':255}]
+	data['project']['stackgroups'] = [{'title': name, 'min': 0, 'max':255}]
 
 # Dateiname als "path"
 for stack in data['project']['stacks']:
-	stack['path'] = os.path.splitext(filename)[0]
-	stack['stackgroups'] = [{'name': name, 'relation': 'has_channel'}]
+	folder = stack['folder']
+	del stack['folder']
+
+	stack['stackgroups'] = [{
+			'name': name,
+			'relation': 'has_channel'}]
+	stack['mirrors'] = [{
+			'title': 'Dresden',
+			'folder':folder,
+			'tile_source_type':'9',
+			'path':os.path.splitext(filename)[0]}]
 
 
 
