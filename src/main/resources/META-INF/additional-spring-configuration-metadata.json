@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "tilebuilder.debug.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable TileBuilder debugging"
+  },
+  {
+    "name": "tilebuilder.thumbnail_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'tilebuilder.thumbnail_size'"
+  },
+  {
+    "name": "tilebuilder.gamma",
+    "type": "java.lang.Double",
+    "description": "A description for 'tilebuilder.gamma'"
+  },
+  {
+    "name": "tilebuilder.tile_dir",
+    "type": "java.lang.String",
+    "description": "A description for 'tilebuilder.tile_dir'"
+  }
+]}
