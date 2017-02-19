@@ -2,7 +2,7 @@
   {
     "name": "tilebuilder.debug.enabled",
     "type": "java.lang.Boolean",
-    "description": "Enable TileBuilder debugging"
+    "description": "Enable TileBuilder debugging. When debugging is enabled, several other debugging options can take effect and will change certain aspects of TileBuilder like the rendering of tiles and caching behaviour."
   },
   {
     "name": "tilebuilder.thumbnail_size",
@@ -18,5 +18,15 @@
     "name": "tilebuilder.tile_dir",
     "type": "java.lang.String",
     "description": "A description for 'tilebuilder.tile_dir'"
+  },
+  {
+    "name": "tilebuilder.debug.tile.bounds",
+    "type": "java.lang.String",
+    "description": "When enabled, a 1 pixel border will be rendered around (but inside) each tile. This option needs tilebuilder.debug.enabled to be true."
+  },
+  {
+    "name": "tilebuilder.debug.tile.overlap",
+    "type": "java.lang.String",
+    "description": "When enabled, areas within a tile that are not actually occupied by image data will be highlighted. This option needs tilebuilder.debug.enabled to be true."
   }
 ]}
