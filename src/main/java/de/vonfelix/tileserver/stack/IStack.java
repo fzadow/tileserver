@@ -1,9 +1,8 @@
 package de.vonfelix.tileserver.stack;
 
-import de.vonfelix.tileserver.MaxValue;
 import de.vonfelix.tileserver.image.IImage;
 
-public interface IStack extends MaxValue {
+public interface IStack {
 
 	public IImage getImage();
 	public String getId();
@@ -26,4 +25,12 @@ public interface IStack extends MaxValue {
 	public long getHeight( int scaleLevel );
 
 	public long getDepth( int scaleLevel );
+
+	public int getMin();
+
+	public int getMax();
+
+	public void setMin(int min);
+
+	public void setMax(int max);
 }

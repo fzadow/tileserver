@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.core.env.Environment;
 
 import de.vonfelix.tileserver.Color;
-import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.TileOutOfBoundsException;
 import de.vonfelix.tileserver.stack.Channel;
 import de.vonfelix.tileserver.stack.CompositeStack;
@@ -22,7 +22,13 @@ import de.vonfelix.tileserver.stack.SimpleStack;
 
 public class TileGenerator {
 
+	private Environment env;
+
 	static Logger logger = LogManager.getLogger();
+
+	public TileGenerator( Environment env ) {
+		this.env = env;
+	}
 
 	/*
 	 * create a custom LinkedHashMap that holds 40 entries (~10 MB) and discards the last recently
@@ -54,7 +60,8 @@ public class TileGenerator {
 		// key to identify map
 		String key = min + ":" + max + ":" + exp;
 
-		if ( !grayMaps.containsKey( key ) || ( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) && Boolean.parseBoolean( Tileserver.getProperty( "debug_regenerate_colormap" ) ) ) ) {
+		if (!grayMaps.containsKey(key) || (env.getProperty("tilebuilder.debug.enabled", Boolean.class)
+				&& env.getProperty("tilebuilder.debug.regenerate_colormap", Boolean.class))) {
 			long startTime = System.nanoTime();
 
 			// map to 8 bit
@@ -120,7 +127,9 @@ public class TileGenerator {
 		Color color = null;
 		
 		for( int i= 0; i < numberOfChannels; ++i ) {
-			exp = ( parameters.has( EXPONENTS ) && i < parameters.<Double[]> get( EXPONENTS ).length ) ? parameters.<Double[]> get( EXPONENTS )[ i ] : Tileserver.hasProperty( "contrast_adj_exp" ) ? Double.parseDouble( Tileserver.getProperty( "contrast_adj_exp" ) ) : 1;
+			exp = ( parameters.has( EXPONENTS ) && i < parameters.<Double[]> get( EXPONENTS ).length )
+					? parameters.<Double[]> get( EXPONENTS )[ i ]
+					: env.getProperty( "tilebuilder.gamma", Double.class, 1d );
 
 			if( composite ) {
 				Channel channel = ( (CompositeStack) stack ).getChannel( i );
@@ -182,8 +191,34 @@ public class TileGenerator {
 			}
 		}
 
-		BufferedImage img = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
-		img.setRGB( 0, 0, width, height, rgb, 0, width );
+		// Show tile overlap if debugging enabled
+		if (env.getProperty("tilebuilder.debug.enabled", Boolean.class, false)
+				&& env.getProperty("tilebuilder.debug.tile.overlap", Boolean.class, false)) {
+			if (tile_width < width || tile_height < height) {
+				for (int y = 0; y < height; ++y) {
+					for (int x = 0; x < width; ++x) {
+						if (x > tile_width || y > tile_height) {
+							rgb[width * y + x] = 255 << 16 | 255 << 8 | 127;
+						}
+					}
+				}
+			}
+		}
+
+		// Show Border if debugging enabled
+		if (env.getProperty("tilebuilder.debug.enabled", Boolean.class, false)
+				&& env.getProperty("tilebuilder.debug.tile.bounds", Boolean.class, false)) {
+			for (int i = 0; i < width; ++i) {
+				rgb[i] = 255 << 16 | 0 << 8 | 0; // top
+				rgb[width * i] = 0 << 16 | 255 << 8 | 255; // left
+				rgb[width * i + width - 1] = 255 << 16 | 0 << 8 | 255; // right
+				rgb[i + (width - 1) * (width - 1)] = 0 << 16 | 255 << 8 | 0; // bottom
+			}
+		}
+
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		img.setRGB(0, 0, width, height, rgb, 0, width);
 
 		logger.debug( "tile generated (" + ( System.nanoTime() - startTime ) / 1000000 + "ms)" );
 

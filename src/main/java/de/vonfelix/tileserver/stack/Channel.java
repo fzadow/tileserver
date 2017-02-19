@@ -10,7 +10,8 @@ public class Channel implements MaxValue, Adjustable {
 
 	private SimpleStack simpleStack;
 	private Color color;
-	private int valueLimit;
+	private int min;
+	private int max;
 
 	public Channel( SimpleStack simpleStack, Color color ) {
 		this.simpleStack= simpleStack;
@@ -31,15 +32,26 @@ public class Channel implements MaxValue, Adjustable {
 
 	@Override
 	public void setMax( int max ) {
-		this.valueLimit = max;
+		this.max = max;
 	}
 
 	@Override
 	public int getMax() {
-		if ( valueLimit == 0 ) {
+		if ( max == 0 ) {
 			return simpleStack.getMax();
 		}
-		return valueLimit;
+		return max;
+	}
+
+	public void setMin(int min) {
+		this.min = min;
+	}
+
+	public int getMin() {
+		if (min == 0) {
+			return simpleStack.getMin();
+		}
+		return min;
 	}
 
 	@Override
@@ -58,11 +70,11 @@ public class Channel implements MaxValue, Adjustable {
 					"CONTRAST_EXPONENT adjustment not yet implemented in" + this.getClass() );
 			// break;
 		case MAX_VALUE:
-			this.valueLimit = (int) value;
+			this.max = (int) value;
 			break;
 		case MIN_VALUE:
-			throw new NotImplementedException( "MIN_VALUE adjustment not yet implemented in" + this.getClass() );
-			// break;
+			this.min = (int) value;
+			break;
 		default:
 			break;
 		}

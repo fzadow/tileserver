@@ -2,17 +2,31 @@ package de.vonfelix.tileserver.image;
 
 import java.util.HashMap;
 
-import de.vonfelix.tileserver.Tileserver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+
 import de.vonfelix.tileserver.exception.StackNotFoundException;
 import de.vonfelix.tileserver.stack.IStack;
 
 public abstract class AbstractImage implements IImage {
 
+	@Autowired
+	private Environment env;
+
 	protected String name;
-	protected int max = Integer.parseInt( Tileserver.getProperty( "max" ) );
-	protected int min = Integer.parseInt( Tileserver.getProperty( "min" ) );
+
+	@Value( "${tilebuilder.min}" )
+	protected int min;
+
+	@Value( "${tilebuilder.max}" )
+	protected int max;
+
 	protected HashMap<String, IStack> stacks = new HashMap<>();
+	// protected HashMap<String, V> stackgroups = new HashMap<>();
 	
+	protected HashMap<String, Object> configurationValues = new HashMap<>();
+
 	public AbstractImage( String name ) {
 		this.name = name;
 	}
@@ -34,6 +48,16 @@ public abstract class AbstractImage implements IImage {
 	public String getName() {
 		return name;
 	};
+
+	@Override
+	public void setMin(int min) {
+		this.min = min;
+	}
+
+	@Override
+	public int getMin() {
+		return min;
+	}
 	
 	@Override
 	public void setMax( int max ) {
@@ -43,5 +67,9 @@ public abstract class AbstractImage implements IImage {
 	@Override
 	public int getMax() {
 		return max;
+	}
+
+	public Object getConfiguration() {
+		return null;
 	}
 }

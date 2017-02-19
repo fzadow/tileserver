@@ -1,24 +1,47 @@
 
-This is the TileBuilder tile server. It serves image tiles for [CATMAID](https://github.com/catmaid/CATMAID). TileBuilder is a self-contained Java application that launches a web server on port 8000. TileBuilder reads images in a specialized HDF5 format which can be generated with the [Fiji plugin from the /scripts directory](https://github.com/fzadow/tileserver/tree/master/scripts).
+This is the TileBuilder tile server. It serves image tiles for [CATMAID](https://github.com/catmaid/CATMAID). TileBuilder is a self-contained Java application that launches a web server on a configurable port (default: 8080). TileBuilder reads images in a specialized HDF5 format which can be generated with the [Fiji plugin from the /scripts directory](https://github.com/fzadow/tileserver/tree/master/scripts).
 
-# Simple Installation
+TileBuilder has been tested to run with Java 7 and 8.
 
-* Make sure Java 8 is installed on your server.
-* Download the [WAR file from the /target directory](https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war) to your server, for example by using the wget command
+# Simple Installation (using the pre-built TileBuilder.war)
 
-  `wget https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war`.
-* create `/opt/etc/tileserver/config.properties` or edit the `config.properties` within the WAR.
-* customize config.properties (see https://github.com/fzadow/tileserver/blob/master/config.properties):
+* Create a directory that you want to run TileBuilder from on your web server and change to that directory. For example, go to your home (`~`) directory and create the directory "tilebuilder":
+
+```
+cd ~
+mkdir tilebuilder
+cd tilebuilder
+```
+
+* Within the directory you created, create another directory that will later hold the images TileBuilder will serve.
+
+```
+mkdir images
+```
+
+
+* Download the [WAR file from the /target directory](https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war) and the [sample configuration file](https://github.com/fzadow/tileserver/raw/master/config.properties) to your server, for example by using these commands
+
+```
+wget https://github.com/fzadow/tileserver/raw/master/target/tilebuilder.war
+wget https://github.com/fzadow/tileserver/raw/master/config.properties
+```
+
+* customize the file config.properties you just downloaded:
 	* source_image_dir
 	* tile_dir
 	* writable_tile_dir
-* run with `java -jar tilebuilder.war`
 
-# Command line options
+* run TileBuilder `java -jar tilebuilder.war`
 
-These command line options can be used when running tilebuilder:
+## Command line options
+
+These command line options can be used when running TileBuilder:
 
 * `--server.port=9000` runs Tilebuilder on port 9000 instead of the default (8080)
+* `-Dlevel=DEBUG` to enable debug output
+
+
 
 # Usage
 

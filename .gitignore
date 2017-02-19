@@ -6,3 +6,10 @@ target/*
 
 /img.jpg
 /target/
+/.README.md.html
+
+.settings/
+.metadata/
+.mvn/
+.classpath
+.project

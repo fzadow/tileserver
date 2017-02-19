@@ -10,11 +10,14 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.exception.ImageNotFoundException;
 
 /**
@@ -23,41 +26,41 @@ import de.vonfelix.tileserver.exception.ImageNotFoundException;
  * @author felix
  *
  */
+@Service
 public class ImageProxy {
+
+	@Autowired
+	private Environment env;
+
+	@Value( "${tilebuilder.debug.enabled}" )
+	Boolean debug_enabled;
+
+	@Value("${tilebuilder.debug.reload_image}")
+	Boolean debug_reload_image;
+
+	@Value( "${tilebuilder.source_image_dir}" )
+	String source_image_dir;
 
 	static Logger logger = LogManager.getLogger();
 
-	private static ImageProxy instance;
-
-	private ImageProxy() {
-	}
-
-	public static synchronized ImageProxy getInstance() {
-		if ( ImageProxy.instance == null ) {
-			ImageProxy.instance = new ImageProxy();
-			logger.info( "ImageProxy initialized. Source directory: " + Tileserver.getProperty( "source_image_dir" ) );
-		}
-		return ImageProxy.instance;
-	}
-
 	HashMap<String, AbstractImage> images = new HashMap<>();
-	
 
 	public synchronized AbstractImage getImage( String name ) {
 
-		logger.debug( "getting image " + name );
+		logger.debug("Getting image " + name);
 
-		if( ! images.containsKey( name ) ||
-				( Boolean.parseBoolean( Tileserver.getProperty( "debug" ) ) &&
-				Boolean.parseBoolean( Tileserver.getProperty( "debug_reload_image" ) ) ) ) {
-			if( ! new File( Tileserver.getProperty("source_image_dir") + name + ".h5" ).exists() ) {
+		if ( !images.containsKey( name ) || ( debug_enabled && debug_reload_image ) ) {
+			if ( !new File( source_image_dir + name + ".h5" ).exists() ) {
 				throw new ImageNotFoundException( name );
 			}
-			logger.info( "loading image " + name );
+			logger.info("Loading image " + name);
 
-			images.put( name, new HDF5YAMLImage( name ) );
+			HDF5YAMLImage img = new HDF5YAMLImage( env, name );
+			img.initialize();
+			images.put( name, img );
 		}
-		//logger.trace( "current size of images map: " + GraphLayout.parseInstance( images ).totalSize() / 1024 + "kb" );
+		// logger.trace("current size of images map: " +
+		// GraphLayout.parseInstance(images).totalSize() / 1024 + "kb");
 		return images.get( name );
 	}
 
@@ -85,7 +88,7 @@ public class ImageProxy {
 			}
 		};
 
-		File source_dir = new File( Tileserver.getProperty( "source_image_dir" ) );
+		File source_dir = new File( source_image_dir );
 		ArrayList<File> files = new ArrayList<File>( Arrays.asList( source_dir.listFiles( yamlFilter ) ) );
 
 		ArrayList<Object> data = new ArrayList<Object>();

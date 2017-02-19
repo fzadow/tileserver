@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.annotation.PostConstruct;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -18,11 +19,33 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imgscalr.Scalr;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
-import de.vonfelix.tileserver.Tileserver;
 import de.vonfelix.tileserver.stack.IStack;
 
+@Service
+@EnableAutoConfiguration
+@Configuration
+@PropertySource( "file:application.properties" )
 public class TileProxy {
+
+	@Autowired
+	Environment env;
+
+	@Autowired
+	private ApplicationContext appContext;
+
+	@Value( "${tilebuilder.tile_dir}" )
+	String tile_dir;
+	@Value( "${tilebuilder.writable_tile_dir}" )
+	String writable_tile_dir;
 
 	private File tileDir;
 	private File writableTileDir;
@@ -31,45 +54,48 @@ public class TileProxy {
 
 	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam( null );
 
-	private TileGenerator tileGenerator = new TileGenerator();
+	private TileGenerator tileGenerator;
 	private TileLog tileLog = TileLog.getInstance();
 
 	static Logger logger = LogManager.getLogger( TileProxy.class.getName() );
 
-	private static TileProxy instance;
-
-	public static synchronized TileProxy getInstance() {
-		if ( TileProxy.instance == null ) {
-			TileProxy.instance = new TileProxy();
-		}
-		return TileProxy.instance;
-	}
-
 	// TODO also try reading files from writable_tile_dir if possible
 
-	private TileProxy() {
-		if ( Tileserver.hasProperty( "tile_dir" ) ) {
-			if ( Files.isDirectory( Paths.get( Tileserver.getProperty( "tile_dir" ) ) ) ) {
-				tileDir = new File( Tileserver.getProperty( "tile_dir" ) );
-				logger.info( "Using tile_dir: " + Tileserver.getProperty( "tile_dir" ) );
+	public TileProxy() {
+	}
+
+	@PostConstruct
+	private void initialize() {
+		tileGenerator = new TileGenerator( env );
+
+		if ( env.containsProperty( "tilebuilder.tile_dir" ) ) {
+			if ( Files.isDirectory( Paths.get( tile_dir ) ) ) {
+				tileDir = new File( tile_dir );
+				logger.info( "Using tile_dir: " + tile_dir );
 			}
 		}
-		if ( Tileserver.hasProperty( "writable_tile_dir" ) ) {
-			if ( Files.isWritable( Paths.get( Tileserver.getProperty( "writable_tile_dir" ) ) ) && Files.isDirectory( Paths.get( Tileserver.getProperty( "writable_tile_dir" ) ) ) ) {
-				writableTileDir = new File( Tileserver.getProperty( "writable_tile_dir" ) );
-				logger.info( "Using writable tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) );
+		if ( env.containsProperty( "tilebuilder.writable_tile_dir" ) ) {
+			if ( Files.isWritable( Paths.get( writable_tile_dir ) )
+					&& Files.isDirectory( Paths.get( writable_tile_dir ) ) ) {
+				writableTileDir = new File( writable_tile_dir );
+				logger.info( "Using writable tile_dir: " + writable_tile_dir );
 			} else {
-				logger.error( "writable_tile_dir: " + Tileserver.getProperty( "writable_tile_dir" ) + " is not writable (or not a directory" );
+				logger.error( "writable_tile_dir: " + writable_tile_dir
+						+ " is not writable (or not a directory" );
 			}
 		}
 
-		this.bDiskRead = tileDir != null && tileDir.isDirectory() && Tileserver.hasProperty( "read_from_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "read_from_disk" ) );
-		this.bDiskWrite = writableTileDir != null && writableTileDir.isDirectory() && Tileserver.hasProperty( "save_to_disk" ) && Boolean.parseBoolean( Tileserver.getProperty( "save_to_disk" ) );
+		this.bDiskRead = tileDir != null && tileDir.isDirectory()
+				&& env.containsProperty( "tilebuilder.read_from_disk" )
+				&& env.getProperty( "tilebuilder.read_from_disk", Boolean.class );
+		this.bDiskWrite = writableTileDir != null && writableTileDir.isDirectory()
+				&& env.containsProperty( "tilebuilder.save_to_disk" )
+				&& env.getProperty( "tilebuilder.save_to_disk", Boolean.class );
 
 		jpegParams.setCompressionMode( ImageWriteParam.MODE_EXPLICIT );
 		jpegParams.setCompressionQuality( 0.0f );
-
 	}
+
 
 	/**
 	 * get a JPEG tile at the given coordinates with the given parameters
@@ -163,5 +189,6 @@ public class TileProxy {
 		}
 
 		return baos.toByteArray();
-	};
+	}
+
 }
