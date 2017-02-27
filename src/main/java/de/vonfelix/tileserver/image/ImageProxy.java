@@ -1,13 +1,12 @@
 package de.vonfelix.tileserver.image;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +52,10 @@ public class ImageProxy {
 			if ( !new File( source_image_dir + name + ".h5" ).exists() ) {
 				throw new ImageNotFoundException( name );
 			}
-			logger.info("Loading image " + name);
+			logger.info("Image " + name + " not yet loaded. Loading...");
 
 			HDF5YAMLImage img = new HDF5YAMLImage( env, name );
-			img.initialize();
+			// img.initialize();
 			images.put( name, img );
 		}
 		// logger.trace("current size of images map: " +
@@ -69,6 +68,7 @@ public class ImageProxy {
 		logger.debug( "getting list of all images" );
 		long startTime = System.nanoTime();
 
+		// FilenameFilter to get all YAML files
 		FilenameFilter yamlFilter = new FilenameFilter() {
 			@Override
 			public boolean accept( File dir, String name ) {
@@ -95,14 +95,22 @@ public class ImageProxy {
 
 		for ( File file : files ) {
 			try {
-				Yaml yaml = new Yaml();
-				data.add( yaml.load( new FileInputStream( file ) ) );
+				// Check if file has already been loaded
+				String name = FilenameUtils.removeExtension(file.getName());
+				HDF5YAMLImage image = (HDF5YAMLImage) images.get(name);
+
+				if (image != null) {
+					data.add(image.getConfigurationYaml());
+				} else {
+					image = new HDF5YAMLImage(env, name);
+					data.add(image.getConfigurationYaml());
+				}
+
+				// Yaml yaml = new Yaml();
+				// data.add( yaml.load( new FileInputStream( file ) ) );
 
 				// list.put( file.getName(), new String( Files.readAllBytes(
 				// Paths.get( file.getPath() ) ) ) );
-			} catch ( IOException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch ( ScannerException e ) {
 				logger.error( "Error loading YAML file: " + file.getName() );
 			}

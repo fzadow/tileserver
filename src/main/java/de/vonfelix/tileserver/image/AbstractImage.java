@@ -14,6 +14,8 @@ public abstract class AbstractImage implements IImage {
 	@Autowired
 	private Environment env;
 
+	private Boolean loaded = false;
+
 	protected String name;
 
 	@Value( "${tilebuilder.min}" )
@@ -31,6 +33,8 @@ public abstract class AbstractImage implements IImage {
 		this.name = name;
 	}
 
+	public abstract void loadImage();
+
 	@Override
 	public int getNumStacks() {
 		return stacks.size();
@@ -38,6 +42,9 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public IStack getStack( String name ) throws StackNotFoundException {
+		if (!loaded) {
+			loadImage();
+		}
 		if ( stacks.get( name ) == null ) {
 			throw new StackNotFoundException( name );
 		}
@@ -46,6 +53,9 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public String getName() {
+		if (!loaded) {
+			loadImage();
+		}
 		return name;
 	};
 
@@ -56,6 +66,9 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public int getMin() {
+		if (!loaded) {
+			loadImage();
+		}
 		return min;
 	}
 	
@@ -66,10 +79,10 @@ public abstract class AbstractImage implements IImage {
 	
 	@Override
 	public int getMax() {
+		if (!loaded) {
+			loadImage();
+		}
 		return max;
 	}
 
-	public Object getConfiguration() {
-		return null;
-	}
 }

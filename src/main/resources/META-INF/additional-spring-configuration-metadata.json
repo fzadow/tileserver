@@ -28,5 +28,10 @@
     "name": "tilebuilder.debug.tile.overlap",
     "type": "java.lang.String",
     "description": "When enabled, areas within a tile that are not actually occupied by image data will be highlighted. This option needs tilebuilder.debug.enabled to be true."
+  },
+  {
+    "name": "tilebuilder.tile_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'tilebuilder.tile_size'"
   }
 ]}

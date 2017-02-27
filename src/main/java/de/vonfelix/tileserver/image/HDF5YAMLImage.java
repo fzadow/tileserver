@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.env.Environment;
@@ -36,46 +34,78 @@ public class HDF5YAMLImage extends AbstractImage {
 
 	// private ImageConfiguration imageConfiguration;
 	
-	private HashMap<String, Object> configuration = new HashMap<>();
+	private HashMap<String, Object> configuration;
 
 	public HDF5YAMLImage( Environment env, String name ) {
 		super( name );
 		this.env = env;
 	}
 
-	@PostConstruct
-	public void initialize() {
+	private void loadConfiguration() {
+		if (configuration != null) {
+			logger.warn("Attempting to load configuration for image " + name + " although it has already been loaded");
+			return;
+		}
+		configuration = new HashMap<>();
+		logger.debug("reading YAML for " + name);
+		try {
+			InputStream input = new FileInputStream(env.getProperty("tilebuilder.source_image_dir") + name + ".yaml");
+			Yaml yaml = new Yaml();
+			configuration = (HashMap<String, Object>) yaml.load(input);
+
+			// Add tile_width and tile_height to YAML configuration
+
+			HashMap _project = (HashMap) ((HashMap<String, Object>) configuration).get("project");
+
+			List<HashMap<String, Object>> _stacks = (List) _project.get("stacks");
+
+			for (HashMap<String, Object> _stack : _stacks) {
+				List<HashMap<String, Object>> _mirrors = (List) _stack.get("mirrors");
+				if (_mirrors == null) {
+					throw new YamlConfigurationException("Invalid YAML configuration for image '" + name
+							+ "': YAML must define a valid 'mirrors' section for each stack.", configuration);
+				}
+				for (HashMap<String, Object> _mirror : _mirrors) {
+					_mirror.put("tile_width", env.getProperty("tilebuilder.tile_size", Integer.class));
+					_mirror.put("tile_height", env.getProperty("tilebuilder.tile_size", Integer.class));
+				}
+			}
+
+		} catch (IOException e) {
+			logger.error("Error loading configuration for image " + name);
+			configuration = null;
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public void loadImage() {
 		
 		logger.debug( "reading hdf5 for " + name );
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( env.getProperty( "tilebuilder.source_image_dir" ) + name + ".h5" );
-		
 
-		// read image info from YAML
-		try {
-			logger.debug( "reading YAML for " + name );
+		if( configuration == null ) {
+			loadConfiguration();
+		}
+		else {
+			HashMap _project = (HashMap) ((HashMap<String, Object>) configuration).get("project");
 
-			InputStream input = new FileInputStream( env.getProperty( "tilebuilder.source_image_dir" ) + name
-					+ ".yaml" );
-			Yaml yaml = new Yaml();
-			configuration = (HashMap<String, Object>) yaml.load(input);
-
-			HashMap project = (HashMap) ((HashMap<String, Object>) configuration).get("project");
-
-			Integer min = project.containsKey("min") ? (Integer) project.get("min")
+			Integer min = _project.containsKey("min") ? (Integer) _project.get("min")
 					: env.getProperty("tilebuilder.min", Integer.class);
-			Integer max = project.containsKey("max") ? (Integer) project.get("max")
+			Integer max = _project.containsKey("max") ? (Integer) _project.get("max")
 					: env.getProperty("tilebuilder.max", Integer.class);
 
 
-			List yamlstacks = (List) project.get("stacks");
+			List _yamlstacks = (List) _project.get("stacks");
 
 
 
 			/*
 			 * READ STACKS
 			 */
-			for ( Object s : yamlstacks ) {
+			for ( Object s : _yamlstacks ) {
 				HashMap<?, ?> st = (HashMap<?, ?>) s;
 
 				/*
@@ -96,8 +126,8 @@ public class HDF5YAMLImage extends AbstractImage {
 				HashMap<String, String> m = null;
 				for (Object mirror : mirrors) {
 					m = (HashMap) mirror;
-					String tileSourceType = (String) m.get("tile_source_type");
-					if (tileSourceType.equals(env.getProperty("tilebuilder.tile_source_type", "9"))) {
+					String _tileSourceType = (String) m.get("tile_source_type");
+					if (_tileSourceType.equals(env.getProperty("tilebuilder.tile_source_type", "9"))) {
 						id = (String) m.get("folder");
 						title = (String) m.get("title");
 						break;
@@ -108,8 +138,6 @@ public class HDF5YAMLImage extends AbstractImage {
 							+ "': Each stack must have exactly one mirror for tile source type 9 and contain 'folder' and 'title' keys. This is the stack in question: "
 							+ mirrors, configuration);
 				}
-				m.put("tile_width", env.getProperty("tilebuilder.tile_size"));
-				m.put("tile_height", env.getProperty("tilebuilder.tile_size"));
 
 				/*
 				 * If a Stack contains a key "channels", it's a composite stack.
@@ -168,25 +196,27 @@ public class HDF5YAMLImage extends AbstractImage {
 				logger.warn( "No stacks found for image " + name );
 			}
 
-		} catch ( IOException e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
 	@Override
-	public String getConfiguration() {
+	public String getConfigurationYaml() {
+		if (configuration == null) {
+			loadConfiguration();
+		}
+		if (configuration != null) {
+			// set options for YAML output
+			final DumperOptions options = new DumperOptions();
+			options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+			options.setPrettyFlow(true);
 
-		// set options for YAML output
-		final DumperOptions options = new DumperOptions();
-		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		options.setPrettyFlow(true);
+			Yaml y = new Yaml(options);
+			String s = y.dump(configuration);
+			logger.trace("Image configuration: " + configuration);
 
-		Yaml y = new Yaml(options);
-		String s = y.dump( configuration );
-		logger.trace("Image configuration: " + configuration);
-
-		return s;
+			return s;
+		}
+		return null;
 	}
 
 	// private void putConfigValues( AbstractStack stack, HashMap yamlStack ) {

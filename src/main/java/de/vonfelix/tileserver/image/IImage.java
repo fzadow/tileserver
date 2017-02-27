@@ -21,4 +21,6 @@ public interface IImage {
 	public void setMax(int max);
 
 	public int getMax();
+
+	public String getConfigurationYaml();
 }

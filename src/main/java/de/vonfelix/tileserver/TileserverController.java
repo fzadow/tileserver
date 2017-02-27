@@ -151,45 +151,11 @@ public class TileserverController {
 			HttpServletRequest req
 			) {
 
-		return (String) imageProxy.getImage( image_name ).getConfiguration();
+		return (String) imageProxy.getImage( image_name ).getConfigurationYaml();
 
 	}
 
-	// @RequestMapping( method=RequestMethod.GET,
-	// value = {"/{image_name}/project.yaml", "/{image_name}.yaml"} )
-	// @ResponseBody
-	// public void getYaml( HttpServletResponse resp,
-	// @PathVariable( "image_name" ) String image_name,
-	// HttpServletRequest req
-	// ) {
-	//
-	// // get request file name from URL
-	// String[] url = req.getAttribute(
-	// HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
-	// ).toString().split("/");
-	// // set response file name to request file name (either project.yaml or
-	// {image_name}.yaml
-	// resp.setHeader("Content-Disposition", "attachment;filename=" + url[
-	// url.length - 1 ] );
-	//
-	// logger.debug( "YAML request for {}.", image_name );
-	//
-	//
-	// try {
-	// InputStream is = new FileInputStream( new File(
-	// Tileserver.getProperty("source_image_dir") + image_name + ".yaml" ) );
-	// org.apache.commons.io.IOUtils.copy(is, resp.getOutputStream() );
-	// resp.flushBuffer();
-	// } catch ( FileNotFoundException e ) {
-	// logger.error( "File {}{}.yaml not found.",
-	// Tileserver.getProperty("source_image_dir"), image_name );
-	// } catch (IOException e ) {
-	// logger.error( "Error writing file to output stream ({})", image_name );
-	// }
-	//
-	// }
-
-	@RequestMapping( method = RequestMethod.GET, value = { "/list" }, produces = "application/yaml" )
+	@RequestMapping(method = RequestMethod.GET, value = { "/list" }, produces = MediaType.TEXT_PLAIN_VALUE)
 	@ResponseBody
 	public String getList( HttpServletResponse resp, HttpServletRequest req ) {
 		return imageProxy.getList();
