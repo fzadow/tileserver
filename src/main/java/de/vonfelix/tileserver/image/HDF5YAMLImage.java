@@ -80,123 +80,121 @@ public class HDF5YAMLImage extends AbstractImage {
 
 
 	@Override
-	public void loadImage() {
+	public synchronized void loadImage() {
 		
 		logger.debug( "reading hdf5 for " + name );
 		// open HDF5 file
 		reader = HDF5Factory.openForReading( env.getProperty( "tilebuilder.source_image_dir" ) + name + ".h5" );
 
 		if( configuration == null ) {
+			logger.debug("Configuration for " + name + " not yet loaded. Loading...");
 			loadConfiguration();
 		}
-		else {
-			HashMap _project = (HashMap) ((HashMap<String, Object>) configuration).get("project");
 
-			Integer min = _project.containsKey("min") ? (Integer) _project.get("min")
-					: env.getProperty("tilebuilder.min", Integer.class);
-			Integer max = _project.containsKey("max") ? (Integer) _project.get("max")
-					: env.getProperty("tilebuilder.max", Integer.class);
+		HashMap _project = (HashMap) ((HashMap<String, Object>) configuration).get("project");
 
-
-			List _yamlstacks = (List) _project.get("stacks");
+		Integer min = _project.containsKey("min") ? (Integer) _project.get("min")
+				: env.getProperty("tilebuilder.min", Integer.class);
+		Integer max = _project.containsKey("max") ? (Integer) _project.get("max")
+				: env.getProperty("tilebuilder.max", Integer.class);
 
 
+		List _yamlstacks = (List) _project.get("stacks");
+
+
+		/*
+		 * READ STACKS
+		 */
+		for (Object s : _yamlstacks) {
+			HashMap<?, ?> st = (HashMap<?, ?>) s;
 
 			/*
-			 * READ STACKS
+			 * Read Data from the list of "mirrors". If at least one entry is a
+			 * mirror with tile source type 9, this is the stack description for
+			 * TileBuilder. If no mirror with tile source type 9 is found, the
+			 * image is not a valid TileBuilder image and an error is thrown.
 			 */
-			for ( Object s : _yamlstacks ) {
-				HashMap<?, ?> st = (HashMap<?, ?>) s;
+			List mirrors = (List) st.get("mirrors");
+			if (mirrors == null) {
+				throw new YamlConfigurationException("Invalid YAML configuration for image '" + name
+						+ "': YAML must define a valid 'mirrors' section for each stack.", configuration);
+			}
 
-				/*
-				 * Read Data from the list of "mirrors". If at least one entry
-				 * is a mirror with tile source type 9, this is the stack
-				 * description for TileBuilder. If no mirror with tile source
-				 * type 9 is found, the image is not a valid TileBuilder image
-				 * and an error is thrown.
-				 */
-				List mirrors = (List) st.get("mirrors");
-				if (mirrors == null) {
-					throw new YamlConfigurationException("Invalid YAML configuration for image '" + name
-							+ "': YAML must define a valid 'mirrors' section for each stack.", configuration);
+			String id = null;
+			String title = null;
+			HashMap<String, String> m = null;
+			for (Object mirror : mirrors) {
+				m = (HashMap) mirror;
+				Integer _tileSourceType = Integer.parseInt(m.get("tile_source_type"));
+				if (_tileSourceType.equals(env.getProperty("tilebuilder.tile_source_type", Integer.class, 9))) {
+					id = (String) m.get("folder");
+					title = (String) m.get("title");
+					break;
 				}
+			}
+			if (m != null && (id == null || title == null)) {
+				throw new YamlConfigurationException("Invalid YAML configuration for image '" + name
+						+ "': Each stack must have exactly one mirror for tile source type 9 and contain 'folder' and 'title' keys. This is the stack in question: "
+						+ mirrors, configuration);
+			}
 
-				String id = null;
-				String title = null;
-				HashMap<String, String> m = null;
-				for (Object mirror : mirrors) {
-					m = (HashMap) mirror;
-					String _tileSourceType = (String) m.get("tile_source_type");
-					if (_tileSourceType.equals(env.getProperty("tilebuilder.tile_source_type", "9"))) {
-						id = (String) m.get("folder");
-						title = (String) m.get("title");
-						break;
-					}
-				}
-				if (m != null && (id == null || title == null)) {
-					throw new YamlConfigurationException("Invalid YAML configuration for image '" + name
-							+ "': Each stack must have exactly one mirror for tile source type 9 and contain 'folder' and 'title' keys. This is the stack in question: "
-							+ mirrors, configuration);
-				}
+			/*
+			 * If a Stack contains a key "channels", it's a composite stack.
+			 */
+			if (st.containsKey("channels")) {
+				min = st.containsKey("min") ? (Integer) st.get("min") : min;
+				max = st.containsKey("max") ? (Integer) st.get("max") : max;
 
-				/*
-				 * If a Stack contains a key "channels", it's a composite stack.
-				 */
-				if ( st.containsKey( "channels" ) ) {
-					min = st.containsKey("min") ? (Integer) st.get("min") : min;
-					max = st.containsKey( "max" ) ? (Integer) st.get( "max" ) : max;
+				logger.trace("  composite stack " + id + " (" + title + ")");
 
-					logger.trace( "  composite stack " + id + " (" + title + ")" );
+				CompositeStack cs = new CompositeStack(this, id, title);
 
-					CompositeStack cs = new CompositeStack( this, id, title );
+				ArrayList ch = (ArrayList) st.get("channels");
+				for (Object c : ch) {
+					HashMap cha = (HashMap) c;
+					String stack_id = (String) cha.get("stack");
+					String color = (String) cha.get("color");
+					min = cha.containsKey("min") ? (Integer) cha.get("min") : min;
+					max = cha.containsKey("max") ? (Integer) cha.get("max") : max;
 
-					ArrayList ch = (ArrayList) st.get( "channels" );
-					for ( Object c : ch ) {
-						HashMap cha = (HashMap) c;
-						String stack_id = (String) cha.get( "stack" );
-						String color = (String) cha.get( "color" );
-						min = cha.containsKey("min") ? (Integer) cha.get("min") : min;
-						max = cha.containsKey( "max" ) ? (Integer) cha.get( "max" ) : max;
-
-						logger.trace( "    " + stack_id + " : " + color );
-						HDF5Stack stack = (HDF5Stack) stacks.get( stack_id );
-						Channel channel = new Channel( stack, Color.valueOf( color.toUpperCase() ) );
-						if (min != null) {
-							channel.setAdjustment(Adjustment.MIN_VALUE, min);
-						}
-						if (max != null) {
-							channel.setAdjustment( Adjustment.MAX_VALUE, max );
-						}
-						cs.addChannel( channel );
-					}
-					stacks.put( cs.getId(), cs );
-				}
-				/*
-				 * Otherwise, if the Stack does not contain a key "channels",
-				 * it's a normal stack.
-				 */
-				else {
-					String path = "stacks/";
-					max = st.containsKey( "max" ) ? (Integer) st.get( "max" ) : max;
-
-					logger.trace( "  stack " + path + "" + id + " (" + title + ")" );
-
-					IStack sta = new HDF5Stack( this, path, id, title );
+					logger.trace("    " + stack_id + " : " + color);
+					HDF5Stack stack = (HDF5Stack) stacks.get(stack_id);
+					Channel channel = new Channel(stack, Color.valueOf(color.toUpperCase()));
 					if (min != null) {
-						sta.setMin(min);
+						channel.setAdjustment(Adjustment.MIN_VALUE, min);
 					}
-					if ( max != null ) {
-						sta.setMax( max );
+					if (max != null) {
+						channel.setAdjustment(Adjustment.MAX_VALUE, max);
 					}
-					stacks.put( sta.getId(), sta );
+					cs.addChannel(channel);
 				}
+				stacks.put(cs.getId(), cs);
 			}
+			/*
+			 * Otherwise, if the Stack does not contain a key "channels", it's a
+			 * normal stack.
+			 */
+			else {
+				String path = "stacks/";
+				max = st.containsKey("max") ? (Integer) st.get("max") : max;
 
-			if ( stacks.size() == 0 ) {
-				logger.warn( "No stacks found for image " + name );
+				logger.trace("  stack " + path + "" + id + " (" + title + ")");
+
+				IStack sta = new HDF5Stack(this, path, id, title);
+				if (min != null) {
+					sta.setMin(min);
+				}
+				if (max != null) {
+					sta.setMax(max);
+				}
+				stacks.put(sta.getId(), sta);
 			}
-
 		}
+
+		if (stacks.size() == 0) {
+			logger.warn("No stacks found for image " + name);
+		}
+
 	}
 	
 	@Override

@@ -15,6 +15,7 @@ public abstract class AbstractImage implements IImage {
 	private Environment env;
 
 	private Boolean loaded = false;
+	private Boolean loading = false;
 
 	protected String name;
 
@@ -42,8 +43,14 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public IStack getStack( String name ) throws StackNotFoundException {
-		if (!loaded) {
-			loadImage();
+		if (!loaded && !loading) {
+			synchronized (this) {
+				if (!loaded && !loading) {
+					loading = true;
+					loadImage();
+					loading = false;
+				}
+			}
 		}
 		if ( stacks.get( name ) == null ) {
 			throw new StackNotFoundException( name );
@@ -53,8 +60,14 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public String getName() {
-		if (!loaded) {
-			loadImage();
+		if (!loaded && !loading) {
+			synchronized (this) {
+				if (!loaded && !loading) {
+					loading = true;
+					loadImage();
+					loading = false;
+				}
+			}
 		}
 		return name;
 	};
@@ -66,8 +79,14 @@ public abstract class AbstractImage implements IImage {
 
 	@Override
 	public int getMin() {
-		if (!loaded) {
-			loadImage();
+		if (!loaded && !loading) {
+			synchronized (this) {
+				if (!loaded && !loading) {
+					loading = true;
+					loadImage();
+					loading = false;
+				}
+			}
 		}
 		return min;
 	}
@@ -79,8 +98,14 @@ public abstract class AbstractImage implements IImage {
 	
 	@Override
 	public int getMax() {
-		if (!loaded) {
-			loadImage();
+		if (!loaded && !loading) {
+			synchronized (this) {
+				if (!loaded && !loading) {
+					loading = true;
+					loadImage();
+					loading = false;
+				}
+			}
 		}
 		return max;
 	}
