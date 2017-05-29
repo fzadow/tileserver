@@ -48,6 +48,11 @@ for stack in data['project']['stacks']:
             stack['min'] = stack_min_val
             stack['max'] = stack_max_val
 
+        metadata = stack.get('metadata')
+        if metadata:
+            stack['description'] = metadata.strip("'")
+            del stack['metadata']
+
 	stack['stackgroups'] = [{
 			'title': name,
 			'relation': 'has_channel'}]
