@@ -205,6 +205,7 @@ public class HDF5YAMLImage extends AbstractImage {
 			} catch (YamlConfigurationException e) {
 				logger.error(e.getMessage());
 				logger.debug(e.getMessageDetail());
+				return null;
 			}
 		}
 		if (configuration != null) {

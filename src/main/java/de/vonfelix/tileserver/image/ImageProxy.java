@@ -99,18 +99,14 @@ public class ImageProxy {
 				String name = FilenameUtils.removeExtension(file.getName());
 				HDF5YAMLImage image = (HDF5YAMLImage) images.get(name);
 
-				if (image != null) {
-					data.add(image.getConfigurationYaml());
-				} else {
+				if (image == null) {
 					image = new HDF5YAMLImage(env, name);
-					data.add(image.getConfigurationYaml());
 				}
 
-				// Yaml yaml = new Yaml();
-				// data.add( yaml.load( new FileInputStream( file ) ) );
-
-				// list.put( file.getName(), new String( Files.readAllBytes(
-				// Paths.get( file.getPath() ) ) ) );
+				String configurationYaml = image.getConfigurationYaml();
+				if (configurationYaml != null) {
+					data.add(configurationYaml);
+				}
 			} catch ( ScannerException e ) {
 				logger.error( "Error loading YAML file: " + file.getName() );
 			}
