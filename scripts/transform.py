@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import sys
 import yaml
 import os
@@ -5,7 +7,7 @@ import os
 
 filename = sys.argv[1]
 
-stream = file(filename, 'r')
+stream = open(filename, 'r')
 data = yaml.load(stream)
 
 # Name extrahieren
