@@ -25,7 +25,7 @@ for stack in data['project']['stacks']:
 	del stack['folder']
 
 	stack['stackgroups'] = [{
-			'name': name,
+			'title': name,
 			'relation': 'has_channel'}]
 	stack['mirrors'] = [{
 			'title': 'Dresden',
