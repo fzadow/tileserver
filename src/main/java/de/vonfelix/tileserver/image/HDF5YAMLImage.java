@@ -200,7 +200,12 @@ public class HDF5YAMLImage extends AbstractImage {
 	@Override
 	public String getConfigurationYaml() {
 		if (configuration == null) {
-			loadConfiguration();
+			try {
+				loadConfiguration();
+			} catch (YamlConfigurationException e) {
+				logger.error(e.getMessage());
+				logger.debug(e.getMessageDetail());
+			}
 		}
 		if (configuration != null) {
 			// set options for YAML output

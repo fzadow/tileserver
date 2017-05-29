@@ -10,22 +10,33 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class YamlConfigurationException extends RuntimeException {
 	static Logger logger = LogManager.getLogger();
 
+	private String message;
+	private String messageDetail;
+
 	public YamlConfigurationException( String imageName ) {
 		super();
-
-		logger.error("Faulty YAML configuration for image \"" + imageName + "\".");
+		this.message = String.format("Faulty YAML configuration for image \"%s\".", imageName);
 	}
 
 	public YamlConfigurationException(String imageName, String reason) {
 		super();
-
-		logger.error("Faulty YAML configuration for image \"" + imageName + "\": " + reason);
+		this.message = String.format("Faulty YAML configuration for image \"%s\": %s.", imageName, reason);
 	}
 
 	public YamlConfigurationException(String message, Object data) {
 		super();
 
-		logger.error(message);
-		logger.debug(data);
+		this.message = message;
+		this.messageDetail = data.toString();
 	}
+
+	public String getMessageDetail() {
+		return messageDetail;
+	}
+
+	@Override
+	public String getMessage() {
+		return message;
+	}
+
 }
