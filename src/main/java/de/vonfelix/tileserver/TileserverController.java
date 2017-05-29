@@ -145,7 +145,7 @@ public class TileserverController {
 	}
 
 	@RequestMapping( method=RequestMethod.GET,
-			value = { "/{image_name}/project.yaml", "/{image_name}.yaml" }, produces = MediaType.TEXT_PLAIN_VALUE )
+			value = { "/{image_name}/project.yaml", "/{image_name}.yaml" }, produces = "text/yaml")
 	public String getYaml( HttpServletResponse resp,
 			@PathVariable( "image_name" ) String image_name,
 			HttpServletRequest req
@@ -155,7 +155,7 @@ public class TileserverController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = { "/list" }, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = { "/list" }, produces = "text/yaml")
 	@ResponseBody
 	public String getList( HttpServletResponse resp, HttpServletRequest req ) {
 		return imageProxy.getList();
