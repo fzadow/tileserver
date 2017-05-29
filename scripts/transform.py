@@ -40,6 +40,9 @@ for stack in data['project']['stacks']:
         stack_max_val = stack.get('valuelimit')
         stack_min_val = 0
 
+        stack['title'] = '{} - {}'.format(name, stack['name'])
+        del stack['name']
+
         if stack_max_val:
             del stack['valuelimit']
             stack['min'] = stack_min_val
