@@ -12,7 +12,8 @@ data = yaml.load(stream)
 name = data['project']['name']
 
 # neuen Namen eintragen
-data['project']['name'] = "DOT"
+data['project']['title'] = "DOT"
+del data['project']['name']
 
 # Stackgroups eintragen
 if not 'stackgroups' in data['project']:
