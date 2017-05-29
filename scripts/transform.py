@@ -58,9 +58,9 @@ for stack in data['project']['stacks']:
 			'relation': 'has_channel'}]
 	stack['mirrors'] = [{
 			'title': 'Dresden',
-			'folder':folder,
-			'tile_source_type':'9',
-			'path':os.path.splitext(filename)[0]}]
+			'folder': folder,
+			'tile_source_type': 9,
+			'path': os.path.splitext(filename)[0]}]
 
 
 
