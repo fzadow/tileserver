@@ -91,7 +91,9 @@ public class ImageProxy {
 		File source_dir = new File( source_image_dir );
 		ArrayList<File> files = new ArrayList<File>( Arrays.asList( source_dir.listFiles( yamlFilter ) ) );
 
-		ArrayList<Object> data = new ArrayList<Object>();
+		// Each YAML file is already a string, just join each element with a "---" on a separate line.
+		StringBuilder documents = new StringBuilder();
+		int n = 0;
 
 		for ( File file : files ) {
 			try {
@@ -105,21 +107,20 @@ public class ImageProxy {
 
 				String configurationYaml = image.getConfigurationYaml();
 				if (configurationYaml != null) {
-					data.add(configurationYaml);
+					if (n > 0) {
+						documents.append("---\n");
+					}
+					documents.append(configurationYaml);
+					n++;
 				}
 			} catch ( ScannerException e ) {
 				logger.error( "Error loading YAML file: " + file.getName() );
 			}
 		}
 
-		DumperOptions options = new DumperOptions();
-		options.setExplicitStart( true );
-		options.setDefaultFlowStyle( DumperOptions.FlowStyle.BLOCK );
-		Yaml yaml = new Yaml( options );
-
 		long duration = ( System.nanoTime() - startTime );
 		logger.debug( "listing all images took " + ( duration / 1000000 ) + " ms" );
 
-		return yaml.dumpAll( data.iterator() );
+		return documents.toString();
 	}
 }
